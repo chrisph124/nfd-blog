@@ -1,0 +1,130 @@
+'use client';
+
+import { usePathname } from 'next/navigation';
+import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
+import { ChevronDownIcon } from '@heroicons/react/24/outline';
+import type { NavItemBlok } from '@/types/storyblok';
+
+interface NavBarProps {
+  navItems: NavItemBlok[];
+}
+
+export default function NavBar({ navItems }: NavBarProps) {
+  const pathname = usePathname();
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
+  const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  // Get active state for navigation item
+  const getIsActive = (itemUrl: string) => {
+    return (pathname === '/' && (itemUrl === '/' || itemUrl.includes('home'))) ||
+           (pathname !== '/' && itemUrl !== '/' && pathname === `/${itemUrl}`);
+  };
+
+  // Toggle dropdown expansion
+  const toggleDropdown = (itemId: string) => {
+    setExpandedItems(prev => ({
+      ...prev,
+      [itemId]: !prev[itemId]
+    }));
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      const clickedOutside = Object.values(dropdownRefs.current).every(
+        ref => ref && !ref.contains(target)
+      );
+
+      if (clickedOutside) {
+        setExpandedItems({});
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Close dropdown on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      setExpandedItems({});
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return (
+    <nav className="hidden lg:flex flex-grow items-center justify-center">
+      <div className="flex gap-[27px] items-center">
+        {navItems.map((item) => {
+          const itemUrl = item.link?.cached_url ?? item.link?.url ?? '#';
+          const isActive = getIsActive(itemUrl);
+          const hasSubItems = item.sub_items && item.sub_items.length > 0;
+          const isExpanded = expandedItems[item._uid] ?? false;
+
+          return (
+            <div
+              key={item._uid}
+              className="relative"
+              ref={(el) => {
+                if (hasSubItems) {
+                  dropdownRefs.current[item._uid] = el;
+                }
+              }}
+            >
+              {hasSubItems ? (
+                <>
+                  <button
+                    onClick={() => toggleDropdown(item._uid)}
+                    className={`flex gap-[4px] items-center text-[18px] leading-[24px] transition-colors ${
+                      isActive
+                        ? 'border-b border-primary-700 text-primary-800 font-bold'
+                        : 'text-gray-700 font-normal hover:text-primary-700'
+                    }`}
+                  >
+                    {item.label}
+                    <ChevronDownIcon
+                      className={`size-[14px] transition-transform duration-300 ease-in-out ${
+                        isExpanded ? 'rotate-180' : 'rotate-0'
+                      }`}
+                    />
+                  </button>
+
+                  {/* Desktop Dropdown */}
+                  {isExpanded && (
+                    <div className="absolute top-full left-0 mt-2 min-w-[200px] bg-white shadow-lg rounded-[8px] py-[8px] z-50 border border-gray-200">
+                      {item.sub_items?.map((subItem) => (
+                        <Link
+                          key={subItem._uid}
+                          href={subItem.link?.cached_url ?? subItem.link?.url ?? '#'}
+                          onClick={() => setExpandedItems({})}
+                          className="block px-[16px] py-[8px] text-[16px] text-gray-700 hover:bg-gray-100 transition-colors"
+                        >
+                          {subItem.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <Link
+                  href={itemUrl}
+                  className={`flex gap-[4px] items-center text-[18px] leading-[24px] transition-colors ${
+                    isActive
+                      ? 'border-b border-primary-700 text-primary-800 font-bold'
+                      : 'text-gray-700 font-normal hover:text-primary-700'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
