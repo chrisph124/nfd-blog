@@ -1,7 +1,7 @@
 "use client";
 
 import { storyblokEditable } from "@storyblok/react/rsc";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
@@ -11,7 +11,7 @@ import NavBar from "@/components/organisms/NavBar";
 import type { HeaderProps } from "@/types/storyblok";
 import { usePathname } from "next/navigation";
 
-export default function Header({ blok }: Readonly<HeaderProps>) {
+const Header = memo(({ blok }: Readonly<HeaderProps>) => {
   const logo =
     blok.logo?.filename ??
     "/assets/f8202cc6898638b4bbed0f7c48b140d1c452bb95.svg";
@@ -26,15 +26,15 @@ export default function Header({ blok }: Readonly<HeaderProps>) {
   const [renderItems, setRenderItems] = useState<Record<string, boolean>>({});
 
   // Get active state for navigation item
-  const getIsActive = (itemUrl: string) => {
+  const getIsActive = useCallback((itemUrl: string) => {
     return (
       (pathname === "/" && (itemUrl === "/" || itemUrl.includes("home"))) ||
       (pathname !== "/" && itemUrl !== "/" && pathname === `/${itemUrl}`)
     );
-  };
+  }, [pathname]);
 
   // Toggle dropdown expansion
-  const toggleDropdown = (itemId: string) => {
+  const toggleDropdown = useCallback((itemId: string) => {
     const isCurrentlyExpanded = expandedItems[itemId];
 
     if (isCurrentlyExpanded) {
@@ -50,13 +50,18 @@ export default function Header({ blok }: Readonly<HeaderProps>) {
         setExpandedItems((prev) => ({ ...prev, [itemId]: true }));
       }, 10); // Small delay to trigger CSS transition
     }
-  };
+  }, [expandedItems]);
 
   // Close mobile menu
-  const closeMobileMenu = () => {
+  const closeMobileMenu = useCallback(() => {
     setIsMenuOpen(false);
     setExpandedItems({});
-  };
+  }, []);
+
+  // Toggle menu handler
+  const handleMenuToggle = useCallback(() => {
+    setIsMenuOpen(prev => !prev);
+  }, []);
 
   // Prevent body scroll when mobile menu is open
   useEffect(() => {
@@ -102,7 +107,7 @@ export default function Header({ blok }: Readonly<HeaderProps>) {
 
           {/* Mobile Menu Toggle */}
           <MenuToggle
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            onClick={handleMenuToggle}
             isOpen={isMenuOpen}
           />
 
@@ -224,4 +229,8 @@ export default function Header({ blok }: Readonly<HeaderProps>) {
       </div>
     </>
   );
-}
+});
+
+Header.displayName = 'Header';
+
+export default Header;

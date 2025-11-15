@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
 
-export default function ThemeToggle() {
+const ThemeToggle = memo(() => {
   const [isDark, setIsDark] = useState<boolean>(false);
 
   useEffect(() => {
@@ -12,11 +12,11 @@ export default function ThemeToggle() {
     setIsDark(prefersDark);
   }, []);
 
-  const toggleTheme = (): void => {
-    setIsDark(!isDark);
+  const toggleTheme = useCallback((): void => {
+    setIsDark(prev => !prev);
     // You can add localStorage and document.documentElement.classList logic here later
     // For now, this uses CSS media query for dark mode
-  };
+  }, []);
 
   return (
     <button
@@ -32,4 +32,8 @@ export default function ThemeToggle() {
       )}
     </button>
   );
-}
+});
+
+ThemeToggle.displayName = 'ThemeToggle';
+
+export default ThemeToggle;

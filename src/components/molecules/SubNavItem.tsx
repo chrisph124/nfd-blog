@@ -1,7 +1,8 @@
+import { memo } from 'react';
 import Link from "next/link";
 import type { SubNavItemProps } from "@/types/storyblok";
 
-export default function SubNavItem({ blok }: SubNavItemProps) {
+const SubNavItem = memo(({ blok }: SubNavItemProps) => {
   const label = blok.label ?? "Link";
   const href = blok.link?.cached_url ?? blok.link?.url ?? "#";
 
@@ -15,4 +16,8 @@ export default function SubNavItem({ blok }: SubNavItemProps) {
       </p>
     </Link>
   );
-}
+});
+
+SubNavItem.displayName = 'SubNavItem';
+
+export default SubNavItem;

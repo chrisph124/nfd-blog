@@ -1,7 +1,8 @@
+import { memo } from 'react';
 import { storyblokEditable } from "@storyblok/react/rsc";
 import type { FooterProps } from "@/types/storyblok";
 
-export default function Footer({ blok }: FooterProps) {
+const Footer = memo(({ blok }: FooterProps) => {
   return (
     <footer {...storyblokEditable(blok)} className="bg-gray-800 text-white w-full">
       <div className="py-6 max-w-[1240px] px-6 md:px-10 lg:px-15 2xl:px-20 mx-auto text-center">
@@ -10,4 +11,8 @@ export default function Footer({ blok }: FooterProps) {
       </div>
     </footer>
   );
-}
+});
+
+Footer.displayName = 'Footer';
+
+export default Footer;
