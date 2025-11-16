@@ -1,11 +1,13 @@
 'use client';
 
+import { memo } from 'react';
+
 interface MenuToggleProps {
   onClick: () => void;
   isOpen: boolean;
 }
 
-export default function MenuToggle({ onClick, isOpen }: MenuToggleProps) {
+const MenuToggle = memo(({ onClick, isOpen }: MenuToggleProps) => {
   return (
     <button
       onClick={onClick}
@@ -33,4 +35,8 @@ export default function MenuToggle({ onClick, isOpen }: MenuToggleProps) {
       </div>
     </button>
   );
-}
+});
+
+MenuToggle.displayName = 'MenuToggle';
+
+export default MenuToggle;

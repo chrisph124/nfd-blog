@@ -166,6 +166,39 @@ export interface StoryblokComponentProps<T extends StoryblokBlok = StoryblokBlok
   blok: T;
 }
 
+// Specific component props types
+export interface FeatureProps {
+  blok: FeatureBlok;
+}
+
+export interface FooterProps {
+  blok: FooterBlok;
+}
+
+export interface GridProps {
+  blok: GridBlok;
+}
+
+export interface HeaderProps {
+  blok: HeaderBlok;
+}
+
+export interface NavItemProps {
+  blok: NavItemBlok;
+}
+
+export interface PageProps {
+  blok: PageBlok;
+}
+
+export interface SubNavItemProps {
+  blok: SubNavItemBlok;
+}
+
+export interface TeaserProps {
+  blok: TeaserBlok;
+}
+
 // ============================================================================
 // Utility Types
 // ============================================================================

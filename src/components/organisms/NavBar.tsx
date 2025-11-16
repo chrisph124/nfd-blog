@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import Link from 'next/link';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import type { NavItemBlok } from '@/types/storyblok';
@@ -10,24 +10,29 @@ interface NavBarProps {
   navItems: NavItemBlok[];
 }
 
-export default function NavBar({ navItems }: NavBarProps) {
+const NavBar = memo(({ navItems }: NavBarProps) => {
   const pathname = usePathname();
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
   const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   // Get active state for navigation item
-  const getIsActive = (itemUrl: string) => {
+  const getIsActive = useCallback((itemUrl: string) => {
     return (pathname === '/' && (itemUrl === '/' || itemUrl.includes('home'))) ||
            (pathname !== '/' && itemUrl !== '/' && pathname === `/${itemUrl}`);
-  };
+  }, [pathname]);
 
   // Toggle dropdown expansion
-  const toggleDropdown = (itemId: string) => {
+  const toggleDropdown = useCallback((itemId: string) => {
     setExpandedItems(prev => ({
       ...prev,
       [itemId]: !prev[itemId]
     }));
-  };
+  }, []);
+
+  // Clear all expanded items
+  const clearExpandedItems = useCallback(() => {
+    setExpandedItems({});
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -38,23 +43,23 @@ export default function NavBar({ navItems }: NavBarProps) {
       );
 
       if (clickedOutside) {
-        setExpandedItems({});
+        clearExpandedItems();
       }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [clearExpandedItems]);
 
   // Close dropdown on scroll
   useEffect(() => {
     const handleScroll = () => {
-      setExpandedItems({});
+      clearExpandedItems();
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [clearExpandedItems]);
 
   return (
     <nav className="hidden lg:flex flex-grow items-center justify-center">
@@ -100,7 +105,7 @@ export default function NavBar({ navItems }: NavBarProps) {
                         <Link
                           key={subItem._uid}
                           href={subItem.link?.cached_url ?? subItem.link?.url ?? '#'}
-                          onClick={() => setExpandedItems({})}
+                          onClick={clearExpandedItems}
                           className="block px-[16px] py-[8px] text-[16px] text-gray-700 hover:bg-gray-100 transition-colors"
                         >
                           {subItem.label}
@@ -127,4 +132,8 @@ export default function NavBar({ navItems }: NavBarProps) {
       </div>
     </nav>
   );
-}
+});
+
+NavBar.displayName = 'NavBar';
+
+export default NavBar;

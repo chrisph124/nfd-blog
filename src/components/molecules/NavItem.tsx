@@ -1,8 +1,9 @@
+import { memo } from 'react';
 import Link from "next/link";
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import type { NavItemProps } from "@/types/storyblok";
 
-export default function NavItem({ blok }: NavItemProps) {
+const NavItem = memo(({ blok }: NavItemProps) => {
   const label = blok.label ?? "Link";
   const href = blok.link?.cached_url ?? blok.link?.url ?? "#";
   const hasDropdown = blok.has_dropdown ?? false;
@@ -25,4 +26,8 @@ export default function NavItem({ blok }: NavItemProps) {
       )}
     </Link>
   );
-}
+});
+
+NavItem.displayName = 'NavItem';
+
+export default NavItem;
