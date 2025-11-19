@@ -4,13 +4,13 @@ import { notFound } from 'next/navigation';
 import type { StoryblokLinksResponse, StoryblokStoryLink } from '@/types/storyblok';
 
 interface PageProps {
-  params: {
+  params: Promise<{
     slug: string[];
-  };
+  }>;
 }
 
 export default async function CatchAllPage({ params }: PageProps) {
-  const { slug } = params;
+  const { slug } = await params;
   const fullSlug = slug.join('/');
 
   try {
@@ -35,9 +35,9 @@ export async function generateStaticParams() {
   const storyblokApi = getStoryblokApi();
 
   try {
-    const { data } = await storyblokApi.get<StoryblokLinksResponse>('cdn/links', {
+    const { data } = await storyblokApi.get('cdn/links', {
       version: 'draft',
-    });
+    }) as { data: StoryblokLinksResponse };
 
     const links = Object.values(data.links) as StoryblokStoryLink[];
 

@@ -1,7 +1,7 @@
 import { memo } from 'react';
-import type { TeaserProps } from "@/types/storyblok";
+import type { StoryblokComponentProps, TeaserBlok } from "@/types/storyblok";
 
-const Teaser = memo(({ blok }: TeaserProps) => {
+const Teaser = memo(({ blok }: StoryblokComponentProps<TeaserBlok>) => {
   return (
     <div className="teaser w-full">
       <div className="max-w-[1240px] px-6 md:px-10 lg:px-15 2xl:px-20 mx-auto my-6">

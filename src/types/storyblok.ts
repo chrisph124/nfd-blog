@@ -63,7 +63,19 @@ export interface ContentBlockBlok extends StoryblokBlok {
   second_cta?: StoryblokLink;
   media?: StoryblokAsset;
   background_image?: StoryblokAsset;
-  content_position?: string;
+  content_alignment?: 'left' | 'center' | 'right';
+  position?: 'vertical' | 'vertical-reverse' | 'horizontal' | 'horizontal-reverse';
+}
+
+/**
+ * cta component
+ */
+export interface CtaBlok extends StoryblokBlok {
+  component: 'cta';
+  label?: string;
+  navigate_to?: StoryblokLink;
+  cta_type?: 'primary' | 'primary-reverse' | 'primary-outlined' | 'secondary' | 'secondary-reverse' | 'secondary-outlined' | 'link';
+  cta_size?: 'hug' | 'large' | 'full';
 }
 
 /**
@@ -109,14 +121,15 @@ export interface HeaderBlok extends StoryblokBlok {
  */
 export interface HeroBlockBlok extends StoryblokBlok {
   component: 'hero_block';
+  background_image?: StoryblokAsset;
   eyebrow?: string;
   heading: string;
   heading_tag?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
   sub_heading?: string;
-  banner?: StoryblokAsset;
-  first_cta?: StoryblokLink;
-  second_cta?: StoryblokLink;
+  image?: StoryblokAsset;
+  cta_group?: (CtaBlok)[];
   content_alignment?: 'left' | 'center' | 'right';
+  position?: 'vertical' | 'vertical-reverse' | 'horizontal' | 'horizontal-reverse';
 }
 
 /**
@@ -166,39 +179,6 @@ export interface StoryblokComponentProps<T extends StoryblokBlok = StoryblokBlok
   blok: T;
 }
 
-// Specific component props types
-export interface FeatureProps {
-  blok: FeatureBlok;
-}
-
-export interface FooterProps {
-  blok: FooterBlok;
-}
-
-export interface GridProps {
-  blok: GridBlok;
-}
-
-export interface HeaderProps {
-  blok: HeaderBlok;
-}
-
-export interface NavItemProps {
-  blok: NavItemBlok;
-}
-
-export interface PageProps {
-  blok: PageBlok;
-}
-
-export interface SubNavItemProps {
-  blok: SubNavItemBlok;
-}
-
-export interface TeaserProps {
-  blok: TeaserBlok;
-}
-
 // ============================================================================
 // Utility Types
 // ============================================================================
@@ -208,6 +188,7 @@ export interface TeaserProps {
  */
 export type AnyBlok =
   | ContentBlockBlok
+  | CtaBlok
   | FeatureBlok
   | FooterBlok
   | GridBlok

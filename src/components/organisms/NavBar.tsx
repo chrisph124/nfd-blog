@@ -63,7 +63,7 @@ const NavBar = memo(({ navItems }: NavBarProps) => {
 
   return (
     <nav className="hidden lg:flex flex-grow items-center justify-center">
-      <div className="flex gap-[27px] items-center">
+      <div className="flex gap-[20px] items-center">
         {navItems.map((item) => {
           const itemUrl = item.link?.cached_url ?? item.link?.url ?? '#';
           const isActive = getIsActive(itemUrl);
@@ -84,7 +84,7 @@ const NavBar = memo(({ navItems }: NavBarProps) => {
                 <>
                   <button
                     onClick={() => toggleDropdown(item._uid)}
-                    className={`flex gap-[4px] items-center text-[18px] leading-[24px] transition-colors ${
+                    className={`flex gap-[4px] items-center text-[18px] leading-[24px] p-2 cursor-pointer transition-colors ${
                       isActive
                         ? 'border-b border-primary-700 text-primary-800 font-bold'
                         : 'text-gray-700 font-normal hover:text-primary-700'
@@ -100,7 +100,7 @@ const NavBar = memo(({ navItems }: NavBarProps) => {
 
                   {/* Desktop Dropdown */}
                   {isExpanded && (
-                    <div className="absolute top-full left-0 mt-2 min-w-[200px] bg-white shadow-lg rounded-[8px] py-[8px] z-50 border border-gray-200">
+                    <div className="absolute top-full left-0 min-w-[200px] bg-white shadow-lg rounded-[8px] py-[8px] z-50 border border-gray-200">
                       {item.sub_items?.map((subItem) => (
                         <Link
                           key={subItem._uid}
@@ -117,7 +117,7 @@ const NavBar = memo(({ navItems }: NavBarProps) => {
               ) : (
                 <Link
                   href={itemUrl}
-                  className={`flex gap-[4px] items-center text-[18px] leading-[24px] transition-colors ${
+                  className={`flex gap-[4px] items-center text-[18px] leading-[24px] p-2 cursor-pointer transition-colors ${
                     isActive
                       ? 'border-b border-primary-700 text-primary-800 font-bold'
                       : 'text-gray-700 font-normal hover:text-primary-700'
