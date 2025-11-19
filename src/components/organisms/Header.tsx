@@ -8,10 +8,10 @@ import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import ThemeToggle from "@/components/atoms/ThemeToggle";
 import MenuToggle from "@/components/atoms/MenuToggle";
 import NavBar from "@/components/organisms/NavBar";
-import type { HeaderProps } from "@/types/storyblok";
+import type { StoryblokComponentProps, HeaderBlok } from "@/types/storyblok";
 import { usePathname } from "next/navigation";
 
-const Header = memo(({ blok }: Readonly<HeaderProps>) => {
+const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) => {
   const logo =
     blok.logo?.filename ??
     "/assets/f8202cc6898638b4bbed0f7c48b140d1c452bb95.svg";

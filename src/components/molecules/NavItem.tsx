@@ -1,9 +1,9 @@
 import { memo } from 'react';
 import Link from "next/link";
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
-import type { NavItemProps } from "@/types/storyblok";
+import type { StoryblokComponentProps, NavItemBlok } from "@/types/storyblok";
 
-const NavItem = memo(({ blok }: NavItemProps) => {
+const NavItem = memo(({ blok }: StoryblokComponentProps<NavItemBlok>) => {
   const label = blok.label ?? "Link";
   const href = blok.link?.cached_url ?? blok.link?.url ?? "#";
   const hasDropdown = blok.has_dropdown ?? false;

@@ -1,8 +1,8 @@
 import { memo } from 'react';
 import Link from "next/link";
-import type { SubNavItemProps } from "@/types/storyblok";
+import type { StoryblokComponentProps, SubNavItemBlok } from "@/types/storyblok";
 
-const SubNavItem = memo(({ blok }: SubNavItemProps) => {
+const SubNavItem = memo(({ blok }: StoryblokComponentProps<SubNavItemBlok>) => {
   const label = blok.label ?? "Link";
   const href = blok.link?.cached_url ?? blok.link?.url ?? "#";
 

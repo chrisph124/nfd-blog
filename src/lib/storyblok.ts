@@ -6,8 +6,10 @@ import Header from "@/components/organisms/Header";
 import Footer from "@/components/organisms/Footer";
 import NavItem from "@/components/molecules/NavItem";
 import SubNavItem from "@/components/molecules/SubNavItem";
+import Hero from "@/components/organisms/Hero";
+import CTA from "@/components/atoms/CTA";
 
-import { apiPlugin, storyblokInit, SbReactSDK } from '@storyblok/react/rsc';
+import { apiPlugin, storyblokInit } from '@storyblok/react/rsc';
 
 // Component mapping type
 const components = {
@@ -19,6 +21,8 @@ const components = {
   footer: Footer,
   nav_item: NavItem,
   sub_nav_item: SubNavItem,
+  hero_block: Hero,
+  cta: CTA,
 } as const;
 
 // Server-side initialization with access token
@@ -29,4 +33,4 @@ export const getStoryblokApi = storyblokInit({
   apiOptions: {
     region: 'eu'
   },
-}) as SbReactSDK;
+});

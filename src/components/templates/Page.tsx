@@ -3,9 +3,9 @@ import {
   storyblokEditable,
   StoryblokServerComponent,
 } from '@storyblok/react/rsc';
-import type { PageProps } from "@/types/storyblok";
+import type { StoryblokComponentProps, PageBlok } from "@/types/storyblok";
 
-const Page = memo(({ blok }: PageProps) => {
+const Page = memo(({ blok }: StoryblokComponentProps<PageBlok>) => {
   return (
     <main {...storyblokEditable(blok)}>
       {blok.body?.map((nestedBlok) => (
