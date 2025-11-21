@@ -106,7 +106,7 @@ const NavBar = memo(({ navItems }: NavBarProps) => {
                           key={subItem._uid}
                           href={subItem.link?.cached_url ?? subItem.link?.url ?? '#'}
                           onClick={clearExpandedItems}
-                          className="block px-[16px] py-[8px] text-[16px] text-gray-700 hover:bg-gray-100 transition-colors"
+                          className="block w-full px-[16px] py-[8px] text-[16px] text-gray-700 hover:bg-gray-200 transition-all duration-200"
                         >
                           {subItem.label}
                         </Link>

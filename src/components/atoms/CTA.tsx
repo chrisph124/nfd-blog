@@ -9,7 +9,7 @@ interface CTAProps {
   blok: CtaBlok;
 }
 
-const CTA = memo(({ blok }: CTAProps) => {
+const Cta = memo(({ blok }: CTAProps) => {
   const {
     label,
     navigate_to,
@@ -76,6 +76,6 @@ const CTA = memo(({ blok }: CTAProps) => {
   );
 });
 
-CTA.displayName = 'CTA';
+Cta.displayName = 'Cta';
 
-export default CTA;
+export default Cta;
