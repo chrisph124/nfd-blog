@@ -152,12 +152,40 @@ export interface PageBlok extends StoryblokBlok {
 }
 
 /**
+ * section_wrapper component
+ */
+export interface SectionWrapperBlok extends StoryblokBlok {
+  component: 'section_wrapper';
+  heading?: string;
+  navigate_to?: (CtaBlok)[];
+  childrens?: StoryblokBlok[];
+  background_pattern?: StoryblokAsset;
+}
+
+/**
  * sub_nav_item component
  */
 export interface SubNavItemBlok extends StoryblokBlok {
   component: 'sub_nav_item';
   label: string;
   link: StoryblokLink;
+}
+
+/**
+ * tab_item component
+ */
+export interface TabItemBlok extends StoryblokBlok {
+  component: 'tab_item';
+  label?: string;
+  content?: StoryblokBlok[];
+}
+
+/**
+ * tabs component
+ */
+export interface TabsBlok extends StoryblokBlok {
+  component: 'tabs';
+  tabs?: (TabItemBlok)[];
 }
 
 /**
@@ -196,7 +224,10 @@ export type AnyBlok =
   | HeroBlockBlok
   | NavItemBlok
   | PageBlok
+  | SectionWrapperBlok
   | SubNavItemBlok
+  | TabItemBlok
+  | TabsBlok
   | TeaserBlok;
 
 /**

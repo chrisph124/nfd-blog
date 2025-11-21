@@ -7,7 +7,10 @@ import Footer from "@/components/organisms/Footer";
 import NavItem from "@/components/molecules/NavItem";
 import SubNavItem from "@/components/molecules/SubNavItem";
 import Hero from "@/components/organisms/Hero";
+import Tabs from "@/components/organisms/Tabs";
+import SectionWrapper from "@/components/organisms/SectionWrapper";
 import CTA from "@/components/atoms/CTA";
+import TabItem from "@/components/molecules/TabItem";
 
 import { apiPlugin, storyblokInit } from '@storyblok/react/rsc';
 
@@ -22,6 +25,9 @@ const components = {
   nav_item: NavItem,
   sub_nav_item: SubNavItem,
   hero_block: Hero,
+  tabs: Tabs,
+  tab_item: TabItem,
+  section_wrapper: SectionWrapper,
   cta: CTA,
 } as const;
 
