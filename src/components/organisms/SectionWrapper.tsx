@@ -2,7 +2,6 @@
 
 import { memo } from "react";
 import { storyblokEditable, StoryblokServerComponent } from "@storyblok/react/rsc";
-import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import type { SectionWrapperBlok } from "@/types/storyblok";
 import { cn } from "@/lib/utils";
