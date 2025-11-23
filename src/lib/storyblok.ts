@@ -9,7 +9,7 @@ import SubNavItem from "@/components/molecules/SubNavItem";
 import Hero from "@/components/organisms/Hero";
 import Tabs from "@/components/organisms/Tabs";
 import SectionWrapper from "@/components/organisms/SectionWrapper";
-import CTA from "@/components/atoms/CTA";
+import Cta from "@/components/atoms/Cta";
 import TabItem from "@/components/molecules/TabItem";
 
 import { apiPlugin, storyblokInit } from '@storyblok/react/rsc';
@@ -28,7 +28,7 @@ const components = {
   tabs: Tabs,
   tab_item: TabItem,
   section_wrapper: SectionWrapper,
-  cta: CTA,
+  cta: Cta,
 } as const;
 
 // Server-side initialization with access token

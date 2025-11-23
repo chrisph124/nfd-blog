@@ -120,18 +120,32 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
 
       {/* Mobile Menu Overlay - Now outside header so shadow shows properly */}
       <div
-        className={`fixed top-[70px] bottom-0 left-0 right-0 bg-gray-900/90 lg:hidden z-40 transition-opacity duration-300 ease-in-out ${
+        className={`fixed top-[70px] bottom-0 left-0 right-0 lg:hidden z-40 transition-opacity duration-300 ease-in-out ${
           isMenuOpen
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
         }`}
-        onClick={closeMobileMenu}
       >
-        <div
-          className={`flex flex-col gap-[32px] px-[16px] py-[32px] h-full w-[90%] md:w-[70%] bg-zinc-100 overflow-y-auto transition-transform duration-300 ease-in-out ml-auto ${
+        {/* Backdrop button */}
+        <button
+          type="button"
+          className="absolute inset-0 bg-gray-900/90 w-full h-full"
+          onClick={closeMobileMenu}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              closeMobileMenu();
+            }
+          }}
+          tabIndex={isMenuOpen ? 0 : -1}
+          aria-label="Close mobile menu"
+        />
+
+        {/* Menu panel */}
+        <aside
+          className={`relative flex flex-col gap-[32px] px-[16px] py-[32px] h-full w-[90%] md:w-[70%] bg-zinc-100 overflow-y-auto transition-transform duration-300 ease-in-out ml-auto ${
             isMenuOpen ? "translate-x-0" : "translate-x-full"
           }`}
-          onClick={(e) => e.stopPropagation()}
+          aria-label="Mobile navigation menu"
         >
           {/* Hero Typography */}
           <div className="flex flex-col gap-[10px] h-[200px] items-center justify-center rounded-[8px] bg-gradient-to-br from-primary-600 to-secondary-900">
@@ -225,7 +239,7 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
               );
             })}
           </div>
-        </div>
+        </aside>
       </div>
     </>
   );
