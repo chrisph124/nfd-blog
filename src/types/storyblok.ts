@@ -51,6 +51,14 @@ export interface StoryblokLink {
 // ============================================================================
 
 /**
+ * card_item component
+ */
+export interface CardItemBlok extends StoryblokBlok {
+  component: 'card_item';
+
+}
+
+/**
  * content_block component
  */
 export interface ContentBlockBlok extends StoryblokBlok {
@@ -152,6 +160,17 @@ export interface PageBlok extends StoryblokBlok {
 }
 
 /**
+ * post component
+ */
+export interface PostBlok extends StoryblokBlok {
+  component: 'post';
+  title?: string;
+  featured_image?: StoryblokAsset;
+  excerpt?: string;
+  body?: StoryblokBlok[];
+}
+
+/**
  * section_wrapper component
  */
 export interface SectionWrapperBlok extends StoryblokBlok {
@@ -215,6 +234,7 @@ export interface StoryblokComponentProps<T extends StoryblokBlok = StoryblokBlok
  * Union of all blok types
  */
 export type AnyBlok =
+  | CardItemBlok
   | ContentBlockBlok
   | CtaBlok
   | FeatureBlok
@@ -224,6 +244,7 @@ export type AnyBlok =
   | HeroBlockBlok
   | NavItemBlok
   | PageBlok
+  | PostBlok
   | SectionWrapperBlok
   | SubNavItemBlok
   | TabItemBlok
