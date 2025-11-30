@@ -48,12 +48,14 @@ const CardTags = memo(({ tags }: CardTagsProps) => {
   return (
     <div className="flex flex-wrap gap-2">
       {tags.map((tag) => (
-        <span
+        <Link
           key={tag}
-          className="px-2 py-1 text-xs font-medium text-primary-700 bg-primary-50 rounded-md"
+          href={`/insight-hub/${tag}`}
+          className="px-2 py-1 text-xs font-medium text-primary-700 bg-primary-50 rounded-md hover:bg-primary-100 transition-colors"
+          onClick={(e) => e.stopPropagation()}
         >
           {tag}
-        </span>
+        </Link>
       ))}
     </div>
   );
@@ -81,6 +83,9 @@ CardMeta.displayName = 'CardMeta';
 const Card = memo(({ story }: CardProps) => {
   const { content, full_slug, tag_list, created_at } = story;
   const { featured_image, title = '', excerpt } = content;
+
+  // Strip "posts/" prefix to get root-level URL (e.g., "posts/my-post" -> "my-post")
+  const postSlug = full_slug.replace(/^posts\//, '');
 
   const cardContent = (
     <article
@@ -110,7 +115,7 @@ const Card = memo(({ story }: CardProps) => {
   );
 
   return (
-    <Link href={`/${full_slug}`} className="block h-full">
+    <Link href={`/${postSlug}`} className="block h-full">
       {cardContent}
     </Link>
   );
