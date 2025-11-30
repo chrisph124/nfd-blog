@@ -32,7 +32,7 @@ export default function Post({ blok }: Readonly<PostProps>) {
       </header>
 
       {body && body.length > 0 && (
-        <div className="prose prose-lg max-w-none">
+        <div className="prose prose-lg max-w-none flex flex-col gap-y-6">
           {body.map((nestedBlok) => (
             <StoryblokServerComponent blok={nestedBlok} key={nestedBlok._uid} />
           ))}

@@ -16,7 +16,7 @@ interface StoriesResponse {
 export default async function CardList({
   filterByTag,
   startsWithPath = 'posts/'
-}: CardListProps) {
+}: Readonly<CardListProps>) {
   const storyblokApi = getStoryblokApi();
 
   const params: Record<string, string> = {
