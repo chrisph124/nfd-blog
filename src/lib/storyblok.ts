@@ -12,6 +12,8 @@ import Tabs from "@/components/organisms/Tabs";
 import SectionWrapper from "@/components/organisms/SectionWrapper";
 import TabItem from "@/components/molecules/TabItem";
 import Cta from "@/components/atoms/Cta";
+import Richtext from "@/components/atoms/Richtext";
+import Media from "@/components/atoms/Media";
 
 import { apiPlugin, storyblokInit } from '@storyblok/react/rsc';
 
@@ -31,6 +33,8 @@ const components = {
   tab_item: TabItem,
   section_wrapper: SectionWrapper,
   cta: Cta,
+  richtext: Richtext,
+  media: Media,
 } as const;
 
 // Server-side initialization with access token
