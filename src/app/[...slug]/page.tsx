@@ -42,7 +42,7 @@ export async function generateStaticParams() {
     const links = Object.values(data.links) as StoryblokStoryLink[];
 
     const paths = links
-      .filter((link) => !link.is_folder && link.slug !== 'home')
+      .filter((link) => !link.is_folder && link.slug !== 'home' && !link.slug.startsWith('global/'))
       .map((link) => ({
         slug: link.slug.split('/'),
       }));

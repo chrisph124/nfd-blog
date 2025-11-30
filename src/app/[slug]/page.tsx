@@ -14,15 +14,30 @@ export default async function DynamicPage({ params }: PageProps) {
 
   try {
     const storyblokApi = getStoryblokApi();
-    const { data } = await storyblokApi.get(`cdn/stories/${slug}`, {
-      version: 'draft',
-    });
 
-    return (
-      <div className="page">
-        <StoryblokStory story={data.story} />
-      </div>
-    );
+    // Try fetching as a post first (from posts/ folder)
+    try {
+      const { data } = await storyblokApi.get(`cdn/stories/posts/${slug}`, {
+        version: 'draft',
+      });
+
+      return (
+        <div className="page">
+          <StoryblokStory story={data.story} />
+        </div>
+      );
+    } catch {
+      // If not found in posts/, try fetching as a regular page
+      const { data } = await storyblokApi.get(`cdn/stories/${slug}`, {
+        version: 'draft',
+      });
+
+      return (
+        <div className="page">
+          <StoryblokStory story={data.story} />
+        </div>
+      );
+    }
   } catch (error) {
     console.error(`Error fetching story for slug: ${slug}`, error);
     notFound();
@@ -41,10 +56,12 @@ export async function generateStaticParams() {
     const links = Object.values(data.links) as StoryblokStoryLink[];
 
     const paths = links
-      .filter((link) => !link.is_folder && link.slug !== 'home')
-      .map((link) => ({
-        slug: link.slug,
-      }));
+      .filter((link) => !link.is_folder && link.slug !== 'home' && !link.slug.startsWith('global/'))
+      .map((link) => {
+        // Strip "posts/" prefix for root-level URLs
+        const slug = link.slug.replace(/^posts\//, '');
+        return { slug };
+      });
 
     return paths;
   } catch (error) {
