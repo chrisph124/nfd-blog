@@ -49,7 +49,7 @@ const SectionWrapper = memo(({ blok }: SectionWrapperProps) => {
     <section
       {...storyblokEditable(blok)}
       className={cn(
-        "relative w-full flex flex-col gap-10 lg:gap-20 px-10 py-12 lg:px-24 lg:py-20",
+        "relative w-full max-w-[1240px] flex flex-col gap-10 lg:gap-20 py-10 lg:py-12 px-6 md:px-10 lg:px-15 2xl:px-20 mx-auto",
         hasBackgroundPattern && "overflow-hidden"
       )}
     >
@@ -59,7 +59,7 @@ const SectionWrapper = memo(({ blok }: SectionWrapperProps) => {
             src={background_pattern.filename}
             alt=""
             fill
-            className="object-cover opacity-[0.03]"
+            className="object-cover opacity-[0.1]"
             sizes="100vw"
           />
         </div>

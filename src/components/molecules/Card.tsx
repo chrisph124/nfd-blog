@@ -87,37 +87,35 @@ const Card = memo(({ story }: CardProps) => {
   // Strip "posts/" prefix to get root-level URL (e.g., "posts/my-post" -> "my-post")
   const postSlug = full_slug.replace(/^posts\//, '');
 
-  const cardContent = (
+  return (
     <article
       className={cn(
-        'group flex flex-col h-full bg-white rounded-xl shadow-sm border border-gray-100',
-        'transition-all duration-200 hover:shadow-md hover:border-gray-200'
+        'group relative flex flex-col h-full bg-white rounded-xl shadow-sm',
+        'transition-all duration-200 hover:shadow-md max-w-full md:max-w-[320px]'
       )}
     >
-      <CardImage image={featured_image} title={title} />
+      <Link href={`/${postSlug}`} className="block">
+        <CardImage image={featured_image} title={title} />
+      </Link>
 
       <div className="flex flex-col gap-3 p-4 flex-1">
         {tag_list && tag_list.length > 0 && <CardTags tags={tag_list} />}
 
-        <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 group-hover:text-primary-700 transition-colors">
-          {title}
-        </h3>
+        <Link href={`/${postSlug}`}>
+          <h3 className="body-1 text-gray-900 line-clamp-3 group-hover:text-primary-700 transition-colors">
+            {title}
+          </h3>
+        </Link>
 
         <CardMeta createdAt={created_at} excerpt={excerpt} />
 
         {excerpt && (
-          <p className="text-sm text-gray-600 line-clamp-3 mt-auto">
+          <p className="text-sm text-gray-600 line-clamp-4 mt-auto">
             {excerpt}
           </p>
         )}
       </div>
     </article>
-  );
-
-  return (
-    <Link href={`/${postSlug}`} className="block h-full">
-      {cardContent}
-    </Link>
   );
 });
 

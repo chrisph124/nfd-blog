@@ -1,7 +1,8 @@
 import { getStoryblokApi } from '@/lib/storyblok';
 import { StoryblokStory } from '@storyblok/react/rsc';
 import { notFound } from 'next/navigation';
-import type { StoryblokLinksResponse, StoryblokStoryLink } from '@/types/storyblok';
+import type { StoryblokLinksResponse, StoryblokStoryLink, PostBlok, StoryblokStory as StoryType } from '@/types/storyblok';
+import Post from '@/components/templates/Post';
 
 interface PageProps {
   params: Promise<{
@@ -21,9 +22,20 @@ export default async function DynamicPage({ params }: PageProps) {
         version: 'draft',
       });
 
+      const story = data.story as StoryType<PostBlok>;
+
+      // If it's a post, render Post component with tags
+      if (story.content.component === 'post') {
+        return (
+          <div className="page">
+            <Post blok={story.content} tags={story.tag_list} />
+          </div>
+        );
+      }
+
       return (
         <div className="page">
-          <StoryblokStory story={data.story} />
+          <StoryblokStory story={story} />
         </div>
       );
     } catch {

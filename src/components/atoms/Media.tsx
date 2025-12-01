@@ -62,7 +62,7 @@ interface CaptionProps {
 }
 
 const Caption = ({ caption }: CaptionProps) => (
-  <figcaption className="mt-3 text-sm text-gray-600 text-center italic">
+  <figcaption className="mt-3 text-sm text-gray-600 text-center italic w-[70%]">
     {caption}
   </figcaption>
 );
@@ -138,26 +138,29 @@ interface VideoFileProps {
   blok: MediaBlok;
 }
 
-const VideoFile = ({ filename, altText, caption, aspectRatio, autoplay, loop, muted, controls, posterImage, blok }: VideoFileProps) => (
-  <figure {...storyblokEditable(blok)} className="group">
-    <div className={`relative w-full overflow-hidden rounded-xl ${getAspectRatioClass(aspectRatio, 'aspect-video')}`}>
-      <video
-        className="absolute inset-0 w-full h-full object-cover"
-        autoPlay={autoplay}
-        loop={loop}
-        muted={muted}
-        controls={controls}
-        poster={posterImage}
-        aria-label={altText}
-      >
-        <source src={filename} type="video/mp4" />
-        {caption && <track kind="captions" label={caption} />}
-        Your browser does not support the video tag.
-      </video>
-    </div>
-    {caption && <Caption caption={caption} />}
-  </figure>
-);
+const VideoFile = ({ filename, altText, caption, aspectRatio, autoplay, loop, muted, controls, posterImage, blok }: VideoFileProps) => {
+
+  return (
+    <figure {...storyblokEditable(blok)} className="group flex flex-col items-center">
+      <div className={`relative w-full md:w-[85%] rounded-xl overflow-hidden ${getAspectRatioClass(aspectRatio, 'aspect-video')}`}>
+        <video
+          className="absolute inset-0 w-full h-full object-cover"
+          autoPlay={autoplay}
+          loop={loop}
+          muted={muted}
+          controls={controls}
+          poster={posterImage}
+          aria-label={altText}
+        >
+          <source src={filename} type="video/mp4" />
+          {caption && <track kind="captions" label={caption} />}
+          Your browser does not support the video tag.
+        </video>
+      </div>
+      {caption && <Caption caption={caption} />}
+    </figure>
+  );
+};
 
 interface ImageFileProps {
   filename: string;
@@ -170,19 +173,16 @@ interface ImageFileProps {
 }
 
 const ImageFile = ({ filename, altText, caption, aspectRatio, isExternalUrl, link, blok }: ImageFileProps) => {
-  const shouldFillContainer = aspectRatio !== 'auto';
-  const hoverEffect = link ? 'group-hover:scale-105' : '';
 
   const imageContent = (
-    <figure {...storyblokEditable(blok)} className="group">
-      <div className={`relative w-full overflow-hidden rounded-xl ${getAspectRatioClass(aspectRatio)}`}>
+    <figure {...storyblokEditable(blok)} className="group flex flex-col items-center">
+      <div className={`relative w-full md:w-[85%] rounded-xl overflow-hidden ${getAspectRatioClass(aspectRatio)}`}>
         <Image
           src={filename}
           alt={altText}
-          fill={shouldFillContainer}
-          width={shouldFillContainer ? undefined : 1200}
-          height={shouldFillContainer ? undefined : 800}
-          className={`${shouldFillContainer ? 'object-cover' : 'w-full h-auto'} transition-transform duration-300 ${hoverEffect}`}
+          width={1200}
+          height={800}
+          className="w-full h-full object-cover"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
           unoptimized={isExternalUrl}
         />
@@ -223,9 +223,10 @@ export default function Media({ blok }: Readonly<MediaProps>) {
 
   // Check if it's a YouTube URL
   if (is_external_url && isYouTubeUrl(filename)) {
+
     return (
-      <figure {...storyblokEditable(blok)} className="group">
-        <div className={`relative w-full overflow-hidden rounded-xl ${getAspectRatioClass(aspect_ratio, 'aspect-video')}`}>
+      <figure {...storyblokEditable(blok)} className="group flex flex-col items-center">
+        <div className={`relative w-full md:w-[85%] rounded-xl overflow-hidden ${getAspectRatioClass(aspect_ratio, 'aspect-video')}`}>
           <VideoEmbed
             youtubeUrl={filename}
             title={altText}
