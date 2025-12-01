@@ -1,4 +1,4 @@
-import { SbBlokData, StoryblokRichTextNode } from "@storyblok/react/rsc";
+import { SbBlokData, type StoryblokRichTextNode } from "@storyblok/react/rsc";
 
 // ============================================================================
 // Base Storyblok Types
@@ -18,17 +18,13 @@ export interface StoryblokBlok extends SbBlokData {
  * Storyblok Asset (images, videos, etc.)
  */
 export interface StoryblokAsset {
-  id: number | null;
+  id: number;
   filename: string;
-  alt?: string | null;
-  title?: string | null;
-  focus?: string | null;
+  alt?: string;
+  title?: string;
+  focus?: string;
   name?: string;
-  copyright?: string | null;
-  source?: string | null;
-  fieldtype?: string;
-  meta_data?: Record<string, unknown>;
-  is_external_url?: boolean;
+  copyright?: string;
 }
 
 /**
@@ -59,7 +55,7 @@ export interface StoryblokLink {
  */
 export interface CardItemBlok extends StoryblokBlok {
   component: 'card_item';
-
+  post_reference?: string | number;
 }
 
 /**
