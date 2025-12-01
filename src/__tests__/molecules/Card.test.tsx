@@ -140,13 +140,41 @@ describe('Card', () => {
     });
   });
 
-  describe('Link', () => {
-    it('renders link with correct href', () => {
+  describe('Links', () => {
+    it('renders multiple links (no nesting)', () => {
       const story = createMockStory();
       render(<Card story={story} />);
 
-      const link = screen.getByRole('link');
-      expect(link).toHaveAttribute('href', '/posts/test-post');
+      const links = screen.getAllByRole('link');
+      // Should have at least: image link, title link, and tag links
+      expect(links.length).toBeGreaterThan(1);
+    });
+
+    it('renders title link with correct href', () => {
+      const story = createMockStory();
+      render(<Card story={story} />);
+
+      const titleLink = screen.getByRole('link', { name: /Test Post Title/i });
+      expect(titleLink).toHaveAttribute('href', '/test-post');
+    });
+
+    it('renders tag links with correct href', () => {
+      const story = createMockStory();
+      render(<Card story={story} />);
+
+      const testTagLink = screen.getByRole('link', { name: 'test' });
+      const exampleTagLink = screen.getByRole('link', { name: 'example' });
+
+      expect(testTagLink).toHaveAttribute('href', '/insight-hub/test');
+      expect(exampleTagLink).toHaveAttribute('href', '/insight-hub/example');
+    });
+
+    it('strips posts/ prefix from full_slug for root-level URL', () => {
+      const story = createMockStory({ full_slug: 'posts/my-blog-post' });
+      render(<Card story={story} />);
+
+      const titleLink = screen.getByRole('link', { name: /Test Post Title/i });
+      expect(titleLink).toHaveAttribute('href', '/my-blog-post');
     });
   });
 
@@ -192,7 +220,7 @@ describe('Card', () => {
       const { container } = render(<Card story={story} />);
 
       const article = container.querySelector('article');
-      expect(article).toHaveClass('group', 'flex', 'flex-col', 'h-full', 'bg-white', 'rounded-xl');
+      expect(article).toHaveClass('group', 'relative', 'flex', 'flex-col', 'h-full', 'bg-white', 'rounded-xl');
     });
 
     it('applies hover effects', () => {
@@ -200,7 +228,15 @@ describe('Card', () => {
       const { container } = render(<Card story={story} />);
 
       const article = container.querySelector('article');
-      expect(article).toHaveClass('hover:shadow-md', 'hover:border-gray-200');
+      expect(article).toHaveClass('hover:shadow-md');
+    });
+
+    it('has max-width constraint', () => {
+      const story = createMockStory();
+      const { container } = render(<Card story={story} />);
+
+      const article = container.querySelector('article');
+      expect(article).toHaveClass('max-w-full', 'md:max-w-[320px]');
     });
   });
 });

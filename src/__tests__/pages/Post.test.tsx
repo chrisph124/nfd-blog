@@ -10,6 +10,13 @@ vi.mock('next/image', () => ({
   ),
 }));
 
+// Mock next/link
+vi.mock('next/link', () => ({
+  default: ({ children, href, className }: { children: React.ReactNode; href: string; className?: string }) => (
+    <a href={href} className={className}>{children}</a>
+  ),
+}));
+
 // Mock StoryblokServerComponent
 vi.mock('@storyblok/react/rsc', () => ({
   StoryblokServerComponent: ({ blok }: { blok: { _uid: string } }) => (
@@ -69,6 +76,79 @@ describe('Post', () => {
 
       const images = screen.queryAllByRole('img');
       expect(images).toHaveLength(0);
+    });
+  });
+
+  describe('Tags', () => {
+    it('renders tags when provided', () => {
+      const blok = createMockBlok();
+      const tags = ['AI', 'Technology', 'Innovation'];
+      render(<Post blok={blok} tags={tags} />);
+
+      expect(screen.getByText('AI')).toBeInTheDocument();
+      expect(screen.getByText('Technology')).toBeInTheDocument();
+      expect(screen.getByText('Innovation')).toBeInTheDocument();
+    });
+
+    it('does not render tags section when tags array is empty', () => {
+      const blok = createMockBlok();
+      const { container } = render(<Post blok={blok} tags={[]} />);
+
+      const tagsContainer = container.querySelector('.flex.flex-wrap.gap-2');
+      expect(tagsContainer).not.toBeInTheDocument();
+    });
+
+    it('does not render tags section when tags prop is not provided', () => {
+      const blok = createMockBlok();
+      const { container } = render(<Post blok={blok} />);
+
+      const tagsContainer = container.querySelector('.flex.flex-wrap.gap-2');
+      expect(tagsContainer).not.toBeInTheDocument();
+    });
+
+    it('renders tag links with correct href', () => {
+      const blok = createMockBlok();
+      const tags = ['AI', 'Tech'];
+      render(<Post blok={blok} tags={tags} />);
+
+      const aiLink = screen.getByRole('link', { name: 'AI' });
+      const techLink = screen.getByRole('link', { name: 'Tech' });
+
+      expect(aiLink).toHaveAttribute('href', '/insight-hub/AI');
+      expect(techLink).toHaveAttribute('href', '/insight-hub/Tech');
+    });
+
+    it('renders tags above title', () => {
+      const blok = createMockBlok({ title: 'My Post Title' });
+      const tags = ['First Tag'];
+      const { container } = render(<Post blok={blok} tags={tags} />);
+
+      const heroSection = container.querySelector('.flex.flex-col.items-center.gap-4');
+      expect(heroSection).toBeInTheDocument();
+
+      // Tags should come before title in DOM
+      const elements = Array.from(heroSection?.children || []);
+      const tagContainer = elements.find(el => el.classList.contains('flex-wrap'));
+      const titleElement = elements.find(el => el.tagName === 'H1');
+
+      expect(tagContainer).toBeTruthy();
+      expect(titleElement).toBeTruthy();
+      expect(elements.indexOf(tagContainer!)).toBeLessThan(elements.indexOf(titleElement!));
+    });
+
+    it('applies correct styling to tag links', () => {
+      const blok = createMockBlok();
+      const tags = ['Styled Tag'];
+      render(<Post blok={blok} tags={tags} />);
+
+      const tagLink = screen.getByRole('link', { name: 'Styled Tag' });
+      // Check individual classes
+      expect(tagLink).toHaveClass('px-3');
+      expect(tagLink).toHaveClass('py-1');
+      expect(tagLink).toHaveClass('text-sm');
+      expect(tagLink).toHaveClass('rounded-full');
+      // Check className string contains expected patterns
+      expect(tagLink.className).toMatch(/text-white|backdrop-blur/);
     });
   });
 
@@ -150,7 +230,7 @@ describe('Post', () => {
       const { container } = render(<Post blok={blok} />);
 
       const article = container.querySelector('article');
-      expect(article).toHaveClass('max-w-4xl', 'mx-auto', 'px-4', 'py-8');
+      expect(article).toHaveClass('flex', 'flex-col', 'justify-center', 'items-center');
     });
 
     it('applies prose styling to body content', () => {
@@ -160,24 +240,35 @@ describe('Post', () => {
       const { container } = render(<Post blok={blok} />);
 
       const proseDiv = container.querySelector('.prose');
-      expect(proseDiv).toHaveClass('prose', 'prose-lg', 'max-w-none');
+      expect(proseDiv).toHaveClass('prose', 'prose-lg', 'max-w-4xl');
     });
 
-    it('has correct header styling', () => {
+    it('has hero section with correct minimum height', () => {
       const blok = createMockBlok();
       const { container } = render(<Post blok={blok} />);
 
-      const header = container.querySelector('header');
-      expect(header).toHaveClass('mb-8');
+      const heroSection = container.querySelector('.relative.flex.items-center.justify-center');
+      expect(heroSection).toBeInTheDocument();
+      expect(heroSection).toHaveClass('min-h-[200px]', 'md:min-h-[300px]');
     });
 
-    it('has correct featured image aspect ratio', () => {
+    it('has dark overlay on hero image', () => {
       const blok = createMockBlok();
       const { container } = render(<Post blok={blok} />);
 
-      const imageContainer = container.querySelector('.aspect-video');
-      expect(imageContainer).toBeInTheDocument();
-      expect(imageContainer).toHaveClass('w-full', 'overflow-hidden', 'rounded-xl', 'mb-8');
+      const overlay = container.querySelector('.bg-black\\/60');
+      expect(overlay).toBeInTheDocument();
+      expect(overlay).toHaveClass('absolute', 'inset-0', '-z-10');
+    });
+
+    it('has correct content max-width', () => {
+      const blok = createMockBlok({
+        body: [{ _uid: 'block-1', component: 'paragraph' }],
+      });
+      const { container } = render(<Post blok={blok} />);
+
+      const contentSection = container.querySelector('.max-w-\\[1240px\\]');
+      expect(contentSection).toBeInTheDocument();
     });
   });
 });
