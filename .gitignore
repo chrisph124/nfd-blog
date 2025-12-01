@@ -43,3 +43,11 @@ next-env.d.ts
 # claude code documentation
 CLAUDE.md
 .claude/
+
+.opencode/
+
+plans/
+
+claude_code_zai_env.sh
+
+.repomixignore
