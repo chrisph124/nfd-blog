@@ -167,8 +167,9 @@ describe('CardItem', () => {
 
   describe('Error Handling', () => {
     it('shows error message in development when fetch fails', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = 'development';
+      (process.env as any).NODE_ENV = 'development';
 
       const blok = createMockBlok('failing-uuid');
       mockGet.mockRejectedValueOnce(new Error('Not found'));
@@ -180,12 +181,14 @@ describe('CardItem', () => {
         expect(screen.getByText(/Failed to fetch post/)).toBeInTheDocument();
       });
 
-      process.env.NODE_ENV = originalEnv;
+      (process.env as any).NODE_ENV = originalEnv;
+      consoleSpy.mockRestore();
     });
 
     it('returns null in production when fetch fails', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = 'production';
+      (process.env as any).NODE_ENV = 'production';
 
       const blok = createMockBlok('failing-uuid');
       mockGet.mockRejectedValueOnce(new Error('Not found'));
@@ -196,7 +199,8 @@ describe('CardItem', () => {
         expect(container.firstChild).toBeNull();
       });
 
-      process.env.NODE_ENV = originalEnv;
+      (process.env as any).NODE_ENV = originalEnv;
+      consoleSpy.mockRestore();
     });
 
     it('logs error to console when fetch fails', async () => {
