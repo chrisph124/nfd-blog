@@ -8,10 +8,11 @@ import { SbBlokData, type StoryblokRichTextNode } from "@storyblok/react/rsc";
  * Base interface for all Storyblok bloks
  * Extends SbBlokData which includes _uid and component
  */
-export interface StoryblokBlok extends SbBlokData {
+export interface StoryblokBlok extends Omit<SbBlokData, keyof Record<string, unknown>> {
   _uid: string;
   component: string;
   _editable?: string;
+  [key: string]: unknown;
 }
 
 /**
@@ -25,6 +26,7 @@ export interface StoryblokAsset {
   focus?: string;
   name?: string;
   copyright?: string;
+  is_external_url?: boolean;
 }
 
 /**
@@ -190,7 +192,7 @@ export interface PostBlok extends StoryblokBlok {
  */
 export interface RichtextBlok extends StoryblokBlok {
   component: 'richtext';
-  content?: StoryblokRichTextNode<string>;
+  content?: StoryblokRichTextNode<string> | null;
 }
 
 /**
