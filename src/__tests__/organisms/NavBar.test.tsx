@@ -216,7 +216,7 @@ describe('NavBar', () => {
       const navItems = [createMockNavItem('item-1', 'Home')];
       const { container } = render(<NavBar navItems={navItems} />);
 
-      const itemsContainer = container.querySelector('.flex.gap-\\[20px\\]');
+      const itemsContainer = container.querySelector(String.raw`.flex.gap-\[20px\]`);
       expect(itemsContainer).toBeInTheDocument();
     });
   });

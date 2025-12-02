@@ -12,7 +12,13 @@ vi.mock('@storyblok/react/rsc', () => ({
 
 vi.mock('next/image', () => ({
   default: ({ src, alt }: { src: string; alt: string }) => (
-    <img src={src} alt={alt} data-testid="next-image" />
+    <div
+      data-testid="next-image"
+      data-src={src}
+      data-alt={alt}
+      role="img"
+      aria-label={alt}
+    />
   ),
 }));
 

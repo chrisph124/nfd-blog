@@ -1,18 +1,24 @@
 import { render } from '@testing-library/react';
 import Richtext from '@/components/atoms/Richtext';
 import type { RichtextBlok } from '@/types/storyblok';
+import type { StoryblokRichTextNode } from '@storyblok/react/rsc';
+import type { RichTextNode, RichTextElementNode } from '@/__tests__/types/test-mocks';
 
 // Mock storyblokEditable
 vi.mock('@storyblok/react/rsc', () => ({
-  storyblokEditable: (blok: any) => ({ 'data-blok-cuid': blok._uid, 'data-blok-uid': blok._uid }),
-  renderRichText: (content: any) => {
+  storyblokEditable: <T extends Record<string, unknown>>(blok: T): T & { 'data-blok-cuid': string; 'data-blok-uid': string } => ({
+    ...blok,
+    'data-blok-cuid': blok._uid as string,
+    'data-blok-uid': blok._uid as string,
+  }),
+  renderRichText: (content: StoryblokRichTextNode<string> | null | undefined): string | null => {
     // Mock different content scenarios
     if (!content) return null;
     if (typeof content === 'object' && content !== null) {
       // Simulate rich text rendering
       return '<p>Mock rich text content</p>';
     }
-    return content;
+    return content as string;
   },
 }));
 
@@ -29,11 +35,11 @@ describe('Richtext Component', () => {
             {
               type: 'text',
               text: 'Sample rich text content'
-            }
+            } as RichTextNode
           ]
-        }
+        } as RichTextElementNode
       ]
-    }
+    } as StoryblokRichTextNode<string>,
   };
 
   describe('Rendering', () => {
@@ -100,7 +106,7 @@ describe('Richtext Component', () => {
       const blokWithEmptyContent: RichtextBlok = {
         _uid: 'test-richtext-empty-content',
         component: 'richtext',
-        content: {},
+        content: {} as StoryblokRichTextNode<string>,
       };
 
       const { container } = render(<Richtext blok={blokWithEmptyContent} />);
@@ -133,11 +139,11 @@ describe('Richtext Component', () => {
                 {
                   type: 'text',
                   text: 'Content that should be rendered'
-                }
+                } as RichTextNode
               ]
-            }
+            } as RichTextElementNode
           ]
-        }
+        } as StoryblokRichTextNode<string>
       };
 
       render(<Richtext blok={blokWithRenderableContent} />);
@@ -200,34 +206,24 @@ describe('Richtext Component', () => {
                 {
                   type: 'text',
                   text: 'Heading Text'
-                }
+                } as RichTextNode
               ]
-            },
+            } as RichTextElementNode,
             {
               type: 'paragraph',
               content: [
                 {
                   type: 'text',
-                  text: 'Paragraph with ',
-                  marks: [
-                    {
-                      type: 'bold'
-                    }
-                  ]
-                },
+                  text: 'Paragraph with '
+                } as RichTextNode,
                 {
                   type: 'text',
-                  text: 'bold text',
-                  marks: [
-                    {
-                      type: 'bold'
-                    }
-                  ]
-                }
+                  text: 'bold text'
+                } as RichTextNode
               ]
-            }
+            } as RichTextElementNode
           ]
-        }
+        } as StoryblokRichTextNode<string>
       };
 
       expect(() => render(<Richtext blok={complexContentBlok} />)).not.toThrow();
@@ -248,11 +244,11 @@ describe('Richtext Component', () => {
                 {
                   type: 'text',
                   text: 'Content with special chars: & < > " \''
-                }
+                } as RichTextNode
               ]
-            }
+            } as RichTextElementNode
           ]
-        }
+        } as StoryblokRichTextNode<string>
       };
 
       expect(() => render(<Richtext blok={blokWithSpecialChars} />)).not.toThrow();
@@ -277,15 +273,15 @@ describe('Richtext Component', () => {
                         {
                           type: 'text',
                           text: 'Nested list item'
-                        }
+                        } as RichTextNode
                       ]
-                    }
+                    } as RichTextElementNode
                   ]
-                }
+                } as RichTextElementNode
               ]
-            }
+            } as RichTextElementNode
           ]
-        }
+        } as StoryblokRichTextNode<string>
       };
 
       expect(() => render(<Richtext blok={deepNestedBlok} />)).not.toThrow();

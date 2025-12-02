@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import StoryblokProvider from '@/components/providers/StoryblokProvider';
 import { getStoryblokApi } from '@/lib/storyblok';
+import type { GetStoryblokApiOptions, StoryblokApiInstance } from '@/__tests__/types/test-mocks';
 
 // Mock the storyblok API function
 vi.mock('@/lib/storyblok', () => ({
@@ -16,7 +17,7 @@ describe('StoryblokProvider Component', () => {
 
   describe('Rendering', () => {
     it('renders children without modification', () => {
-      mockGetStoryblokApi.mockReturnValue({} as any);
+      mockGetStoryblokApi.mockReturnValue({} as GetStoryblokApiOptions);
 
       render(
         <StoryblokProvider>
@@ -30,7 +31,7 @@ describe('StoryblokProvider Component', () => {
     });
 
     it('renders multiple children', () => {
-      mockGetStoryblokApi.mockReturnValue({} as any);
+      mockGetStoryblokApi.mockReturnValue({} as GetStoryblokApiOptions);
 
       render(
         <StoryblokProvider>
@@ -44,7 +45,7 @@ describe('StoryblokProvider Component', () => {
     });
 
     it('renders complex React components as children', () => {
-      mockGetStoryblokApi.mockReturnValue({} as any);
+      mockGetStoryblokApi.mockReturnValue({} as GetStoryblokApiOptions);
 
       const TestComponent = ({ text }: { text: string }) => (
         <div data-testid="complex-component">{text}</div>
@@ -61,7 +62,7 @@ describe('StoryblokProvider Component', () => {
     });
 
     it('renders null children gracefully', () => {
-      mockGetStoryblokApi.mockReturnValue({} as any);
+      mockGetStoryblokApi.mockReturnValue({} as GetStoryblokApiOptions);
 
       render(
         <StoryblokProvider>
@@ -74,7 +75,7 @@ describe('StoryblokProvider Component', () => {
     });
 
     it('renders empty fragment children', () => {
-      mockGetStoryblokApi.mockReturnValue({} as any);
+      mockGetStoryblokApi.mockReturnValue({} as GetStoryblokApiOptions);
 
       render(
         <StoryblokProvider>
@@ -92,7 +93,7 @@ describe('StoryblokProvider Component', () => {
       const mockApiInstance = {
         init: vi.fn(),
         get: vi.fn(),
-      } as any;
+      } as StoryblokApiInstance;
 
       mockGetStoryblokApi.mockReturnValue(mockApiInstance);
 
@@ -110,7 +111,7 @@ describe('StoryblokProvider Component', () => {
       const mockApiInstance = {
         init: vi.fn(),
         get: vi.fn(),
-      } as any;
+      } as StoryblokApiInstance;
 
       mockGetStoryblokApi.mockReturnValue(mockApiInstance);
 
@@ -150,7 +151,7 @@ describe('StoryblokProvider Component', () => {
 
   describe('Provider Behavior', () => {
     it('acts as a pass-through component', () => {
-      mockGetStoryblokApi.mockReturnValue({} as any);
+      mockGetStoryblokApi.mockReturnValue({} as GetStoryblokApiOptions);
 
       const TestComponent = ({ children }: { children: React.ReactNode }) => (
         <div data-testid="wrapper">{children}</div>
@@ -169,7 +170,7 @@ describe('StoryblokProvider Component', () => {
     });
 
     it('preserves children props and attributes', () => {
-      mockGetStoryblokApi.mockReturnValue({} as any);
+      mockGetStoryblokApi.mockReturnValue({} as GetStoryblokApiOptions);
 
       render(
         <StoryblokProvider>
@@ -191,16 +192,10 @@ describe('StoryblokProvider Component', () => {
     });
 
     it('supports React Portal children', () => {
-      mockGetStoryblokApi.mockReturnValue({} as any);
+      mockGetStoryblokApi.mockReturnValue({} as GetStoryblokApiOptions);
 
       const portalDiv = document.createElement('div');
       document.body.appendChild(portalDiv);
-
-      const PortalComponent = ({ children }: { children: React.ReactNode }) => {
-        return typeof window !== 'undefined'
-          ? window.document.createDocumentFragment()
-          : <div>{children}</div>;
-      };
 
       // This tests that the provider doesn't interfere with complex React rendering patterns
       expect(() => {
@@ -218,14 +213,14 @@ describe('StoryblokProvider Component', () => {
 
   describe('Component Structure', () => {
     it('has correct component name for debugging', () => {
-      mockGetStoryblokApi.mockReturnValue({} as any);
+      mockGetStoryblokApi.mockReturnValue({} as GetStoryblokApiOptions);
 
       const component = StoryblokProvider;
       expect(component.name).toBe('StoryblokProvider');
     });
 
     it('is a client component (use client directive)', () => {
-      mockGetStoryblokApi.mockReturnValue({} as any);
+      mockGetStoryblokApi.mockReturnValue({} as GetStoryblokApiOptions);
 
       // Component should render without SSR issues
       expect(() => {
@@ -240,7 +235,7 @@ describe('StoryblokProvider Component', () => {
 
   describe('Edge Cases', () => {
     it('handles deeply nested children', () => {
-      mockGetStoryblokApi.mockReturnValue({} as any);
+      mockGetStoryblokApi.mockReturnValue({} as GetStoryblokApiOptions);
 
       render(
         <StoryblokProvider>
@@ -260,7 +255,7 @@ describe('StoryblokProvider Component', () => {
     });
 
     it('handles children with conditional rendering', () => {
-      mockGetStoryblokApi.mockReturnValue({} as any);
+      mockGetStoryblokApi.mockReturnValue({} as GetStoryblokApiOptions);
 
       const ConditionalComponent = ({ show }: { show: boolean }) => (
         show ? <div data-testid="conditional-content">Shown Content</div> : null
@@ -284,7 +279,7 @@ describe('StoryblokProvider Component', () => {
     });
 
     it('handles children that throw errors during render', () => {
-      mockGetStoryblokApi.mockReturnValue({} as any);
+      mockGetStoryblokApi.mockReturnValue({} as GetStoryblokApiOptions);
 
       const ErrorComponent = () => {
         throw new Error('Component render error');
@@ -300,13 +295,7 @@ describe('StoryblokProvider Component', () => {
     });
 
     it('handles async components as children', async () => {
-      mockGetStoryblokApi.mockReturnValue({} as any);
-
-      const AsyncComponent = async () => {
-        // Simulate async operation
-        await new Promise(resolve => setTimeout(resolve, 0));
-        return <div data-testid="async-content">Async Content</div>;
-      };
+      mockGetStoryblokApi.mockReturnValue({} as GetStoryblokApiOptions);
 
       // Note: This test ensures the provider doesn't break with async components,
       // though actual rendering would need to be handled by React's concurrent features
@@ -322,7 +311,7 @@ describe('StoryblokProvider Component', () => {
 
   describe('Type Safety', () => {
     it('accepts ReactNode as children prop', () => {
-      mockGetStoryblokApi.mockReturnValue({} as any);
+      mockGetStoryblokApi.mockReturnValue({} as GetStoryblokApiOptions);
 
       const testCases = [
         <div key="jsx">JSX Element</div>,

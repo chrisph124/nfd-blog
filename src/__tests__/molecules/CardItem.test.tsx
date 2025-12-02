@@ -68,6 +68,9 @@ const createMockBlok = (post_reference?: string | number): CardItemBlok => ({
   post_reference,
 });
 
+// Test mock function type support and IntelliSense
+// Note: IDE should provide full IntelliSense for mock functions
+
 describe('CardItem', () => {
   beforeEach(() => {
     mockGet.mockClear();
@@ -168,8 +171,8 @@ describe('CardItem', () => {
   describe('Error Handling', () => {
     it('shows error message in development when fetch fails', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      const originalEnv = process.env.NODE_ENV;
-      (process.env as any).NODE_ENV = 'development';
+
+      vi.stubEnv('NODE_ENV', 'development');
 
       const blok = createMockBlok('failing-uuid');
       mockGet.mockRejectedValueOnce(new Error('Not found'));
@@ -181,14 +184,14 @@ describe('CardItem', () => {
         expect(screen.getByText(/Failed to fetch post/)).toBeInTheDocument();
       });
 
-      (process.env as any).NODE_ENV = originalEnv;
+      vi.unstubAllEnvs();
       consoleSpy.mockRestore();
     });
 
     it('returns null in production when fetch fails', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      const originalEnv = process.env.NODE_ENV;
-      (process.env as any).NODE_ENV = 'production';
+
+      vi.stubEnv('NODE_ENV', 'production');
 
       const blok = createMockBlok('failing-uuid');
       mockGet.mockRejectedValueOnce(new Error('Not found'));
@@ -199,7 +202,7 @@ describe('CardItem', () => {
         expect(container.firstChild).toBeNull();
       });
 
-      (process.env as any).NODE_ENV = originalEnv;
+      vi.unstubAllEnvs();
       consoleSpy.mockRestore();
     });
 

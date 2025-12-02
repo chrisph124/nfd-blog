@@ -5,8 +5,24 @@ import type { PostBlok } from '@/types/storyblok';
 
 // Mock next/image
 vi.mock('next/image', () => ({
-  default: ({ src, alt, ...props }: { src: string; alt: string; [key: string]: unknown }) => (
-    <img src={src} alt={alt} {...props} />
+  default: ({ src, alt, fill, priority, ...props }: {
+    src: string;
+    alt: string;
+    fill?: boolean;
+    priority?: boolean;
+    [key: string]: unknown
+  }) => (
+    <div
+      data-testid="next-image"
+      data-src={src}
+      data-alt={alt}
+      data-fill={fill?.toString()}
+      data-priority={priority?.toString()}
+      alt={alt}
+      role="img"
+      aria-label={alt}
+      {...props}
+    />
   ),
 }));
 
@@ -65,9 +81,10 @@ describe('Post', () => {
       const blok = createMockBlok();
       render(<Post blok={blok} />);
 
-      const image = screen.getByAltText('Test featured image');
+      const image = screen.getByRole('img');
       expect(image).toBeInTheDocument();
-      expect(image).toHaveAttribute('src', 'https://a.storyblok.com/f/test.jpg');
+      expect(image).toHaveAttribute('alt', 'Test featured image');
+      expect(image).toHaveAttribute('data-src', 'https://a.storyblok.com/f/test.jpg');
     });
 
     it('does not render image when featured_image is not provided', () => {
@@ -219,8 +236,10 @@ describe('Post', () => {
       });
       render(<Post blok={blok} />);
 
-      const image = screen.getByAltText('Fallback Alt Text');
+      const image = screen.getByRole('img');
       expect(image).toBeInTheDocument();
+      expect(image).toHaveAttribute('alt', 'Fallback Alt Text');
+      expect(image).toHaveAttribute('data-src', 'https://a.storyblok.com/f/test.jpg');
     });
   });
 
@@ -256,7 +275,7 @@ describe('Post', () => {
       const blok = createMockBlok();
       const { container } = render(<Post blok={blok} />);
 
-      const overlay = container.querySelector('.bg-black\\/60');
+      const overlay = container.querySelector(String.raw`.bg-black\/60`);
       expect(overlay).toBeInTheDocument();
       expect(overlay).toHaveClass('absolute', 'inset-0', '-z-10');
     });
@@ -267,7 +286,7 @@ describe('Post', () => {
       });
       const { container } = render(<Post blok={blok} />);
 
-      const contentSection = container.querySelector('.max-w-\\[1240px\\]');
+      const contentSection = container.querySelector(String.raw`.max-w-\[1240px\]`);
       expect(contentSection).toBeInTheDocument();
     });
   });
