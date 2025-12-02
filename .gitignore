@@ -51,3 +51,7 @@ plans/
 claude_code_zai_env.sh
 
 .repomixignore
+
+docs/
+
+repomix-output.xml
