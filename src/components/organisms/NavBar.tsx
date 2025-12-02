@@ -25,6 +25,7 @@ const NavBar = memo(({ navItems }: NavBarProps) => {
   const toggleDropdown = useCallback((itemId: string) => {
     setExpandedItems(prev => ({
       ...prev,
+      // eslint-disable-next-line security/detect-object-injection
       [itemId]: !prev[itemId]
     }));
   }, []);

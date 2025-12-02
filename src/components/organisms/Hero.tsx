@@ -2,9 +2,9 @@
 
 import { memo } from "react";
 import {
-  storyblokEditable,
+  makeStoryblokEditable,
   StoryblokServerComponent,
-} from "@storyblok/react/rsc";
+} from "@/lib/storyblok-utils";
 import type { HeroBlockBlok, CtaBlok, StoryblokAsset } from "@/types/storyblok";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -172,7 +172,7 @@ const Hero = memo(({ blok }: HeroProps) => {
 
   return (
     <section
-      {...storyblokEditable(blok)}
+      {...makeStoryblokEditable(blok)}
       className="relative w-full min-h-[250px] overflow-hidden"
     >
       {hasBackgroundImage && (

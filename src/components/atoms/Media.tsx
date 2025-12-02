@@ -1,7 +1,7 @@
-import { storyblokEditable } from '@storyblok/react/rsc';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { MediaBlok, StoryblokLink } from '@/types/storyblok';
+import { makeStoryblokEditable } from '@/lib/storyblok-utils';
 
 // ============================================================================
 // Constants
@@ -141,14 +141,14 @@ interface VideoFileProps {
 const VideoFile = ({ filename, altText, caption, aspectRatio, autoplay, loop, muted, controls, posterImage, blok }: VideoFileProps) => {
 
   return (
-    <figure {...storyblokEditable(blok)} className="group flex flex-col items-center">
+    <figure {...makeStoryblokEditable(blok)} className="group flex flex-col items-center">
       <div className={`relative w-full md:w-[85%] rounded-xl overflow-hidden ${getAspectRatioClass(aspectRatio, 'aspect-video')}`}>
         <video
           className="absolute inset-0 w-full h-full object-cover"
-          autoPlay={autoplay}
-          loop={loop}
-          muted={muted}
-          controls={controls}
+          {...(autoplay && { autoPlay: true })}
+          {...(loop && { loop: true })}
+          {...(muted && { muted: true })}
+          {...(controls && { controls: true })}
           poster={posterImage}
           aria-label={altText}
         >
@@ -175,7 +175,7 @@ interface ImageFileProps {
 const ImageFile = ({ filename, altText, caption, aspectRatio, isExternalUrl, link, blok }: ImageFileProps) => {
 
   const imageContent = (
-    <figure {...storyblokEditable(blok)} className="group flex flex-col items-center">
+    <figure {...makeStoryblokEditable(blok)} className="group flex flex-col items-center">
       <div className={`relative w-full md:w-[85%] rounded-xl overflow-hidden ${getAspectRatioClass(aspectRatio)}`}>
         <Image
           src={filename}
@@ -225,7 +225,7 @@ export default function Media({ blok }: Readonly<MediaProps>) {
   if (is_external_url && isYouTubeUrl(filename)) {
 
     return (
-      <figure {...storyblokEditable(blok)} className="group flex flex-col items-center">
+      <figure {...makeStoryblokEditable(blok)} className="group flex flex-col items-center">
         <div className={`relative w-full md:w-[85%] rounded-xl overflow-hidden ${getAspectRatioClass(aspect_ratio, 'aspect-video')}`}>
           <VideoEmbed
             youtubeUrl={filename}

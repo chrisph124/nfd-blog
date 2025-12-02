@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { storyblokEditable } from '@storyblok/react/rsc';
+import { makeStoryblokEditable } from '@/lib/storyblok-utils';
 import { getStoryblokApi } from '@/lib/storyblok';
 import type { CardItemBlok, StoryblokStory, PostBlok } from '@/types/storyblok';
 import Card from './Card';
@@ -88,7 +88,7 @@ export default function CardItem({ blok }: Readonly<CardItemProps>) {
   }
 
   return (
-    <div {...storyblokEditable(blok)}>
+    <div {...makeStoryblokEditable(blok)}>
       <Card story={story} />
     </div>
   );

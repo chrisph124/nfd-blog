@@ -1,7 +1,7 @@
 "use client";
 
 import { memo } from "react";
-import { storyblokEditable, StoryblokServerComponent } from "@storyblok/react/rsc";
+import { makeStoryblokEditable, StoryblokServerComponent } from "@/lib/storyblok-utils";
 import Image from "next/image";
 import type { SectionWrapperBlok } from "@/types/storyblok";
 import { cn } from "@/lib/utils";
@@ -47,7 +47,7 @@ const SectionWrapper = memo(({ blok }: SectionWrapperProps) => {
 
   return (
     <section
-      {...storyblokEditable(blok)}
+      {...makeStoryblokEditable(blok)}
       className={cn(
         "relative w-full max-w-[1240px] flex flex-col gap-10 lg:gap-20 py-10 lg:py-12 px-6 md:px-10 lg:px-15 2xl:px-20 mx-auto",
         hasBackgroundPattern && "overflow-hidden"

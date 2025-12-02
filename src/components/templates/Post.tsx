@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { StoryblokServerComponent } from "@storyblok/react/rsc";
+import { StoryblokServerComponent } from "@/lib/storyblok-utils";
 import type { PostBlok } from "@/types/storyblok";
 
 interface PostProps {
