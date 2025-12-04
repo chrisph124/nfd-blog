@@ -4,7 +4,7 @@ import { memo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { StoryblokStory, PostBlok } from '@/types/storyblok';
-import { cn, getReadingTime, formatDate } from '@/lib/utils';
+import { cn, getStoryReadingTime, formatDate } from '@/lib/utils';
 
 interface CardProps {
   story: StoryblokStory<PostBlok>;
@@ -22,6 +22,7 @@ interface CardTagsProps {
 interface CardMetaProps {
   createdAt?: string;
   excerpt?: string;
+  body?: unknown[];
 }
 
 const CardImage = memo(({ image, title }: CardImageProps) => {
@@ -63,9 +64,9 @@ const CardTags = memo(({ tags }: CardTagsProps) => {
 
 CardTags.displayName = 'CardTags';
 
-const CardMeta = memo(({ createdAt, excerpt }: CardMetaProps) => {
+const CardMeta = memo(({ createdAt, body }: CardMetaProps) => {
   const formattedDate = createdAt ? formatDate(createdAt) : '';
-  const readingTime = excerpt ? getReadingTime(excerpt) : '';
+  const readingTime = getStoryReadingTime(body);
 
   if (!formattedDate && !readingTime) return null;
 
@@ -82,7 +83,7 @@ CardMeta.displayName = 'CardMeta';
 
 const Card = memo(({ story }: CardProps) => {
   const { content, full_slug, tag_list, created_at } = story;
-  const { featured_image, title = '', excerpt } = content;
+  const { featured_image, title = '', excerpt, body } = content;
 
   // Strip "posts/" prefix to get root-level URL (e.g., "posts/my-post" -> "my-post")
   const postSlug = full_slug.replace(/^posts\//, '');
@@ -107,7 +108,7 @@ const Card = memo(({ story }: CardProps) => {
           </h3>
         </Link>
 
-        <CardMeta createdAt={created_at} excerpt={excerpt} />
+        <CardMeta createdAt={created_at} body={body} />
 
         {excerpt && (
           <p className="text-sm text-gray-600 line-clamp-4 mt-auto">
