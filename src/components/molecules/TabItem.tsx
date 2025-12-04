@@ -1,7 +1,7 @@
 "use client";
 
 import { memo } from "react";
-import { storyblokEditable, StoryblokServerComponent } from "@storyblok/react/rsc";
+import { makeStoryblokEditable, StoryblokServerComponent } from "@/lib/storyblok-utils";
 import type { TabItemBlok } from "@/types/storyblok";
 
 interface TabItemProps {
@@ -12,7 +12,7 @@ const TabItem = memo(({ blok }: TabItemProps) => {
   const { content } = blok;
 
   return (
-    <div {...storyblokEditable(blok)} className="w-full">
+    <div {...makeStoryblokEditable(blok)} className="w-full">
       {content?.map((nestedBlok) => (
         <StoryblokServerComponent key={nestedBlok._uid} blok={nestedBlok} />
       ))}

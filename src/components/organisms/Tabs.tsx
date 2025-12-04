@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, memo } from "react";
-import { storyblokEditable, StoryblokServerComponent } from "@storyblok/react/rsc";
+import { makeStoryblokEditable, StoryblokServerComponent } from "@/lib/storyblok-utils";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import type { TabsBlok, TabItemBlok } from "@/types/storyblok";
 import { cn } from "@/lib/utils";
@@ -66,6 +66,7 @@ const TabDropdown = memo(({ tabs, activeTab, onSelect }: DropdownProps) => {
         aria-expanded={isOpen}
         aria-haspopup="listbox"
       >
+        {/* eslint-disable-next-line security/detect-object-injection */}
         <span>{tabs[activeTab]?.label || "Select tab"}</span>
         <ChevronDownIcon
           className={cn("size-4 transition-transform text-gray-700", isOpen && "rotate-180")}
@@ -108,10 +109,11 @@ const Tabs = memo(({ blok }: TabsProps) => {
     return null;
   }
 
+  // eslint-disable-next-line security/detect-object-injection
   const activeTabContent = tabs[activeTab]?.content;
 
   return (
-    <div {...storyblokEditable(blok)} className="flex flex-col gap-12 items-center w-full">
+    <div {...makeStoryblokEditable(blok)} className="flex flex-col gap-12 items-center w-full">
       <div className="hidden md:flex gap-4 items-center justify-center">
         {tabs.map((tab, index) => (
           <TabButton

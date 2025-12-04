@@ -11,8 +11,17 @@ vi.mock('@storyblok/react/rsc', () => ({
 }));
 
 vi.mock('next/image', () => ({
-  default: ({ src, alt, ...props }: { src: string; alt: string; [key: string]: unknown }) => (
-    <img src={src} alt={alt} {...props} data-testid="next-image" />
+  default: ({ src, alt, fill, priority, ...props }: { src: string; alt: string; fill?: boolean; priority?: boolean; [key: string]: unknown }) => (
+    <div
+      data-src={src}
+      data-alt={alt}
+      role="img"
+      aria-label={alt}
+      {...(fill && { 'data-fill': 'true' })}
+      {...(priority && { 'data-priority': 'true' })}
+      data-testid="next-image"
+      {...props}
+    />
   ),
 }));
 

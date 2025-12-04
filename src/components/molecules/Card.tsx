@@ -4,7 +4,7 @@ import { memo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { StoryblokStory, PostBlok } from '@/types/storyblok';
-import { cn, getReadingTime, formatDate } from '@/lib/utils';
+import { cn, getStoryReadingTime, formatDate } from '@/lib/utils';
 
 interface CardProps {
   story: StoryblokStory<PostBlok>;
@@ -22,6 +22,7 @@ interface CardTagsProps {
 interface CardMetaProps {
   createdAt?: string;
   excerpt?: string;
+  body?: unknown[];
 }
 
 const CardImage = memo(({ image, title }: CardImageProps) => {
@@ -48,12 +49,14 @@ const CardTags = memo(({ tags }: CardTagsProps) => {
   return (
     <div className="flex flex-wrap gap-2">
       {tags.map((tag) => (
-        <span
+        <Link
           key={tag}
-          className="px-2 py-1 text-xs font-medium text-primary-700 bg-primary-50 rounded-md"
+          href={`/insight-hub/${tag}`}
+          className="px-2 py-1 text-xs font-medium text-primary-700 bg-primary-50 rounded-md hover:bg-primary-100 transition-colors"
+          onClick={(e) => e.stopPropagation()}
         >
           {tag}
-        </span>
+        </Link>
       ))}
     </div>
   );
@@ -61,9 +64,9 @@ const CardTags = memo(({ tags }: CardTagsProps) => {
 
 CardTags.displayName = 'CardTags';
 
-const CardMeta = memo(({ createdAt, excerpt }: CardMetaProps) => {
+const CardMeta = memo(({ createdAt, body }: CardMetaProps) => {
   const formattedDate = createdAt ? formatDate(createdAt) : '';
-  const readingTime = excerpt ? getReadingTime(excerpt) : '';
+  const readingTime = getStoryReadingTime(body);
 
   if (!formattedDate && !readingTime) return null;
 
@@ -80,39 +83,40 @@ CardMeta.displayName = 'CardMeta';
 
 const Card = memo(({ story }: CardProps) => {
   const { content, full_slug, tag_list, created_at } = story;
-  const { featured_image, title = '', excerpt } = content;
+  const { featured_image, title = '', excerpt, body } = content;
 
-  const cardContent = (
+  // Strip "posts/" prefix to get root-level URL (e.g., "posts/my-post" -> "my-post")
+  const postSlug = full_slug.replace(/^posts\//, '');
+
+  return (
     <article
       className={cn(
-        'group flex flex-col h-full bg-white rounded-xl shadow-sm border border-gray-100',
-        'transition-all duration-200 hover:shadow-md hover:border-gray-200'
+        'group relative flex flex-col h-full bg-white rounded-xl shadow-sm',
+        'transition-all duration-200 hover:shadow-md max-w-full md:max-w-[320px]'
       )}
     >
-      <CardImage image={featured_image} title={title} />
+      <Link href={`/${postSlug}`} className="block">
+        <CardImage image={featured_image} title={title} />
+      </Link>
 
       <div className="flex flex-col gap-3 p-4 flex-1">
         {tag_list && tag_list.length > 0 && <CardTags tags={tag_list} />}
 
-        <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 group-hover:text-primary-700 transition-colors">
-          {title}
-        </h3>
+        <Link href={`/${postSlug}`}>
+          <h3 className="body-1 text-gray-900 line-clamp-3 group-hover:text-primary-700 transition-colors">
+            {title}
+          </h3>
+        </Link>
 
-        <CardMeta createdAt={created_at} excerpt={excerpt} />
+        <CardMeta createdAt={created_at} body={body} />
 
         {excerpt && (
-          <p className="text-sm text-gray-600 line-clamp-3 mt-auto">
+          <p className="text-sm text-gray-600 line-clamp-4 mt-auto">
             {excerpt}
           </p>
         )}
       </div>
     </article>
-  );
-
-  return (
-    <Link href={`/${full_slug}`} className="block h-full">
-      {cardContent}
-    </Link>
   );
 });
 

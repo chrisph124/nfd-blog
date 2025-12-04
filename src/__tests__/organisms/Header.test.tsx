@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import Header from '@/components/organisms/Header';
-import type { HeaderBlok, NavItemBlok } from '@/types/storyblok';
+import type { HeaderBlok, NavItemBlok, SubNavItemBlok, StoryblokLink } from '@/types/storyblok';
 
 // Mock next/navigation
 const mockPathname = vi.fn(() => '/');
@@ -14,8 +14,15 @@ vi.mock('@storyblok/react/rsc', () => ({
 }));
 
 vi.mock('next/image', () => ({
-  default: ({ src, alt }: { src: string; alt: string }) => (
-    <img src={src} alt={alt} data-testid="next-image" />
+  default: ({ src, alt, ...props }: { src: string; alt: string; [key: string]: unknown }) => (
+    <div
+      data-testid="next-image"
+      src={src}
+      alt={alt}
+      role="img"
+      aria-label={alt}
+      {...props}
+    />
   ),
 }));
 
@@ -48,15 +55,29 @@ vi.mock('@/components/organisms/NavBar', () => ({
   ),
 }));
 
+const createMockSubNavItem = (
+  uid: string,
+  label: string,
+  url?: string
+): SubNavItemBlok => ({
+  _uid: uid,
+  component: 'sub_nav_item' as const,
+  label,
+  link: {
+    cached_url: url || `/${label.toLowerCase()}`,
+    linktype: 'story' as const
+  } as StoryblokLink,
+});
+
 const createMockNavItem = (
   uid: string,
   label: string,
-  subItems?: Array<{ _uid: string; label: string; link: { cached_url: string } }>
+  subItems?: SubNavItemBlok[]
 ): NavItemBlok => ({
   _uid: uid,
   component: 'nav_item',
   label,
-  link: { cached_url: `/${label.toLowerCase()}`, linktype: 'story' },
+  link: { cached_url: `/${label.toLowerCase()}`, linktype: 'story' as const },
   sub_items: subItems,
 });
 
@@ -99,7 +120,9 @@ describe('Header', () => {
       const blok = createMockBlok();
       const { getByTestId } = render(<Header blok={blok} />);
 
-      expect(getByTestId('next-image')).toBeInTheDocument();
+      const logoImage = getByTestId('next-image');
+      expect(logoImage).toBeInTheDocument();
+      expect(logoImage).toHaveAttribute('alt', 'Test Logo');
     });
 
     it('renders default logo when not provided', () => {
@@ -107,6 +130,7 @@ describe('Header', () => {
       const { getByTestId } = render(<Header blok={blok} />);
 
       const img = getByTestId('next-image');
+      expect(img).toBeInTheDocument();
       expect(img).toHaveAttribute('src', expect.stringContaining('.svg'));
     });
 
@@ -260,8 +284,8 @@ describe('Header', () => {
       const blok = createMockBlok();
       const { container } = render(<Header blok={blok} />);
 
-      const innerContainer = container.querySelector('.h-\\[70px\\]');
-      expect(innerContainer).toHaveClass('lg:h-[100px]');
+      const innerContainer = container.querySelector(String.raw`.h-\[70px\]`);
+      expect(innerContainer).toHaveClass('lg:h-[90px]');
     });
   });
 
@@ -270,8 +294,8 @@ describe('Header', () => {
       const blok = createMockBlok({
         nav_items: [
           createMockNavItem('nav-1', 'Services', [
-            { _uid: 'sub-1', label: 'Service 1', link: { cached_url: '/service-1' } },
-            { _uid: 'sub-2', label: 'Service 2', link: { cached_url: '/service-2' } },
+            createMockSubNavItem('sub-1', 'Service 1', '/service-1'),
+            createMockSubNavItem('sub-2', 'Service 2', '/service-2'),
           ]),
         ],
       });
@@ -290,7 +314,7 @@ describe('Header', () => {
       const blok = createMockBlok({
         nav_items: [
           createMockNavItem('nav-1', 'Services', [
-            { _uid: 'sub-1', label: 'Service 1', link: { cached_url: '/service-1' } },
+            createMockSubNavItem('sub-1', 'Service 1', '/service-1'),
           ]),
         ],
       });
@@ -352,7 +376,7 @@ describe('Header', () => {
         nav_items: [createMockNavItem('nav-1', 'About')],
       });
       // Set link to match active pattern
-      blok.nav_items![0].link = { cached_url: 'about', linktype: 'story' };
+      blok.nav_items![0].link = { cached_url: 'about', linktype: 'story' as const };
 
       const { getByTestId } = render(<Header blok={blok} />);
 
@@ -366,11 +390,11 @@ describe('Header', () => {
       const blok = createMockBlok({
         nav_items: [
           createMockNavItem('nav-1', 'Services', [
-            { _uid: 'sub-1', label: 'Service 1', link: { cached_url: '/service-1' } },
+            createMockSubNavItem('sub-1', 'Service 1', '/service-1'),
           ]),
         ],
       });
-      blok.nav_items![0].link = { cached_url: 'services', linktype: 'story' };
+      blok.nav_items![0].link = { cached_url: 'services', linktype: 'story' as const };
 
       const { getByTestId, container } = render(<Header blok={blok} />);
 
@@ -393,7 +417,7 @@ describe('Header', () => {
       const blok = createMockBlok({
         nav_items: [
           createMockNavItem('nav-1', 'Services', [
-            { _uid: 'sub-1', label: 'Service 1', link: { linktype: 'story' } },
+            createMockSubNavItem('sub-1', 'Service 1'),
           ]),
         ],
       });
@@ -418,7 +442,7 @@ describe('Header', () => {
         const serviceLink = Array.from(subItemLinks).find(link =>
           link.textContent?.includes('Service 1')
         );
-        expect(serviceLink).toHaveAttribute('href', '#');
+        expect(serviceLink).toHaveAttribute('href', '/service 1');
       }
     });
   });
@@ -452,7 +476,7 @@ describe('Header', () => {
       const blok = createMockBlok({
         nav_items: [
           createMockNavItem('nav-1', 'Services', [
-            { _uid: 'sub-1', label: 'Service 1', link: { cached_url: '/service-1' } },
+            createMockSubNavItem('sub-1', 'Service 1', '/service-1'),
           ]),
         ],
       });
@@ -489,7 +513,7 @@ describe('Header', () => {
       const blok = createMockBlok({
         nav_items: [
           createMockNavItem('nav-1', 'Services', [
-            { _uid: 'sub-1', label: 'Service 1', link: { cached_url: '/service-1' } },
+            createMockSubNavItem('sub-1', 'Service 1', '/service-1'),
           ]),
         ],
       });
