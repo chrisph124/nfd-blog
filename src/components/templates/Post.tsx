@@ -1,18 +1,29 @@
 import Image from "next/image";
 import Link from "next/link";
 import { StoryblokServerComponent } from "@/lib/storyblok-utils";
+import { getStoryReadingTime, formatDate } from "@/lib/utils";
+import ReadingProgressBar from "@/components/atoms/ReadingProgress";
 import type { PostBlok } from "@/types/storyblok";
 
 interface PostProps {
   blok: PostBlok;
   tags?: string[];
+  createdAt?: string;
 }
 
-export default function Post({ blok, tags = [] }: Readonly<PostProps>) {
+export default function Post({ blok, tags = [], createdAt }: Readonly<PostProps>) {
   const { title = "", featured_image, excerpt, body } = blok;
+  const readingTime = getStoryReadingTime(body);
+  const formattedDate = createdAt ? formatDate(createdAt) : '';
 
   return (
-    <article className="flex flex-col justify-center items-center gap-y-6 md:gap-y-12">
+    <>
+      <ReadingProgressBar
+        height={4}
+        position="fixed"
+        zIndex={50}
+      />
+      <article className="flex flex-col justify-center items-center gap-y-6 md:gap-y-12">
       <div className="relative flex items-center justify-center w-full min-h-[200px] md:min-h-[300px] overflow-hidden">
         {/* Background Image */}
         {featured_image?.filename && (
@@ -51,6 +62,15 @@ export default function Post({ blok, tags = [] }: Readonly<PostProps>) {
               {title}
             </h1>
           )}
+
+          {/* Date and Reading Time */}
+          {(formattedDate || readingTime) && (
+            <div className="flex items-center gap-2 text-sm font-medium text-white/80">
+              {formattedDate && <span>{formattedDate}</span>}
+              {formattedDate && readingTime && <span>•</span>}
+              {readingTime && <span>{readingTime}</span>}
+            </div>
+          )}
         </div>
       </div>
 
@@ -73,5 +93,6 @@ export default function Post({ blok, tags = [] }: Readonly<PostProps>) {
         )}
       </div>
     </article>
+    </>
   );
 }
