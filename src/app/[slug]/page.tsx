@@ -24,11 +24,15 @@ export default async function DynamicPage({ params }: PageProps) {
 
       const story = data.story as StoryType<PostBlok>;
 
-      // If it's a post, render Post component with tags
+      // If it's a post, render Post component with tags and created date
       if (story.content.component === 'post') {
         return (
           <div className="page">
-            <Post blok={story.content} tags={story.tag_list} />
+            <Post
+              blok={story.content}
+              tags={story.tag_list}
+              createdAt={story.first_published_at || story.created_at}
+            />
           </div>
         );
       }
