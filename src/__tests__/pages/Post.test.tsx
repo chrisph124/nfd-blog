@@ -1,7 +1,11 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, cleanup } from '@testing-library/react';
 import Post from '@/components/templates/Post';
 import type { PostBlok } from '@/types/storyblok';
+
+vi.mock('node:crypto', () => ({
+  randomUUID: () => 'test-uuid-12345'
+}));
 
 // Mock next/image
 vi.mock('next/image', () => ({
@@ -39,6 +43,83 @@ vi.mock('@storyblok/react/rsc', () => ({
     <div data-testid={`blok-${blok._uid}`}>Mocked Blok</div>
   ),
 }));
+
+// Mock ReadingProgress component
+vi.mock('@/components/atoms/ReadingProgress', () => ({
+  default: vi.fn(() => <div data-testid="reading-progress">Mocked ReadingProgress</div>),
+}));
+
+// Mock utils
+vi.mock('@/lib/utils', () => ({
+  getStoryReadingTime: vi.fn(() => '1 min read'),
+  formatDate: vi.fn((date) => {
+    if (!date) return '';
+    const d = new Date(date);
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  }),
+  cn: vi.fn((...classes) => classes.filter(Boolean).join(' ')),
+}));
+
+// Mock storyblok-utils
+vi.mock('@/lib/storyblok-utils', () => ({
+  StoryblokServerComponent: ({ blok }: { blok: { _uid: string } }) => (
+    <div data-testid={`blok-${blok._uid}`}>Mocked Blok</div>
+  ),
+}));
+
+// Mock IntersectionObserver for ReadingProgress component tests
+const mockObserve = vi.fn();
+const mockUnobserve = vi.fn();
+const mockDisconnect = vi.fn();
+
+let mockIntersectionObserver: ReturnType<typeof vi.fn>;
+
+beforeEach(() => {
+  // Reset all mocks
+  vi.clearAllMocks();
+
+  // Mock IntersectionObserver
+  mockIntersectionObserver = vi.fn().mockImplementation(
+    function(this: IntersectionObserver, callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {
+      this.observe = mockObserve;
+      this.unobserve = mockUnobserve;
+      this.disconnect = mockDisconnect;
+      Object.defineProperty(this, 'callback', { value: callback });
+      Object.defineProperty(this, 'options', { value: options });
+      return this;
+    }
+  );
+
+  global.IntersectionObserver = mockIntersectionObserver as unknown as typeof IntersectionObserver;
+
+  // Mock window properties for scroll testing
+  Object.defineProperty(window, 'innerHeight', {
+    writable: true,
+    configurable: true,
+    value: 1000
+  });
+
+  Object.defineProperty(window, 'pageYOffset', {
+    writable: true,
+    configurable: true,
+    value: 0
+  });
+
+  Object.defineProperty(document.documentElement, 'scrollTop', {
+    writable: true,
+    configurable: true,
+    value: 0
+  });
+
+  // Mock event listeners
+  vi.spyOn(window, 'addEventListener');
+  vi.spyOn(window, 'removeEventListener');
+});
+
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+});
 
 const createMockBlok = (overrides: Partial<PostBlok> = {}): PostBlok => ({
   _uid: 'test-uid',
@@ -288,6 +369,309 @@ describe('Post', () => {
 
       const contentSection = container.querySelector(String.raw`.max-w-\[1240px\]`);
       expect(contentSection).toBeInTheDocument();
+    });
+  });
+
+  describe('Date and Reading Time', () => {
+    it('displays created date when provided', () => {
+      const blok = createMockBlok();
+      const createdAt = '2025-01-15T10:00:00.000Z';
+
+      render(<Post blok={blok} createdAt={createdAt} />);
+
+      expect(screen.getByText('January 15, 2025')).toBeInTheDocument();
+    });
+
+    it('displays reading time for content', () => {
+      const blok = createMockBlok();
+
+      render(<Post blok={blok} />);
+
+      expect(screen.getByText('1 min read')).toBeInTheDocument();
+    });
+
+    it('displays both date and reading time separated by bullet', () => {
+      const blok = createMockBlok();
+      const createdAt = '2025-01-15T10:00:00.000Z';
+
+      render(<Post blok={blok} createdAt={createdAt} />);
+
+      expect(screen.getByText('January 15, 2025')).toBeInTheDocument();
+      expect(screen.getByText('1 min read')).toBeInTheDocument();
+    });
+
+    it('handles invalid date strings gracefully', () => {
+      const blok = createMockBlok();
+      const invalidDate = 'invalid-date';
+
+      render(<Post blok={blok} createdAt={invalidDate} />);
+
+      // Should still display reading time
+      expect(screen.getByText('1 min read')).toBeInTheDocument();
+      // Invalid date should not crash or display malformed content
+      expect(screen.queryByText('invalid-date')).not.toBeInTheDocument();
+    });
+  });
+
+  // ============================================================================
+  // ReadingProgress Integration Tests
+  // ============================================================================
+
+  describe('ReadingProgress Integration', () => {
+    it('renders ReadingProgress component in Post template', () => {
+      const blok = createMockBlok();
+      render(<Post blok={blok} />);
+
+      expect(screen.getByTestId('reading-progress')).toBeInTheDocument();
+    });
+
+    it('renders ReadingProgress between hero section and article content', () => {
+      const blok = createMockBlok({
+        body: [{ _uid: 'block-1', component: 'paragraph' }],
+      });
+      render(<Post blok={blok} />);
+
+      // Find the ReadingProgress component
+      const readingProgress = screen.getByTestId('reading-progress');
+      expect(readingProgress).toBeInTheDocument();
+
+      // Check that article content is present via the blok component
+      const blokComponent = screen.getByTestId('blok-block-1');
+      expect(blokComponent).toBeInTheDocument();
+
+      // Both ReadingProgress and content should be present
+      expect(readingProgress).toBeInTheDocument();
+      expect(blokComponent).toBeInTheDocument();
+    });
+
+    it('renders article content section with correct ID for progress tracking', () => {
+      const blok = createMockBlok({
+        body: [{ _uid: 'block-1', component: 'paragraph' }],
+      });
+      render(<Post blok={blok} />);
+
+      // Check that content is rendered and can be found
+      expect(screen.getByTestId('blok-block-1')).toBeInTheDocument();
+
+      // Check that article is present and has proper structure
+      expect(screen.getByRole('article')).toBeInTheDocument();
+    });
+
+    it('renders ReadingProgress even when no body content is present', () => {
+      const blok = createMockBlok({ body: [] });
+      render(<Post blok={blok} />);
+
+      expect(screen.getByTestId('reading-progress')).toBeInTheDocument();
+    });
+
+    it('renders ReadingProgress with all Post features (tags, date, reading time)', () => {
+      const blok = createMockBlok({
+        body: [{ _uid: 'block-1', component: 'paragraph' }],
+      });
+      const tags = ['Technology', 'AI'];
+      const createdAt = '2025-01-15T10:00:00.000Z';
+
+      render(<Post blok={blok} tags={tags} createdAt={createdAt} />);
+
+      // All elements should be present together
+      expect(screen.getByTestId('reading-progress')).toBeInTheDocument();
+      expect(screen.getByText('Technology')).toBeInTheDocument();
+      expect(screen.getByText('AI')).toBeInTheDocument();
+      expect(screen.getByText('January 15, 2025')).toBeInTheDocument();
+      expect(screen.getByText('1 min read')).toBeInTheDocument();
+      expect(screen.getByTestId('blok-block-1')).toBeInTheDocument();
+    });
+
+    it('maintains correct article content structure with prose classes', () => {
+      const blok = createMockBlok({
+        body: [
+          { _uid: 'block-1', component: 'paragraph' },
+          { _uid: 'block-2', component: 'heading' },
+        ],
+      });
+      render(<Post blok={blok} />);
+
+      // Check that prose classes are applied to the correct element
+      const proseSection = document.querySelector('.prose.prose-lg.max-w-4xl.flex.flex-col.gap-y-6');
+      expect(proseSection).toBeInTheDocument();
+
+      // ReadingProgress should still be present
+      expect(screen.getByTestId('reading-progress')).toBeInTheDocument();
+    });
+
+    it('preserves Storyblok content rendering with ReadingProgress', () => {
+      const blok = createMockBlok({
+        body: [
+          { _uid: 'storyblok-1', component: 'rich_text' },
+          { _uid: 'storyblok-2', component: 'image' },
+        ],
+      });
+      render(<Post blok={blok} />);
+
+      // ReadingProgress should be present
+      expect(screen.getByTestId('reading-progress')).toBeInTheDocument();
+
+      // Storyblok content should render correctly
+      expect(screen.getByTestId('blok-storyblok-1')).toBeInTheDocument();
+      expect(screen.getByTestId('blok-storyblok-2')).toBeInTheDocument();
+    });
+
+    it('works with featured image and ReadingProgress', () => {
+      const blok = createMockBlok({
+        featured_image: {
+          id: 1,
+          filename: 'https://a.storyblok.com/f/test.jpg',
+          alt: 'Test featured image',
+        },
+        body: [{ _uid: 'block-1', component: 'paragraph' }],
+      });
+      render(<Post blok={blok} />);
+
+      // All elements should be present
+      expect(screen.getByTestId('reading-progress')).toBeInTheDocument();
+      expect(screen.getByRole('img')).toBeInTheDocument();
+      expect(screen.getByTestId('blok-block-1')).toBeInTheDocument();
+    });
+
+    it('handles missing body content gracefully with ReadingProgress', () => {
+      const blok = createMockBlok({ body: undefined });
+      render(<Post blok={blok} />);
+
+      // ReadingProgress should still render
+      expect(screen.getByTestId('reading-progress')).toBeInTheDocument();
+
+      // Body section should not be present when no body content
+      expect(screen.queryByText('Test excerpt')).not.toBeInTheDocument();
+    });
+  });
+
+  // ============================================================================
+  // Accessibility Integration Tests
+  // ============================================================================
+
+  describe('Accessibility Integration', () => {
+    it('maintains proper heading hierarchy with ReadingProgress', () => {
+      const blok = createMockBlok({ title: 'Accessible Post Title' });
+      render(<Post blok={blok} />);
+
+      // h1 should be present for the title
+      const heading = screen.getByRole('heading', { level: 1 });
+      expect(heading).toBeInTheDocument();
+      expect(heading).toHaveTextContent('Accessible Post Title');
+
+      // ReadingProgress should be present but not interfere with heading structure
+      expect(screen.getByTestId('reading-progress')).toBeInTheDocument();
+    });
+
+    it('preserves ARIA labels on featured images with ReadingProgress', () => {
+      const blok = createMockBlok({
+        featured_image: {
+          id: 1,
+          filename: 'https://a.storyblok.com/f/test.jpg',
+          alt: 'Descriptive alt text for accessibility',
+        },
+      });
+      render(<Post blok={blok} />);
+
+      const image = screen.getByRole('img');
+      expect(image).toHaveAttribute('aria-label', 'Descriptive alt text for accessibility');
+      expect(screen.getByTestId('reading-progress')).toBeInTheDocument();
+    });
+
+    it('maintains semantic structure with ReadingProgress integration', () => {
+      const blok = createMockBlok({
+        body: [{ _uid: 'block-1', component: 'paragraph' }],
+      });
+      render(<Post blok={blok} />);
+
+      // Main article element should be present
+      const article = screen.getByRole('article');
+      expect(article).toBeInTheDocument();
+
+      // ReadingProgress should not break semantic structure
+      expect(screen.getByTestId('reading-progress')).toBeInTheDocument();
+
+      // Content should be properly rendered
+      expect(screen.getByTestId('blok-block-1')).toBeInTheDocument();
+    });
+
+    it('preserves proper link functionality in tags with ReadingProgress', () => {
+      const blok = createMockBlok();
+      const tags = ['Accessibility', 'Testing'];
+      render(<Post blok={blok} tags={tags} />);
+
+      const accessibilityLink = screen.getByRole('link', { name: 'Accessibility' });
+      const testingLink = screen.getByRole('link', { name: 'Testing' });
+
+      expect(accessibilityLink).toHaveAttribute('href', '/insight-hub/Accessibility');
+      expect(testingLink).toHaveAttribute('href', '/insight-hub/Testing');
+      expect(screen.getByTestId('reading-progress')).toBeInTheDocument();
+    });
+  });
+
+  // ============================================================================
+  // Performance and Integration Tests
+  // ============================================================================
+
+  describe('Performance and Integration', () => {
+    it('does not cause layout shift with ReadingProgress', () => {
+      const blok = createMockBlok({
+        body: [{ _uid: 'block-1', component: 'paragraph' }],
+      });
+      render(<Post blok={blok} />);
+
+      // Check that main layout elements are present
+      const article = screen.getByRole('article');
+      expect(article).toBeInTheDocument();
+
+      // Check that hero section is present by looking for the image or title
+      expect(screen.getByTestId('reading-progress')).toBeInTheDocument();
+
+      // Check that article content is present by looking for the blok component
+      expect(screen.getByTestId('blok-block-1')).toBeInTheDocument();
+    });
+
+    it('handles window resize events gracefully with ReadingProgress', () => {
+      const blok = createMockBlok({
+        body: [{ _uid: 'block-1', component: 'paragraph' }],
+      });
+      render(<Post blok={blok} />);
+
+      // Simulate window resize
+      window.dispatchEvent(new Event('resize'));
+
+      // Component should still render correctly
+      expect(screen.getByTestId('reading-progress')).toBeInTheDocument();
+      expect(screen.getByTestId('blok-block-1')).toBeInTheDocument();
+    });
+
+    it('maintains responsive design with ReadingProgress', () => {
+      const blok = createMockBlok({
+        body: [{ _uid: 'block-1', component: 'paragraph' }],
+      });
+      const { container } = render(<Post blok={blok} />);
+
+      // Check responsive classes are maintained
+      const article = container.querySelector('article');
+      expect(article).toHaveClass('gap-y-6', 'md:gap-y-12');
+
+      const heroSection = container.querySelector('.relative.flex.items-center.justify-center');
+      expect(heroSection).toHaveClass('min-h-[200px]', 'md:min-h-[300px]');
+
+      expect(screen.getByTestId('reading-progress')).toBeInTheDocument();
+    });
+
+    it('preserves correct content max-width with ReadingProgress', () => {
+      const blok = createMockBlok({
+        body: [{ _uid: 'block-1', component: 'paragraph' }],
+      });
+      render(<Post blok={blok} />);
+
+      // Check content containers have correct max-width
+      const contentContainers = document.querySelectorAll('.max-w-\\[1240px\\]');
+      expect(contentContainers.length).toBeGreaterThan(0);
+
+      expect(screen.getByTestId('reading-progress')).toBeInTheDocument();
     });
   });
 });

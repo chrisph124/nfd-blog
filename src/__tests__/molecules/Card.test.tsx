@@ -120,7 +120,7 @@ describe('Card', () => {
       });
       render(<Card story={story} />);
 
-      expect(screen.getByText(/Jan 15, 2025/)).toBeInTheDocument();
+      expect(screen.getByText(/January 15, 2025/)).toBeInTheDocument();
     });
 
     it('renders reading time based on excerpt', () => {

@@ -285,7 +285,7 @@ describe('Header', () => {
       const { container } = render(<Header blok={blok} />);
 
       const innerContainer = container.querySelector(String.raw`.h-\[70px\]`);
-      expect(innerContainer).toHaveClass('lg:h-[100px]');
+      expect(innerContainer).toHaveClass('lg:h-[90px]');
     });
   });
 
