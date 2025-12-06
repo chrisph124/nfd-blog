@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { StoryblokServerComponent } from '@storyblok/react/rsc';
+import { StoryblokServerComponent } from '@/lib/storyblok-utils';
 import type { StoryblokComponentProps, GridBlok } from "@/types/storyblok";
 
 const Grid = memo(({ blok }: StoryblokComponentProps<GridBlok>) => {

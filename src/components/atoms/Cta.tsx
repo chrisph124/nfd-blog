@@ -38,7 +38,7 @@ const Cta = memo(({ blok }: CTAProps) => {
     'link': 'bg-transparent text-primary-900 px-0 py-0 pointer no-underline hover:underline',
   };
 
-  const className = `${baseStyles} ${sizeStyles[cta_size]} ${typeStyles[cta_type]}`;
+  const className = `${baseStyles} ${sizeStyles[cta_size || 'hug']} ${typeStyles[cta_type || 'primary']}`;
 
   // Handle link navigation
   const href = navigate_to?.cached_url || navigate_to?.url || '#';

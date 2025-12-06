@@ -1,4 +1,5 @@
 import Page from "@/components/templates/Page";
+import Post from "@/components/templates/Post";
 import Feature from "@/components/molecules/Feature";
 import Grid from "@/components/organisms/Grid";
 import Teaser from "@/components/molecules/Teaser";
@@ -9,14 +10,18 @@ import SubNavItem from "@/components/molecules/SubNavItem";
 import Hero from "@/components/organisms/Hero";
 import Tabs from "@/components/organisms/Tabs";
 import SectionWrapper from "@/components/organisms/SectionWrapper";
-import Cta from "@/components/atoms/Cta";
 import TabItem from "@/components/molecules/TabItem";
+import Cta from "@/components/atoms/Cta";
+import Richtext from "@/components/atoms/Richtext";
+import Media from "@/components/atoms/Media";
+import CardItem from "@/components/molecules/CardItem";
 
 import { apiPlugin, storyblokInit } from '@storyblok/react/rsc';
 
 // Component mapping type
 const components = {
   page: Page,
+  post: Post,
   feature: Feature,
   grid: Grid,
   teaser: Teaser,
@@ -29,6 +34,9 @@ const components = {
   tab_item: TabItem,
   section_wrapper: SectionWrapper,
   cta: Cta,
+  richtext: Richtext,
+  media: Media,
+  card_item: CardItem,
 } as const;
 
 // Server-side initialization with access token

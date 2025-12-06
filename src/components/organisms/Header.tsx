@@ -1,6 +1,6 @@
 "use client";
 
-import { storyblokEditable } from "@storyblok/react/rsc";
+import { makeStoryblokEditable } from "@/lib/storyblok-utils";
 import { useState, useEffect, useCallback, memo } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -35,6 +35,7 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
 
   // Toggle dropdown expansion
   const toggleDropdown = useCallback((itemId: string) => {
+    // eslint-disable-next-line security/detect-object-injection
     const isCurrentlyExpanded = expandedItems[itemId];
 
     if (isCurrentlyExpanded) {
@@ -79,10 +80,10 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
   return (
     <>
       <header
-        {...storyblokEditable(blok)}
+        {...makeStoryblokEditable(blok)}
         className="w-full sticky top-0 bg-background z-50 shadow-sm"
       >
-        <div className="flex h-[70px] lg:h-[100px] items-center w-full max-w-[1240px] px-6 md:px-10 lg:px-15 2xl:px-20 mx-auto">
+        <div className="flex h-[70px] lg:h-[90px] items-center w-full max-w-[1240px] px-6 md:px-10 lg:px-15 2xl:px-20 mx-auto">
           {/* Logo Section - Fixed width */}
           <Link href="/" className="flex gap-[14px] items-center flex-shrink-0">
             <div className="relative shrink-0 size-[48px]">

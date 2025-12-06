@@ -1,4 +1,4 @@
-import { SbBlokData } from "@storyblok/react/rsc";
+import { SbBlokData, type StoryblokRichTextNode } from "@storyblok/react/rsc";
 
 // ============================================================================
 // Base Storyblok Types
@@ -8,10 +8,11 @@ import { SbBlokData } from "@storyblok/react/rsc";
  * Base interface for all Storyblok bloks
  * Extends SbBlokData which includes _uid and component
  */
-export interface StoryblokBlok extends SbBlokData {
+export interface StoryblokBlok extends Omit<SbBlokData, keyof Record<string, unknown>> {
   _uid: string;
   component: string;
   _editable?: string;
+  [key: string]: unknown;
 }
 
 /**
@@ -25,6 +26,7 @@ export interface StoryblokAsset {
   focus?: string;
   name?: string;
   copyright?: string;
+  is_external_url?: boolean;
 }
 
 /**
@@ -49,6 +51,14 @@ export interface StoryblokLink {
 // ============================================================================
 // Component-Specific Blok Types (Auto-generated)
 // ============================================================================
+
+/**
+ * card_item component
+ */
+export interface CardItemBlok extends StoryblokBlok {
+  component: 'card_item';
+  post_reference?: string | number;
+}
 
 /**
  * content_block component
@@ -133,6 +143,21 @@ export interface HeroBlockBlok extends StoryblokBlok {
 }
 
 /**
+ * media component
+ */
+export interface MediaBlok extends StoryblokBlok {
+  component: 'media';
+  media_file: StoryblokAsset;
+  poster_image?: StoryblokAsset;
+  autoplay?: boolean;
+  loop?: boolean;
+  muted?: boolean;
+  controls?: boolean;
+  link?: StoryblokLink;
+  aspect_ratio?: 'video' | 'square' | 'portrait' | 'wide' | 'auto';
+}
+
+/**
  * nav_item component
  */
 export interface NavItemBlok extends StoryblokBlok {
@@ -149,6 +174,25 @@ export interface NavItemBlok extends StoryblokBlok {
 export interface PageBlok extends StoryblokBlok {
   component: 'page';
   body?: StoryblokBlok[];
+}
+
+/**
+ * post component
+ */
+export interface PostBlok extends StoryblokBlok {
+  component: 'post';
+  title?: string;
+  featured_image?: StoryblokAsset;
+  excerpt?: string;
+  body?: StoryblokBlok[];
+}
+
+/**
+ * richtext component
+ */
+export interface RichtextBlok extends StoryblokBlok {
+  component: 'richtext';
+  content?: StoryblokRichTextNode<string> | null;
 }
 
 /**
@@ -215,6 +259,7 @@ export interface StoryblokComponentProps<T extends StoryblokBlok = StoryblokBlok
  * Union of all blok types
  */
 export type AnyBlok =
+  | CardItemBlok
   | ContentBlockBlok
   | CtaBlok
   | FeatureBlok
@@ -222,8 +267,11 @@ export type AnyBlok =
   | GridBlok
   | HeaderBlok
   | HeroBlockBlok
+  | MediaBlok
   | NavItemBlok
   | PageBlok
+  | PostBlok
+  | RichtextBlok
   | SectionWrapperBlok
   | SubNavItemBlok
   | TabItemBlok

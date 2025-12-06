@@ -12,7 +12,13 @@ vi.mock('@storyblok/react/rsc', () => ({
 
 vi.mock('next/image', () => ({
   default: ({ src, alt }: { src: string; alt: string }) => (
-    <img src={src} alt={alt} data-testid="next-image" />
+    <div
+      data-testid="next-image"
+      data-src={src}
+      data-alt={alt}
+      role="img"
+      aria-label={alt}
+    />
   ),
 }));
 
@@ -168,7 +174,7 @@ describe('SectionWrapper', () => {
       const { container } = render(<SectionWrapper blok={blok} />);
 
       const section = container.querySelector('section');
-      expect(section).toHaveClass('px-10', 'py-12', 'lg:px-24', 'lg:py-20');
+      expect(section).toHaveClass('relative', 'w-full', 'max-w-[1240px]', 'flex', 'flex-col', 'gap-10', 'lg:gap-20', 'py-10', 'lg:py-12', 'px-6', 'md:px-10', 'lg:px-15', '2xl:px-20', 'mx-auto');
     });
 
     it('heading has correct typography', () => {

@@ -12,3 +12,78 @@ import { twMerge } from "tailwind-merge";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+/**
+ * Calculate estimated reading time for text content
+ * Average reading speed: 200-250 words per minute
+ *
+ * @param text - The text content to analyze
+ * @param wordsPerMinute - Reading speed (default: 200)
+ * @returns Formatted reading time string (e.g., "5 min read")
+ */
+export function getReadingTime(text: string, wordsPerMinute: number = 200): string {
+  if (!text) return '1 min read';
+
+  const words = text.trim().split(/\s+/).length;
+  const minutes = Math.ceil(words / wordsPerMinute);
+
+  return `${minutes} min read`;
+}
+
+/**
+ * Calculate reading time from story body content
+ * Extracts text from rich text blocks for accurate reading time calculation
+ *
+ * @param body - Storyblok body content array
+ * @param wordsPerMinute - Reading speed (default: 200)
+ * @returns Formatted reading time string (e.g., "5 min read")
+ */
+export function getStoryReadingTime(body: unknown[] | undefined, wordsPerMinute: number = 200): string {
+  if (!body || body.length === 0) return "1 min read";
+
+  // Extract text content from rich text blocks
+  const textContent = body.reduce((acc: string, block) => {
+    if (typeof block === 'object' && block !== null) {
+      const blockObj = block as Record<string, unknown>;
+      // Handle rich text content
+      if (blockObj.content && Array.isArray(blockObj.content)) {
+        return acc + blockObj.content
+          .filter((item: unknown) => {
+            const itemObj = item as Record<string, unknown>;
+            return itemObj.type === 'text';
+          })
+          .map((item: unknown) => {
+            const itemObj = item as Record<string, unknown>;
+            return (itemObj.text as string) || '';
+          })
+          .join(' ');
+      }
+      // Handle other content types
+      return acc + JSON.stringify(block).replace(/[^a-zA-Z\s]/g, ' ');
+    }
+    return acc;
+  }, '');
+
+  const words = textContent.trim().split(/\s+/).filter(word => word.length > 0).length;
+  const minutes = Math.max(1, Math.ceil(words / wordsPerMinute));
+
+  return `${minutes} min read`;
+}
+
+/**
+ * Format date to readable string
+ *
+ * @param dateString - ISO date string
+ * @param locale - Locale for formatting (default: 'en-US')
+ * @returns Formatted date string (e.g., "November 23, 2025")
+ */
+export function formatDate(dateString: string, locale: string = 'en-US'): string {
+  if (!dateString) return '';
+
+  const date = new Date(dateString);
+  return date.toLocaleDateString(locale, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
