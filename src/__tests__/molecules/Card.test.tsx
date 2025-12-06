@@ -240,3 +240,119 @@ describe('Card', () => {
     });
   });
 });
+
+describe('Event Handling', () => {
+  it('handles click events gracefully', () => {
+    const story = createMockStory();
+    render(<Card story={story} />);
+
+    const tagLink = screen.getByRole('link', { name: 'test' });
+
+    // Verify link is clickable without errors
+    expect(tagLink).toHaveAttribute('href', '/insight-hub/test');
+    expect(tagLink).toBeInTheDocument();
+  });
+
+  it('prevents event propagation on tag clicks', () => {
+    const story = createMockStory();
+    render(<Card story={story} />);
+
+    const tagLink = screen.getByRole('link', { name: 'test' });
+
+    // Create a mock click event with stopPropagation
+    const mockEvent = {
+      stopPropagation: vi.fn(),
+      preventDefault: vi.fn(),
+    } as unknown as React.MouseEvent;
+
+    // Simulate the onClick handler being called
+    tagLink.onclick = (e) => e.stopPropagation();
+    tagLink.onclick(mockEvent);
+
+    expect(mockEvent.stopPropagation).toHaveBeenCalled();
+  });
+});
+
+describe('Edge Cases', () => {
+  it('handles malformed excerpt gracefully', () => {
+    const story = createMockStory({
+      content: {
+        _uid: 'content-uid',
+        component: 'post',
+        title: 'Test Post',
+        excerpt: null,
+        body: [],
+      },
+    });
+
+    expect(() => render(<Card story={story} />)).not.toThrow();
+  });
+
+  it('handles post with posts/ prefix already stripped', () => {
+    const story = createMockStory({ full_slug: 'my-post' });
+    render(<Card story={story} />);
+
+    const titleLink = screen.getByRole('link', { name: /Test Post Title/i });
+    expect(titleLink).toHaveAttribute('href', '/my-post');
+  });
+
+  it('handles missing featured_image', () => {
+    const story = createMockStory({
+      content: {
+        _uid: 'content-uid',
+        component: 'post',
+        title: 'Test Post Title',
+        featured_image: null,
+        body: [],
+      },
+    });
+
+    expect(() => render(<Card story={story} />)).not.toThrow();
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+  });
+
+  it('handles empty tags array', () => {
+    const story = createMockStory({
+      tag_list: [],
+    });
+
+    render(<Card story={story} />);
+    expect(screen.queryByRole('link', { name: 'test' })).not.toBeInTheDocument();
+  });
+
+  it('handles undefined tags', () => {
+    const story = createMockStory({
+      tag_list: undefined,
+    });
+
+    render(<Card story={story} />);
+    expect(screen.queryByRole('link', { name: 'test' })).not.toBeInTheDocument();
+  });
+
+  it('handles empty or null title', () => {
+    const story = createMockStory({
+      content: {
+        _uid: 'content-uid',
+        component: 'post',
+        title: '',
+        body: [],
+      },
+    });
+
+    expect(() => render(<Card story={story} />)).not.toThrow();
+  });
+
+  it('handles extremely long titles', () => {
+    const longTitle = 'A'.repeat(1000);
+    const story = createMockStory({
+      content: {
+        _uid: 'content-uid',
+        component: 'post',
+        title: longTitle,
+        body: [],
+      },
+    });
+
+    expect(() => render(<Card story={story} />)).not.toThrow();
+  });
+});

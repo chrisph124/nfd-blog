@@ -4,6 +4,18 @@ import type { RichtextBlok } from '@/types/storyblok';
 import type { StoryblokRichTextNode } from '@storyblok/react/rsc';
 import type { RichTextNode, RichTextElementNode } from '@/__tests__/types/test-mocks';
 
+// Test interfaces for type safety
+interface TestRichtextBlok extends Omit<RichtextBlok, 'content'> {
+  content: StoryblokRichTextNode<string> | null | undefined;
+}
+
+interface TestRichTextContent {
+  type?: string;
+  content?: unknown[];
+  attrs?: Record<string, unknown>;
+  text?: string;
+}
+
 // Mock storyblokEditable
 vi.mock('@storyblok/react/rsc', () => ({
   storyblokEditable: <T extends Record<string, unknown>>(blok: T): T & { 'data-blok-cuid': string; 'data-blok-uid': string } => ({
@@ -286,5 +298,92 @@ describe('Richtext Component', () => {
 
       expect(() => render(<Richtext blok={deepNestedBlok} />)).not.toThrow();
     });
+  });
+});
+
+describe('renderRichText Edge Cases', () => {
+  it('handles renderRichText returning empty string', () => {
+    // Create a test case where renderRichText might return null/empty
+    const blokWithNullContent: TestRichtextBlok = {
+      _uid: 'test-null-content',
+      component: 'richtext',
+      content: null,
+    };
+
+    const { container } = render(<Richtext blok={blokWithNullContent} />);
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('handles undefined content gracefully', () => {
+    const blok: TestRichtextBlok = {
+      _uid: 'test-undefined-content',
+      component: 'richtext',
+      content: undefined,
+    };
+
+    expect(() => render(<Richtext blok={blok} />)).not.toThrow();
+  });
+
+  it('handles null content gracefully', () => {
+    const blok: TestRichtextBlok = {
+      _uid: 'test-null-content',
+      component: 'richtext',
+      content: null,
+    };
+
+    expect(() => render(<Richtext blok={blok} />)).not.toThrow();
+  });
+
+  it('handles undefined content gracefully', () => {
+    const blok: TestRichtextBlok = {
+      _uid: 'test-undefined-content-2',
+      component: 'richtext',
+      content: undefined,
+    };
+
+    expect(() => render(<Richtext blok={blok} />)).not.toThrow();
+  });
+
+  it('handles empty content object', () => {
+    const blok: TestRichtextBlok = {
+      _uid: 'test-empty-object',
+      component: 'richtext',
+      content: {} as StoryblokRichTextNode<string>,
+    };
+
+    expect(() => render(<Richtext blok={blok} />)).not.toThrow();
+  });
+
+  it('handles content without type', () => {
+    const blok: TestRichtextBlok = {
+      _uid: 'test-no-type',
+      component: 'richtext',
+      content: {
+        content: [
+          { text: 'Simple text without type' } as TestRichTextContent
+        ]
+      } as StoryblokRichTextNode<string>,
+    };
+
+    expect(() => render(<Richtext blok={blok} />)).not.toThrow();
+  });
+
+  it('handles malformed rich text structure', () => {
+    const blok: TestRichtextBlok = {
+      _uid: 'test-malformed',
+      component: 'richtext',
+      content: {
+        type: 'doc',
+        content: [
+          null,
+          undefined,
+          { text: 'Valid node' } as TestRichTextContent,
+          '',
+          { type: 'paragraph', content: 'string instead of array' as unknown } as TestRichTextContent
+        ]
+      } as StoryblokRichTextNode<string>,
+    };
+
+    expect(() => render(<Richtext blok={blok} />)).not.toThrow();
   });
 });

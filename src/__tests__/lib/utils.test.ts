@@ -1,5 +1,19 @@
 import { describe, it, expect } from 'vitest';
-import { cn } from '@/lib/utils';
+import { cn, getReadingTime, getStoryReadingTime, formatDate } from '@/lib/utils';
+
+// Test interfaces for type safety
+interface TestTextContent {
+  type: string;
+  text?: string;
+  src?: string;
+  children?: TestTextContent[];
+}
+
+interface TestRichTextBlock {
+  content?: TestTextContent[];
+  type?: string;
+  text?: string;
+}
 
 describe('cn utility function', () => {
   describe('Basic functionality', () => {
@@ -121,5 +135,198 @@ describe('cn utility function', () => {
     it('handles arbitrary values', () => {
       expect(cn('w-[100px]', 'h-[200px]')).toBe('w-[100px] h-[200px]');
     });
+  });
+});
+
+describe('getReadingTime', () => {
+  it('returns "1 min read" for empty string', () => {
+    expect(getReadingTime('')).toBe('1 min read');
+  });
+
+  it('returns "1 min read" for null/undefined input', () => {
+    expect(getReadingTime(null as unknown as string)).toBe('1 min read');
+    expect(getReadingTime(undefined as unknown as string)).toBe('1 min read');
+  });
+
+  it('handles single word correctly', () => {
+    expect(getReadingTime('hello')).toBe('1 min read');
+  });
+
+  it('calculates reading time for short text', () => {
+    const text = 'word '.repeat(100); // 100 words
+    expect(getReadingTime(text)).toBe('1 min read');
+  });
+
+  it('calculates reading time for longer text', () => {
+    const text = 'word '.repeat(400); // 400 words
+    expect(getReadingTime(text)).toBe('2 min read');
+  });
+
+  it('respects custom words per minute', () => {
+    const text = 'word '.repeat(100);
+    expect(getReadingTime(text, 50)).toBe('2 min read');
+  });
+
+  it('handles text with extra whitespace', () => {
+    const text = '  word   word  word  ';
+    expect(getReadingTime(text)).toBe('1 min read');
+  });
+
+  it('handles text with special characters', () => {
+    const text = 'Hello, world! This is a test.';
+    expect(getReadingTime(text)).toBe('1 min read');
+  });
+
+  it('calculates correctly for different word counts', () => {
+    expect(getReadingTime('word '.repeat(250))).toBe('2 min read');
+    expect(getReadingTime('word '.repeat(500))).toBe('3 min read');
+    expect(getReadingTime('word '.repeat(1000))).toBe('5 min read');
+  });
+});
+
+describe('getStoryReadingTime', () => {
+  it('returns "1 min read" for empty body array', () => {
+    expect(getStoryReadingTime([])).toBe('1 min read');
+    expect(getStoryReadingTime(undefined)).toBe('1 min read');
+    expect(getStoryReadingTime(null as unknown as TestRichTextBlock[])).toBe('1 min read');
+  });
+
+  it('extracts text from rich text blocks', () => {
+    const body: TestRichTextBlock[] = [
+      {
+        content: [
+          { type: 'text', text: 'Hello world' },
+          { type: 'text', text: ' this is a test' }
+        ]
+      }
+    ];
+    expect(getStoryReadingTime(body)).toBe('1 min read');
+  });
+
+  it('filters out non-text content types', () => {
+    const body: TestRichTextBlock[] = [
+      {
+        content: [
+          { type: 'text', text: 'Hello' },
+          { type: 'image', src: 'test.jpg' },
+          { type: 'text', text: 'world' }
+        ]
+      }
+    ];
+    expect(getStoryReadingTime(body)).toBe('1 min read');
+  });
+
+  it('handles empty text content', () => {
+    const body: TestRichTextBlock[] = [
+      {
+        content: [
+          { type: 'text', text: '' },
+          { type: 'text', text: null as unknown as string }
+        ]
+      }
+    ];
+    expect(getStoryReadingTime(body)).toBe('1 min read');
+  });
+
+  it('handles multiple blocks', () => {
+    const body = [
+      {
+        content: [
+          { type: 'text', text: 'First block text ' }
+        ]
+      },
+      {
+        content: [
+          { type: 'text', text: 'Second block text' }
+        ]
+      }
+    ];
+    expect(getStoryReadingTime(body)).toBe('1 min read');
+  });
+
+  it('handles blocks without content array', () => {
+    const body = [
+      { type: 'heading', text: 'Simple block' }
+    ];
+    expect(getStoryReadingTime(body)).toBe('1 min read');
+  });
+
+  it('uses custom words per minute', () => {
+    const body = [
+      {
+        content: Array.from({ length: 100 }, (_, i) => ({
+          type: 'text',
+          text: `word${i} `
+        }))
+      }
+    ];
+    expect(getStoryReadingTime(body, 50)).toBe('2 min read');
+  });
+
+  it('handles non-object blocks gracefully', () => {
+    const body = ['string block', null, undefined];
+    expect(getStoryReadingTime(body)).toBe('1 min read');
+  });
+
+  it('calculates reading time for substantial content', () => {
+    const body = [
+      {
+        content: Array.from({ length: 250 }, (_, i) => ({
+          type: 'text',
+          text: `word${i} `
+        }))
+      }
+    ];
+    expect(getStoryReadingTime(body, 200)).toBe('2 min read');
+  });
+
+  it('handles mixed content types in rich text', () => {
+    const body = [
+      {
+        content: [
+          { type: 'text', text: 'Paragraph text with multiple words ' },
+          { type: 'paragraph', children: [{ type: 'text', text: 'Nested text content' }] },
+          { type: 'text', text: 'More text content ' }
+        ]
+      }
+    ];
+    expect(getStoryReadingTime(body)).toBe('1 min read');
+  });
+});
+
+describe('formatDate', () => {
+  it('returns empty string for invalid input', () => {
+    expect(formatDate('')).toBe('');
+    expect(formatDate(null as unknown as string)).toBe('');
+    expect(formatDate(undefined as unknown as string)).toBe('');
+  });
+
+  it('formats valid ISO date string', () => {
+    expect(formatDate('2025-01-15T10:00:00.000Z')).toBe('January 15, 2025');
+  });
+
+  it('formats date string without time', () => {
+    expect(formatDate('2025-01-15')).toBe('January 15, 2025');
+  });
+
+  it('uses custom locale', () => {
+    expect(formatDate('2025-01-15', 'es-ES')).toBe('15 de enero de 2025');
+  });
+
+  it('handles different date formats', () => {
+    expect(formatDate('2025-12-06')).toBe('December 6, 2025');
+    expect(formatDate('2024-02-29')).toBe('February 29, 2024'); // Leap year
+  });
+
+  it('handles edge cases of date parsing', () => {
+    // Should handle invalid dates gracefully - Date constructor returns "Invalid Date" string
+    expect(formatDate('invalid-date')).toBe('Invalid Date');
+  });
+
+  it('formats recent dates correctly', () => {
+    const today = new Date();
+    const dateString = today.toISOString();
+    expect(formatDate(dateString)).toContain(today.getFullYear().toString());
+    expect(formatDate(dateString)).toContain(today.toLocaleDateString('en-US', { month: 'long' }));
   });
 });

@@ -91,11 +91,24 @@ const ReadingProgressBar = memo<ReadingProgressBarProps>(({
     );
   }
 
-  const positionClassesMap = {
-    fixed: 'fixed top-[66px] lg:top-[86px] left-0 w-full',
-    sticky: 'sticky top-[66px] lg:top-[86px] left-0 w-full',
+  // Securely determine position classes using allowlist approach
+  const getPositionClasses = (pos: string | undefined): string => {
+    const ALLOWED_POSITIONS = ['fixed', 'sticky'] as const;
+    type AllowedPosition = typeof ALLOWED_POSITIONS[number];
+
+    if (pos && ALLOWED_POSITIONS.includes(pos as AllowedPosition)) {
+      const positionClassesMap = {
+        fixed: 'fixed top-[66px] lg:top-[86px] left-0 w-full',
+        sticky: 'sticky top-[66px] lg:top-[86px] left-0 w-full',
+      };
+      return positionClassesMap[pos as AllowedPosition];
+    }
+
+    // Default fallback for invalid positions
+    return 'fixed top-[66px] lg:top-[86px] left-0 w-full';
   };
-  const positionClasses = positionClassesMap[position];
+
+  const positionClasses = getPositionClasses(position);
 
   return (
     <div

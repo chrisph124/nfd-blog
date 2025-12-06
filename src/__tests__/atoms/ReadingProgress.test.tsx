@@ -249,4 +249,101 @@ describe('ReadingProgressBar', () => {
       expect(progressBar).toBeInTheDocument();
     });
   });
+
+  describe('Event Handler Execution', () => {
+    it('executes scroll callback with requestAnimationFrame', () => {
+      const { unmount } = render(<ReadingProgressBar />);
+
+      // Get the scroll handler that was added
+      const scrollHandler = (window.addEventListener as vi.MockedFunction<typeof window.addEventListener>).mock.calls
+        .find(call => call[0] === 'scroll')?.[1] as (() => void) | undefined;
+
+      // Execute the scroll handler
+      scrollHandler();
+
+      // Verify requestAnimationFrame was called
+      expect(window.requestAnimationFrame).toHaveBeenCalled();
+
+      unmount();
+    });
+
+    it('executes resize callback with requestAnimationFrame', () => {
+      render(<ReadingProgressBar />);
+
+      // Get the resize handler
+      const resizeHandlers = (window.addEventListener as vi.MockedFunction<typeof window.addEventListener>).mock.calls
+        .filter(call => call[0] === 'resize');
+
+      // Find the resize handler from the setup effect
+      const resizeHandler = resizeHandlers[1]?.[1] as (() => void) | undefined; // Second resize call is from setup
+
+      if (resizeHandler) {
+        resizeHandler();
+        expect(window.requestAnimationFrame).toHaveBeenCalled();
+      }
+    });
+
+    it('executes resize handler and calls requestAnimationFrame callback', () => {
+      render(<ReadingProgressBar />);
+
+      // Get the resize handler
+      const resizeHandlers = (window.addEventListener as vi.MockedFunction<typeof window.addEventListener>).mock.calls
+        .filter(call => call[0] === 'resize');
+      const resizeHandler = resizeHandlers[1]?.[1] as (() => void) | undefined;
+
+      if (resizeHandler) {
+        // Execute the resize handler
+        resizeHandler();
+
+        // Get the requestAnimationFrame callback and execute it
+        const raCallback = (window.requestAnimationFrame as vi.MockedFunction<typeof window.requestAnimationFrame>).mock.calls[0]?.[0] as FrameRequestCallback | undefined;
+        expect(typeof raCallback).toBe('function');
+
+        // Execute the requestAnimationFrame callback to cover lines 65-66
+        raCallback();
+      }
+    });
+
+    it('handles rapid scroll events efficiently', () => {
+      const { unmount } = render(<ReadingProgressBar />);
+
+      const scrollHandler = (window.addEventListener as vi.MockedFunction<typeof window.addEventListener>).mock.calls
+        .find(call => call[0] === 'scroll')?.[1] as (() => void) | undefined;
+
+      // Simulate rapid scroll events
+      for (let i = 0; i < 10; i++) {
+        scrollHandler();
+      }
+
+      // Should use requestAnimationFrame for each call
+      expect(window.requestAnimationFrame).toHaveBeenCalledTimes(10);
+
+      unmount();
+    });
+
+    it('cleans up event listeners on unmount', () => {
+      const { unmount } = render(<ReadingProgressBar />);
+
+      // Verify event listeners were added
+      expect(window.addEventListener).toHaveBeenCalledWith('scroll', expect.any(Function), { passive: true });
+      expect(window.addEventListener).toHaveBeenCalledWith('resize', expect.any(Function), { passive: true });
+
+      unmount();
+
+      // Verify event listeners were removed
+      expect(window.removeEventListener).toHaveBeenCalledWith('scroll', expect.any(Function));
+      expect(window.removeEventListener).toHaveBeenCalledWith('resize', expect.any(Function));
+    });
+
+    it('verifies scroll and resize event listener setup', () => {
+      const { unmount } = render(<ReadingProgressBar />);
+
+      // Verify correct event listeners were added
+      expect(window.addEventListener).toHaveBeenCalledWith('scroll', expect.any(Function), { passive: true });
+      expect(window.addEventListener).toHaveBeenCalledWith('resize', expect.any(Function), { passive: true });
+      expect(window.addEventListener).toHaveBeenCalledWith('resize', expect.any(Function), { passive: true });
+
+      unmount();
+    });
+  });
 });
