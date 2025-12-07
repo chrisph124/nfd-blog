@@ -85,19 +85,8 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
       >
         <div className="flex h-[70px] lg:h-[90px] items-center w-full max-w-[1240px] px-6 md:px-10 lg:px-15 2xl:px-20 mx-auto">
           {/* Logo Section - Fixed width */}
-          <Link href="/" className="flex gap-[14px] items-center flex-shrink-0">
-            <div className="relative shrink-0 size-[48px]">
-              <Image
-                src={logo}
-                alt={logoAlt}
-                width={48}
-                height={48}
-                className="object-contain"
-              />
-            </div>
-            <div className="flex flex-col font-medium justify-center text-[24px] text-black">
-              <p className="leading-[20px]">{title}</p>
-            </div>
+          <Link href="/">
+            <h3 className="logo-font text-transparent bg-linear-to-r from-primary-700 to-secondary-900 bg-clip-text">{title}</h3>
           </Link>
 
           {/* Navigation - Desktop only */}

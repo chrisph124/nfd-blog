@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Nunito, Geist_Mono, Lora } from "next/font/google";
+import { Nunito, Lora, Bitcount_Prop_Single } from "next/font/google";
 import "./globals.css";
 import StoryblokProvider from "@/components/providers/StoryblokProvider";
 import { getStoryblokApi } from "@/lib/storyblok";
@@ -13,9 +13,11 @@ const nunito = Nunito({
   display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const bitcountPropSingle = Bitcount_Prop_Single({
+  variable: "--font-bitcount-prop-single",
+  weight: ["400", "500", "600", "700", "800"],
   subsets: ["latin"],
+  display: "swap",
 });
 
 const lora = Lora({
@@ -55,7 +57,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className="h-full">
-        <body className={`${nunito.variable} ${geistMono.variable} ${lora.variable} antialiased flex flex-col min-h-full`}>
+        <body className={`${nunito.variable} ${bitcountPropSingle.variable} ${lora.variable} antialiased flex flex-col min-h-full`}>
           <StoryblokProvider>
             {headerStory && <Header blok={headerStory.content.body[0]} />}
             <main className="flex-grow">

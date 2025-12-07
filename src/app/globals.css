@@ -91,7 +91,7 @@
 
   /* Font families */
   --font-sans: var(--font-nunito);
-  --font-mono: var(--font-geist-mono);
+  --font-bitcount-prop-single: var(--font-bitcount-prop-single);
   --font-display: var(--font-lora);
 
   /* Display typography - Mobile first (base 16px = 1rem) */
@@ -285,6 +285,10 @@ h6, .h6 {
   line-height: var(--line-height-caption);
   font-weight: var(--font-weight-caption);
   font-family: var(--font-nunito), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+.logo-font {
+  font-family: var(--font-bitcount-prop-single) !important;
 }
 
 /* Slide down animation for dropdowns */
