@@ -49,7 +49,7 @@ const SectionWrapper = memo(({ blok }: SectionWrapperProps) => {
     <section
       {...makeStoryblokEditable(blok)}
       className={cn(
-        "relative w-full max-w-[1240px] flex flex-col gap-10 lg:gap-20 py-10 lg:py-12 px-6 md:px-10 lg:px-15 2xl:px-20 mx-auto",
+        "relative w-full flex flex-col gap-10 lg:gap-20 py-10 lg:py-12",
         hasBackgroundPattern && "overflow-hidden"
       )}
     >
@@ -65,7 +65,7 @@ const SectionWrapper = memo(({ blok }: SectionWrapperProps) => {
         </div>
       )}
 
-      <div className="relative z-10 flex flex-col gap-10 lg:gap-14 items-center w-full">
+      <div className="w-full max-w-[1240px] relative z-10 flex flex-col gap-10 lg:gap-14 items-center px-6 md:px-10 lg:px-15 2xl:px-20 mx-auto">
         <SectionHeader heading={heading} navigateTo={navigate_to} />
 
         {childrens && childrens.length > 0 && (
