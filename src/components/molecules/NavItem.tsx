@@ -15,7 +15,7 @@ const NavItem = memo(({ blok }: StoryblokComponentProps<NavItemBlok>) => {
       className={`flex gap-[4px] items-center ${
         isActive
           ? "border-b border-primary-700 text-primary-800 font-bold"
-          : "text-gray-700 font-normal"
+          : "text-black font-normal"
       } hover:text-primary-700 transition-colors`}
     >
       <span className="text-[18px] leading-[24px] subtitle-1">
