@@ -2,7 +2,7 @@
 
 :root {
   /* Base colors */
-  --white: #F0EEE9;
+  --white: #FAF9F6;
   --black: #161616;
   --background: var(--white);
   --foreground: var(--black);
@@ -368,4 +368,53 @@ h6, .h6 {
 
 .animate-slideUp {
   animation: slideUp 0.3s ease-in-out;
+}
+
+/* ============================================
+   CTA Gradient Border Styles
+   ============================================ */
+
+/* Primary gradient border - works with any background */
+.cta-primary-gradient-border:hover::before {
+  content: "";
+  position: absolute;
+  top: -2px; /* Adjust for border thickness */
+  left: -2px; /* Adjust for border thickness */
+  right: -2px; /* Adjust for border thickness */
+  bottom: -2px; /* Adjust for border thickness */
+  background: linear-gradient(135deg, var(--primary-700), var(--secondary-900));
+  z-index: -1; /* Place behind the main element */
+  border-radius: inherit; /* Inherit border radius from parent */
+}
+
+/* Legacy class for backward compatibility */
+.cta-primary-outlined-border {
+  position: relative;
+  border: 2px solid transparent;
+}
+
+.cta-primary-outlined-border::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: -1;
+  margin: -2px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--primary-700), var(--secondary-900));
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out, background 0.3s ease-in-out;
+}
+
+/* Rotate gradient on hover */
+.group:hover .cta-primary-outlined-border::before {
+  background: linear-gradient(315deg, var(--primary-700), var(--secondary-900));
+}
+
+.cta-primary-outlined-border:focus-visible {
+  outline: 2px solid var(--primary-700);
+  outline-offset: 2px;
 }
