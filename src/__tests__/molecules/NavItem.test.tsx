@@ -132,7 +132,7 @@ describe('NavItem', () => {
       render(<NavItem blok={blok} />);
 
       const link = screen.getByRole('link');
-      expect(link).toHaveClass('text-gray-700', 'font-normal');
+      expect(link).toHaveClass('text-black', 'font-normal');
     });
   });
 
