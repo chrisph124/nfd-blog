@@ -60,7 +60,7 @@ export default async function RootLayout({
         <body className={`${nunito.variable} ${bitcountPropSingle.variable} ${lora.variable} antialiased flex flex-col min-h-full`}>
           <StoryblokProvider>
             {headerStory && <Header blok={headerStory.content.body[0]} />}
-            <main className="flex-grow">
+            <main className="grow py-10">
               {children}
             </main>
             {footerStory && <Footer blok={footerStory.content.body[0]} />}
