@@ -21,7 +21,7 @@ const TabButton = memo(({ label, isActive, onClick }: TabButtonProps) => (
     type="button"
     onClick={onClick}
     className={cn(
-      "px-6 py-4 rounded-lg font-semibold text-base text-gray-700 transition-colors cursor-pointer",
+      "px-6 py-4 rounded-lg font-semibold   transition-colors cursor-pointer",
       isActive ? "cursor-default bg-blue-200 pointer-events-none" : "hover:bg-gray-100"
     )}
   >

@@ -2,10 +2,10 @@
 
 :root {
   /* Base colors */
-  --background: #ededed;
-  --foreground: #171717;
-  --white: #F4F5F7;
-  --black: #0F0F0F;
+  --white: #FAF9F6;
+  --black: #161616;
+  --background: var(--white);
+  --foreground: var(--black);
 
   /* Primary color scale (Blue) */
   --primary-50: #EFF6FF;
@@ -42,6 +42,30 @@
   --gray-700: #374151;
   --gray-800: #1F2937;
   --gray-900: #111827;
+
+  /* Viva Magenta */
+  --viva-magenta-50:  #FEF7F9;
+  --viva-magenta-100: #FDEEF1;
+  --viva-magenta-200: #FAD4DD;
+  --viva-magenta-300: #F6B3C1;
+  --viva-magenta-400: #EE8198;
+  --viva-magenta-500: #BE3455;
+  --viva-magenta-600: #A02844;
+  --viva-magenta-700: #801F36;
+  --viva-magenta-800: #631A2B;
+  --viva-magenta-900: #451822;
+
+  /* Neon Cyan */
+  --neon-cyan-50:  #F0FFFE;
+  --neon-cyan-100: #CCFEFD;
+  --neon-cyan-200: #99FCFA;
+  --neon-cyan-300: #66FAF7;
+  --neon-cyan-400: #33F8F4;
+  --neon-cyan-500: #00FEFC;
+  --neon-cyan-600: #00E5E3;
+  --neon-cyan-700: #00CCCA;
+  --neon-cyan-800: #00B3B2;
+  --neon-cyan-900: #009A99;
 }
 
 @theme inline {
@@ -89,9 +113,33 @@
   --color-gray-800: var(--gray-800);
   --color-gray-900: var(--gray-900);
 
+  /* Viva Magenta palette */
+  --color-viva-magenta-50: var(--viva-magenta-50);
+  --color-viva-magenta-100: var(--viva-magenta-100);
+  --color-viva-magenta-200: var(--viva-magenta-200);
+  --color-viva-magenta-300: var(--viva-magenta-300);
+  --color-viva-magenta-400: var(--viva-magenta-400);
+  --color-viva-magenta-500: var(--viva-magenta-500);
+  --color-viva-magenta-600: var(--viva-magenta-600);
+  --color-viva-magenta-700: var(--viva-magenta-700);
+  --color-viva-magenta-800: var(--viva-magenta-800);
+  --color-viva-magenta-900: var(--viva-magenta-900);
+
+  /* Neon Cyan */
+  --color-neon-cyan-50: var(--neon-cyan-50);
+  --color-neon-cyan-100: var(--neon-cyan-100);
+  --color-neon-cyan-200: var(--neon-cyan-200);
+  --color-neon-cyan-300: var(--neon-cyan-300);
+  --color-neon-cyan-400: var(--neon-cyan-400);
+  --color-neon-cyan-500: var(--neon-cyan-500);
+  --color-neon-cyan-600: var(--neon-cyan-600);
+  --color-neon-cyan-700: var(--neon-cyan-700);
+  --color-neon-cyan-800: var(--neon-cyan-800);
+  --color-neon-cyan-900: var(--neon-cyan-900);
+
   /* Font families */
   --font-sans: var(--font-nunito);
-  --font-mono: var(--font-geist-mono);
+  --font-bitcount-prop-single: var(--font-bitcount-prop-single);
   --font-display: var(--font-lora);
 
   /* Display typography - Mobile first (base 16px = 1rem) */
@@ -287,6 +335,10 @@ h6, .h6 {
   font-family: var(--font-nunito), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
+.logo-font {
+  font-family: var(--font-bitcount-prop-single) !important;
+}
+
 /* Slide down animation for dropdowns */
 @keyframes slideDown {
   from {
@@ -316,4 +368,53 @@ h6, .h6 {
 
 .animate-slideUp {
   animation: slideUp 0.3s ease-in-out;
+}
+
+/* ============================================
+   CTA Gradient Border Styles
+   ============================================ */
+
+/* Primary gradient border - works with any background */
+.cta-primary-gradient-border:hover::before {
+  content: "";
+  position: absolute;
+  top: -2px; /* Adjust for border thickness */
+  left: -2px; /* Adjust for border thickness */
+  right: -2px; /* Adjust for border thickness */
+  bottom: -2px; /* Adjust for border thickness */
+  background: linear-gradient(135deg, var(--primary-700), var(--secondary-900));
+  z-index: -1; /* Place behind the main element */
+  border-radius: inherit; /* Inherit border radius from parent */
+}
+
+/* Legacy class for backward compatibility */
+.cta-primary-outlined-border {
+  position: relative;
+  border: 2px solid transparent;
+}
+
+.cta-primary-outlined-border::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: -1;
+  margin: -2px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--primary-700), var(--secondary-900));
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out, background 0.3s ease-in-out;
+}
+
+/* Rotate gradient on hover */
+.group:hover .cta-primary-outlined-border::before {
+  background: linear-gradient(315deg, var(--primary-700), var(--secondary-900));
+}
+
+.cta-primary-outlined-border:focus-visible {
+  outline: 2px solid var(--primary-700);
+  outline-offset: 2px;
 }

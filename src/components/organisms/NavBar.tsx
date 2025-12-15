@@ -88,7 +88,7 @@ const NavBar = memo(({ navItems }: NavBarProps) => {
                     className={`flex gap-[4px] items-center text-[18px] leading-[24px] p-2 cursor-pointer transition-colors ${
                       isActive
                         ? 'border-b border-primary-700 text-primary-800 font-bold'
-                        : 'text-gray-700 font-normal hover:text-primary-700'
+                        : 'text-black font-normal hover:text-primary-700'
                     }`}
                   >
                     {item.label}
@@ -121,7 +121,7 @@ const NavBar = memo(({ navItems }: NavBarProps) => {
                   className={`flex gap-[4px] items-center text-[18px] leading-[24px] p-2 cursor-pointer transition-colors ${
                     isActive
                       ? 'border-b border-primary-700 text-primary-800 font-bold'
-                      : 'text-gray-700 font-normal hover:text-primary-700'
+                      : 'text-black font-normal hover:text-primary-700'
                   }`}
                 >
                   {item.label}

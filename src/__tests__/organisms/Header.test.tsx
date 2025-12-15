@@ -116,29 +116,23 @@ describe('Header', () => {
       expect(screen.getByText('My Blog')).toBeInTheDocument();
     });
 
-    it('renders logo image', () => {
-      const blok = createMockBlok();
-      const { getByTestId } = render(<Header blok={blok} />);
+    it('renders logo as text with gradient', () => {
+      const blok = createMockBlok({ title: 'Test Site' });
+      render(<Header blok={blok} />);
 
-      const logoImage = getByTestId('next-image');
-      expect(logoImage).toBeInTheDocument();
-      expect(logoImage).toHaveAttribute('alt', 'Test Logo');
-    });
-
-    it('renders default logo when not provided', () => {
-      const blok = createMockBlok({ logo: undefined });
-      const { getByTestId } = render(<Header blok={blok} />);
-
-      const img = getByTestId('next-image');
-      expect(img).toBeInTheDocument();
-      expect(img).toHaveAttribute('src', expect.stringContaining('.svg'));
+      const logoText = screen.getByText('Test Site');
+      expect(logoText).toBeInTheDocument();
+      expect(logoText).toHaveClass('logo-font', 'text-transparent', 'bg-clip-text');
     });
 
     it('renders default title when not provided', () => {
-      const blok = createMockBlok({ title: undefined });
+      const blok = createMockBlok({ title: undefined, logo: undefined });
       render(<Header blok={blok} />);
 
-      expect(screen.getByText('The Folio')).toBeInTheDocument();
+      // Default title is 'The Folio' per Header.tsx:19
+      const defaultTitle = screen.getByText('The Folio');
+      expect(defaultTitle).toBeInTheDocument();
+      expect(defaultTitle).toHaveClass('logo-font', 'text-transparent', 'bg-clip-text');
     });
   });
 

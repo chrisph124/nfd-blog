@@ -52,7 +52,7 @@ const CardTags = memo(({ tags }: CardTagsProps) => {
         <Link
           key={tag}
           href={`/insight-hub/${tag}`}
-          className="px-2 py-1 text-xs font-medium text-primary-700 bg-primary-50 rounded-md hover:bg-primary-100 transition-colors"
+          className="px-2 py-1 text-xs font-bold uppercase text-neon-cyan-900 bg-gray-200 rounded-md hover:bg-gray-50 transition-colors"
           onClick={(e) => e.stopPropagation()}
         >
           {tag}
@@ -71,7 +71,7 @@ const CardMeta = memo(({ createdAt, body }: CardMetaProps) => {
   if (!formattedDate && !readingTime) return null;
 
   return (
-    <div className="flex items-center gap-2 text-sm text-gray-500">
+    <div className="flex items-center gap-2 text-xs italic text-gray-500">
       {formattedDate && <span>{formattedDate}</span>}
       {formattedDate && readingTime && <span>•</span>}
       {readingTime && <span>{readingTime}</span>}
@@ -103,7 +103,7 @@ const Card = memo(({ story }: CardProps) => {
         {tag_list && tag_list.length > 0 && <CardTags tags={tag_list} />}
 
         <Link href={`/${postSlug}`}>
-          <h3 className="body-1 text-gray-900 line-clamp-3 group-hover:text-primary-700 transition-colors">
+          <h3 className="body-1 line-clamp-3 group-hover:text-primary-700 transition-colors">
             {title}
           </h3>
         </Link>
@@ -111,7 +111,7 @@ const Card = memo(({ story }: CardProps) => {
         <CardMeta createdAt={created_at} body={body} />
 
         {excerpt && (
-          <p className="text-sm text-gray-600 line-clamp-4 mt-auto">
+          <p className="text-sm line-clamp-4 mt-auto">
             {excerpt}
           </p>
         )}

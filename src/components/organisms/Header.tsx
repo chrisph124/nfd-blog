@@ -3,7 +3,6 @@
 import { makeStoryblokEditable } from "@/lib/storyblok-utils";
 import { useState, useEffect, useCallback, memo } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import ThemeToggle from "@/components/atoms/ThemeToggle";
 import MenuToggle from "@/components/atoms/MenuToggle";
@@ -12,10 +11,6 @@ import type { StoryblokComponentProps, HeaderBlok } from "@/types/storyblok";
 import { usePathname } from "next/navigation";
 
 const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) => {
-  const logo =
-    blok.logo?.filename ??
-    "/assets/f8202cc6898638b4bbed0f7c48b140d1c452bb95.svg";
-  const logoAlt = blok.logo?.alt ?? "Logo";
   const title = blok.title ?? "The Folio";
   const navItems = blok.nav_items ?? [];
   const enableTheme = blok.enableTheme ?? false;
@@ -85,19 +80,8 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
       >
         <div className="flex h-[70px] lg:h-[90px] items-center w-full max-w-[1240px] px-6 md:px-10 lg:px-15 2xl:px-20 mx-auto">
           {/* Logo Section - Fixed width */}
-          <Link href="/" className="flex gap-[14px] items-center flex-shrink-0">
-            <div className="relative shrink-0 size-[48px]">
-              <Image
-                src={logo}
-                alt={logoAlt}
-                width={48}
-                height={48}
-                className="object-contain"
-              />
-            </div>
-            <div className="flex flex-col font-medium justify-center text-[24px] text-black">
-              <p className="leading-[20px]">{title}</p>
-            </div>
+          <Link href="/">
+            <h3 className="logo-font text-transparent bg-linear-to-r from-primary-700 to-secondary-900 bg-clip-text">{title}</h3>
           </Link>
 
           {/* Navigation - Desktop only */}
@@ -206,7 +190,7 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
                                 onClick={closeMobileMenu}
                                 className="flex items-center justify-between px-[16px] py-[12px] hover:bg-secondary-200 transition-colors"
                               >
-                                <p className="font-medium text-[18px] leading-[28px] text-gray-700">
+                                <p className="font-medium text-[18px] leading-[28px] text-black">
                                   {subItem.label}
                                 </p>
                               </Link>
