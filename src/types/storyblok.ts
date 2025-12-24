@@ -240,6 +240,14 @@ export interface TeaserBlok extends StoryblokBlok {
   headline?: string;
 }
 
+/**
+ * post_list component
+ */
+export interface PostListBlok extends StoryblokBlok {
+  component: 'post_list';
+  posts_per_page?: number;
+}
+
 // ============================================================================
 // Component Props Types
 // ============================================================================
@@ -271,6 +279,7 @@ export type AnyBlok =
   | NavItemBlok
   | PageBlok
   | PostBlok
+  | PostListBlok
   | RichtextBlok
   | SectionWrapperBlok
   | SubNavItemBlok
