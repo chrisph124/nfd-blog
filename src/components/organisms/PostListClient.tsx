@@ -55,9 +55,9 @@ export default function PostListClient({
   };
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6 max-w-[1240px] px-6 md:px-10 lg:px-15 2xl:px-20 mx-auto">
       {/* Posts Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
         {posts.map((story) => (
           <Card key={story.uuid} story={story} />
         ))}
@@ -81,13 +81,6 @@ export default function PostListClient({
             {loading ? 'Loading...' : 'Load More Posts'}
           </button>
         </div>
-      )}
-
-      {/* No More Posts Message */}
-      {!hasMore && posts.length > 0 && (
-        <p className="text-center text-gray-500 text-sm">
-          No more posts to load
-        </p>
       )}
     </div>
   );
