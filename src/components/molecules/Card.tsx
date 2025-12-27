@@ -111,7 +111,7 @@ const Card = memo(({ story }: CardProps) => {
         <CardMeta createdAt={created_at} body={body} />
 
         {excerpt && (
-          <p className="subtitle-2 line-clamp-5 mt-auto">
+          <p className="subtitle-2 line-clamp-6 mt-auto">
             {excerpt}
           </p>
         )}
