@@ -209,7 +209,7 @@ describe('NavBar', () => {
       const { container } = render(<NavBar navItems={navItems} />);
 
       const nav = container.querySelector('nav');
-      expect(nav).toHaveClass('flex-grow', 'items-center', 'justify-center');
+      expect(nav).toHaveClass('flex-grow', 'items-center', 'justify-end');
     });
 
     it('has gap between items', () => {

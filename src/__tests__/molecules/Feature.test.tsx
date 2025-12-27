@@ -61,16 +61,16 @@ describe('Feature', () => {
       const blok = createMockBlok();
       const { container } = render(<Feature blok={blok} />);
 
-      const innerDiv = container.querySelector('.max-w-\\[1240px\\]');
+      const innerDiv = container.querySelector(String.raw`.max-w-\[1280px\]`);
       expect(innerDiv).toBeInTheDocument();
-      expect(innerDiv).toHaveClass('px-6', 'md:px-10', 'lg:px-15', '2xl:px-20');
+      expect(innerDiv).toHaveClass('px-6', 'md:px-10', 'lg:px-15', 'xl:px-5');
     });
 
     it('has centered content with margin', () => {
       const blok = createMockBlok();
       const { container } = render(<Feature blok={blok} />);
 
-      const innerDiv = container.querySelector('.max-w-\\[1240px\\]');
+      const innerDiv = container.querySelector(String.raw`.max-w-\[1280px\]`);
       expect(innerDiv).toHaveClass('mx-auto', 'my-6');
     });
   });
