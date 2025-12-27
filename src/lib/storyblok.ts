@@ -15,6 +15,7 @@ import Cta from "@/components/atoms/Cta";
 import Richtext from "@/components/atoms/Richtext";
 import Media from "@/components/atoms/Media";
 import CardItem from "@/components/molecules/CardItem";
+import PostList from "@/components/organisms/PostList";
 
 import { apiPlugin, storyblokInit } from '@storyblok/react/rsc';
 
@@ -37,6 +38,7 @@ const components = {
   richtext: Richtext,
   media: Media,
   card_item: CardItem,
+  post_list: PostList,
 } as const;
 
 // Server-side initialization with access token
