@@ -3,7 +3,7 @@
 import { makeStoryblokEditable } from "@/lib/storyblok-utils";
 import { useState, useEffect, useCallback, memo } from "react";
 import Link from "next/link";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { HiChevronDown } from "react-icons/hi2";
 import ThemeToggle from "@/components/atoms/ThemeToggle";
 import MenuToggle from "@/components/atoms/MenuToggle";
 import NavBar from "@/components/organisms/NavBar";
@@ -164,7 +164,7 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
                         >
                           {item.label}
                         </p>
-                        <ChevronDownIcon
+                        <HiChevronDown
                           className={`size-[24px] transition-transform duration-300 ease-in-out ${
                             isExpanded ? "rotate-180" : "rotate-0"
                           } ${isActive ? "text-primary-800" : "text-gray-800"}`}

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, memo } from "react";
 import { makeStoryblokEditable, StoryblokServerComponent } from "@/lib/storyblok-utils";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { HiChevronDown } from "react-icons/hi2";
 import type { TabsBlok, TabItemBlok } from "@/types/storyblok";
 import { cn } from "@/lib/utils";
 
@@ -68,7 +68,7 @@ const TabDropdown = memo(({ tabs, activeTab, onSelect }: DropdownProps) => {
       >
         {/* eslint-disable-next-line security/detect-object-injection */}
         <span>{tabs[activeTab]?.label || "Select tab"}</span>
-        <ChevronDownIcon
+        <HiChevronDown
           className={cn("size-4 transition-transform text-gray-700", isOpen && "rotate-180")}
         />
       </button>

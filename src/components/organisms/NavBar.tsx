@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import Link from 'next/link';
-import { ChevronDownIcon } from '@heroicons/react/24/outline';
+import { HiChevronDown } from "react-icons/hi2";
 import type { NavItemBlok } from '@/types/storyblok';
 
 interface NavBarProps {
@@ -92,7 +92,7 @@ const NavBar = memo(({ navItems }: NavBarProps) => {
                     }`}
                   >
                     {item.label}
-                    <ChevronDownIcon
+                    <HiChevronDown
                       className={`size-[14px] transition-transform duration-300 ease-in-out ${
                         isExpanded ? 'rotate-180' : 'rotate-0'
                       }`}
