@@ -1,4 +1,4 @@
-import { SbBlokData, type StoryblokRichTextNode } from "@storyblok/react/rsc";
+import { SbBlokData } from "@storyblok/react/rsc";
 
 // ============================================================================
 // Base Storyblok Types
@@ -8,11 +8,10 @@ import { SbBlokData, type StoryblokRichTextNode } from "@storyblok/react/rsc";
  * Base interface for all Storyblok bloks
  * Extends SbBlokData which includes _uid and component
  */
-export interface StoryblokBlok extends Omit<SbBlokData, keyof Record<string, unknown>> {
+export interface StoryblokBlok extends SbBlokData {
   _uid: string;
   component: string;
   _editable?: string;
-  [key: string]: unknown;
 }
 
 /**
@@ -26,7 +25,6 @@ export interface StoryblokAsset {
   focus?: string;
   name?: string;
   copyright?: string;
-  is_external_url?: boolean;
 }
 
 /**
@@ -57,7 +55,7 @@ export interface StoryblokLink {
  */
 export interface CardItemBlok extends StoryblokBlok {
   component: 'card_item';
-  post_reference?: string | number;
+  post_reference?: string;
 }
 
 /**
@@ -188,11 +186,19 @@ export interface PostBlok extends StoryblokBlok {
 }
 
 /**
+ * post_list component
+ */
+export interface PostListBlok extends StoryblokBlok {
+  component: 'post_list';
+  posts_per_page?: number;
+}
+
+/**
  * richtext component
  */
 export interface RichtextBlok extends StoryblokBlok {
   component: 'richtext';
-  content?: StoryblokRichTextNode<string> | null;
+  content?: string;
 }
 
 /**
@@ -271,6 +277,7 @@ export type AnyBlok =
   | NavItemBlok
   | PageBlok
   | PostBlok
+  | PostListBlok
   | RichtextBlok
   | SectionWrapperBlok
   | SubNavItemBlok
