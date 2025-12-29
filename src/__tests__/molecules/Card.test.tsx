@@ -220,7 +220,15 @@ describe('Card', () => {
       const { container } = render(<Card story={story} />);
 
       const article = container.querySelector('article');
-      expect(article).toHaveClass('group', 'relative', 'flex', 'flex-col', 'h-full', 'bg-white', 'rounded-xl');
+      expect(article).toHaveClass('group', 'relative', 'flex', 'h-full', 'bg-white', 'rounded-xl');
+    });
+
+    it('applies responsive flex direction (flex-row md:flex-col)', () => {
+      const story = createMockStory();
+      const { container } = render(<Card story={story} />);
+
+      const article = container.querySelector('article');
+      expect(article).toHaveClass('flex', 'flex-row', 'md:flex-col');
     });
 
     it('applies hover effects', () => {
@@ -231,12 +239,20 @@ describe('Card', () => {
       expect(article).toHaveClass('hover:shadow-md');
     });
 
-    it('has max-width constraint', () => {
+    it('has max-width constraint (max-w-full lg:max-w-[320px])', () => {
       const story = createMockStory();
       const { container } = render(<Card story={story} />);
 
       const article = container.querySelector('article');
-      expect(article).toHaveClass('max-w-full', 'md:max-w-[320px]');
+      expect(article).toHaveClass('max-w-full', 'lg:max-w-[320px]');
+    });
+
+    it('applies transition effects', () => {
+      const story = createMockStory();
+      const { container } = render(<Card story={story} />);
+
+      const article = container.querySelector('article');
+      expect(article).toHaveClass('transition-all', 'duration-200');
     });
   });
 });

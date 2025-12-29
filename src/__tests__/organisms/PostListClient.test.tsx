@@ -288,7 +288,7 @@ describe('PostListClient', () => {
       );
 
       const wrapper = container.firstChild as HTMLElement;
-      expect(wrapper).toHaveClass('flex', 'flex-col', 'gap-6', 'max-w-[1240px]', 'mx-auto');
+      expect(wrapper).toHaveClass('flex', 'flex-col', 'gap-6', 'max-w-[1280px]', 'px-6', 'md:px-10', 'lg:px-15', 'xl:px-5', 'mx-auto');
     });
 
     it('renders grid with responsive breakpoints', () => {
@@ -318,7 +318,7 @@ describe('PostListClient', () => {
       );
 
       const wrapper = container.firstChild as HTMLElement;
-      expect(wrapper).toHaveClass('px-6', 'md:px-10', 'lg:px-15', '2xl:px-20');
+      expect(wrapper).toHaveClass('px-6', 'md:px-10', 'lg:px-15', 'xl:px-5');
     });
   });
 

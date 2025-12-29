@@ -63,7 +63,7 @@ const NavBar = memo(({ navItems }: NavBarProps) => {
   }, [clearExpandedItems]);
 
   return (
-    <nav className="hidden lg:flex flex-grow items-center justify-center">
+    <nav className="hidden lg:flex flex-grow items-center justify-end">
       <div className="flex gap-[20px] items-center">
         {navItems.map((item) => {
           const itemUrl = item.link?.cached_url ?? item.link?.url ?? '#';

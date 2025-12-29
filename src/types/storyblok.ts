@@ -135,6 +135,7 @@ export interface HeroBlockBlok extends StoryblokBlok {
   heading_tag?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
   sub_heading?: string;
   image?: StoryblokAsset;
+  image_type?: 'auto' | 'full' | 'half';
   cta_group?: (CtaBlok)[];
   content_alignment?: 'left' | 'center' | 'right';
   position?: 'vertical' | 'vertical-reverse' | 'horizontal' | 'horizontal-reverse';
