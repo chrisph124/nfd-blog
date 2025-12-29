@@ -26,8 +26,8 @@ vi.mock('next/image', () => ({
   ),
 }));
 
-vi.mock('@heroicons/react/24/outline', () => ({
-  ChevronDownIcon: ({ className }: { className?: string }) => (
+vi.mock('@react-icons/hi2/HiChevronDown', () => ({
+  HiChevronDown: ({ className }: { className?: string }) => (
     <svg data-testid="chevron-down-icon" className={className} />
   ),
 }));

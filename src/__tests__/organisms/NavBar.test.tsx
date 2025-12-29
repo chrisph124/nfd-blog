@@ -9,8 +9,8 @@ vi.mock('next/navigation', () => ({
   usePathname: () => mockPathname(),
 }));
 
-vi.mock('@heroicons/react/24/outline', () => ({
-  ChevronDownIcon: ({ className }: { className?: string }) => (
+vi.mock('react-icons/hi2', () => ({
+  HiChevronDown: ({ className }: { className?: string }) => (
     <svg data-testid="chevron-down-icon" className={className} />
   ),
 }));

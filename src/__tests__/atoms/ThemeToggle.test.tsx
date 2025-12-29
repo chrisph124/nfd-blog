@@ -3,11 +3,11 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import ThemeToggle from '@/components/atoms/ThemeToggle';
 
 // Mock heroicons
-vi.mock('@heroicons/react/24/outline', () => ({
-  SunIcon: ({ className }: { className?: string }) => (
+vi.mock('react-icons/hi2', () => ({
+  HiSun: ({ className }: { className?: string }) => (
     <svg data-testid="sun-icon" className={className} />
   ),
-  MoonIcon: ({ className }: { className?: string }) => (
+  HiMoon: ({ className }: { className?: string }) => (
     <svg data-testid="moon-icon" className={className} />
   ),
 }));
