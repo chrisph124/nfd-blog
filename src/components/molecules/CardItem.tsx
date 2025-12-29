@@ -30,9 +30,7 @@ export default function CardItem({ blok }: Readonly<CardItemProps>) {
         let storyIdentifier: string;
         const apiParams: Record<string, string> = { version: 'draft' };
 
-        if (typeof post_reference === 'number') {
-          storyIdentifier = post_reference.toString();
-        } else if (typeof post_reference === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(post_reference)) {
+        if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(post_reference)) {
           storyIdentifier = post_reference;
           apiParams.find_by = 'uuid';
         } else {

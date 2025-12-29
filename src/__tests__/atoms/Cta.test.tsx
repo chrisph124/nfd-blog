@@ -3,9 +3,9 @@ import { render, screen } from '@testing-library/react';
 import Cta from '@/components/atoms/Cta';
 import type { CtaBlok } from '@/types/storyblok';
 
-// Mock heroicons
-vi.mock('@heroicons/react/24/outline', () => ({
-  ArrowRightIcon: ({ className }: { className?: string }) => (
+// Mock react-icons/hi2
+vi.mock('react-icons/hi2', () => ({
+  HiArrowRight: ({ className }: { className?: string }) => (
     <svg data-testid="arrow-right-icon" className={className} />
   ),
 }));

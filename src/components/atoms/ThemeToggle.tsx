@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, memo } from 'react';
-import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
+import { HiSun, HiMoon } from "react-icons/hi2";
 
 const ThemeToggle = memo(() => {
   const [isDark, setIsDark] = useState<boolean>(false);
@@ -26,9 +26,9 @@ const ThemeToggle = memo(() => {
       type="button"
     >
       {isDark ? (
-        <MoonIcon className="size-full text-gray-700" />
+        <HiMoon className="size-full text-gray-700" />
       ) : (
-        <SunIcon className="size-full text-gray-700" />
+        <HiSun className="size-full text-gray-700" />
       )}
     </button>
   );

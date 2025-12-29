@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import Link from "next/link";
-import { ChevronDownIcon } from '@heroicons/react/24/outline';
+import { HiChevronDown } from "react-icons/hi2";
 import type { StoryblokComponentProps, NavItemBlok } from "@/types/storyblok";
 
 const NavItem = memo(({ blok }: StoryblokComponentProps<NavItemBlok>) => {
@@ -22,7 +22,7 @@ const NavItem = memo(({ blok }: StoryblokComponentProps<NavItemBlok>) => {
         {label}
       </span>
       {hasDropdown && (
-        <ChevronDownIcon className="size-[14px]" />
+        <HiChevronDown className="size-[14px]" />
       )}
     </Link>
   );
