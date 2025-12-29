@@ -25,6 +25,7 @@ export interface StoryblokAsset {
   focus?: string;
   name?: string;
   copyright?: string;
+  is_external_url?: boolean;
 }
 
 /**
