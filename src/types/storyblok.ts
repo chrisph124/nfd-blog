@@ -1,4 +1,4 @@
-import { SbBlokData } from "@storyblok/react/rsc";
+import { SbBlokData, StoryblokRichTextNode } from "@storyblok/react/rsc";
 
 // ============================================================================
 // Base Storyblok Types
@@ -198,10 +198,10 @@ export interface PostListBlok extends StoryblokBlok {
 /**
  * richtext component
  */
-export interface RichtextBlok extends StoryblokBlok {
+export type RichtextBlok = Omit<StoryblokBlok, 'component' | 'content'> & {
   component: 'richtext';
-  content?: string;
-}
+  content?: StoryblokRichTextNode<string> | null;
+};
 
 /**
  * section_wrapper component
