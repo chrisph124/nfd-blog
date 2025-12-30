@@ -452,11 +452,10 @@ describe('Cta', () => {
       const link = screen.getByRole('link');
       const textSpan = link.querySelector('span.cta-text');
 
-      // Wrapper base styles
+      // Wrapper base styles (cn() with tailwind-merge optimizes class order)
       expect(link).toHaveClass(
         'group',
         'rounded-2xl',
-        'transition-all',
         'duration-300',
         'transition-opacity'
       );
@@ -483,9 +482,9 @@ describe('Cta', () => {
       const link = screen.getByRole('link');
       const textSpan = link.querySelector('span.cta-text');
 
-      // Both wrapper and text have transition classes
-      expect(link).toHaveClass('transition-all', 'duration-300', 'transition-opacity');
-      expect(textSpan).toHaveClass('transition-all', 'duration-300', 'transition-opacity');
+      // Both wrapper and text have transition classes (cn() optimizes with tailwind-merge)
+      expect(link).toHaveClass('duration-300', 'transition-opacity');
+      expect(textSpan).toHaveClass('duration-300', 'transition-opacity');
     });
 
     it('applies group class for hover pattern', () => {

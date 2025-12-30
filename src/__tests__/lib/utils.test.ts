@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { cn, getReadingTime, getStoryReadingTime, formatDate } from '@/lib/utils';
+import { cn, getReadingTime, getStoryReadingTime, formatDate, normalizeStoryblokUrl } from '@/lib/utils';
 
 // Test interfaces for type safety
 interface TestTextContent {
@@ -328,5 +328,111 @@ describe('formatDate', () => {
     const dateString = today.toISOString();
     expect(formatDate(dateString)).toContain(today.getFullYear().toString());
     expect(formatDate(dateString)).toContain(today.toLocaleDateString('en-US', { month: 'long' }));
+  });
+});
+
+describe('normalizeStoryblokUrl', () => {
+  describe('Null/undefined handling', () => {
+    it('returns "#" for null input', () => {
+      expect(normalizeStoryblokUrl(null)).toBe('#');
+    });
+
+    it('returns "#" for undefined input', () => {
+      expect(normalizeStoryblokUrl(undefined)).toBe('#');
+    });
+
+    it('returns "#" for empty string', () => {
+      expect(normalizeStoryblokUrl('')).toBe('#');
+    });
+  });
+
+  describe('Relative path normalization', () => {
+    it('converts relative path to absolute path', () => {
+      expect(normalizeStoryblokUrl('about')).toBe('/about');
+    });
+
+    it('converts nested relative path to absolute path', () => {
+      expect(normalizeStoryblokUrl('insight-hub/category')).toBe('/insight-hub/category');
+    });
+
+    it('handles paths with query parameters', () => {
+      expect(normalizeStoryblokUrl('about?ref=navbar')).toBe('/about?ref=navbar');
+    });
+
+    it('handles paths with hash fragments', () => {
+      expect(normalizeStoryblokUrl('about#section')).toBe('/about#section');
+    });
+  });
+
+  describe('Already absolute paths', () => {
+    it('returns absolute path unchanged', () => {
+      expect(normalizeStoryblokUrl('/about')).toBe('/about');
+    });
+
+    it('handles nested absolute paths', () => {
+      expect(normalizeStoryblokUrl('/insight-hub/category')).toBe('/insight-hub/category');
+    });
+
+    it('handles absolute paths with query parameters', () => {
+      expect(normalizeStoryblokUrl('/about?ref=navbar')).toBe('/about?ref=navbar');
+    });
+
+    it('handles absolute paths with hash fragments', () => {
+      expect(normalizeStoryblokUrl('/about#section')).toBe('/about#section');
+    });
+  });
+
+  describe('External URLs', () => {
+    it('returns http URL unchanged', () => {
+      expect(normalizeStoryblokUrl('http://example.com')).toBe('http://example.com');
+    });
+
+    it('returns https URL unchanged', () => {
+      expect(normalizeStoryblokUrl('https://example.com')).toBe('https://example.com');
+    });
+
+    it('handles URLs with paths', () => {
+      expect(normalizeStoryblokUrl('https://example.com/path/to/page')).toBe('https://example.com/path/to/page');
+    });
+
+    it('handles URLs with query parameters', () => {
+      expect(normalizeStoryblokUrl('https://example.com?param=value')).toBe('https://example.com?param=value');
+    });
+
+    it('returns mailto links unchanged', () => {
+      expect(normalizeStoryblokUrl('mailto:hello@example.com')).toBe('mailto:hello@example.com');
+    });
+  });
+
+  describe('Special cases', () => {
+    it('returns "#" unchanged for hash-only anchor', () => {
+      expect(normalizeStoryblokUrl('#')).toBe('#');
+    });
+
+    it('handles home page path', () => {
+      expect(normalizeStoryblokUrl('home')).toBe('/home');
+    });
+
+    it('handles root path', () => {
+      expect(normalizeStoryblokUrl('/')).toBe('/');
+    });
+  });
+
+  describe('Real-world Storyblok scenarios', () => {
+    it('fixes navigation bug from /insight-hub/category to about page', () => {
+      // This is the actual bug scenario reported by user
+      expect(normalizeStoryblokUrl('about')).toBe('/about');
+    });
+
+    it('handles typical navigation items', () => {
+      expect(normalizeStoryblokUrl('home')).toBe('/home');
+      expect(normalizeStoryblokUrl('insight-hub')).toBe('/insight-hub');
+      expect(normalizeStoryblokUrl('insight-hub/web-development')).toBe('/insight-hub/web-development');
+    });
+
+    it('handles Storyblok external links', () => {
+      expect(normalizeStoryblokUrl('https://github.com/user')).toBe('https://github.com/user');
+      expect(normalizeStoryblokUrl('mailto:contact@example.com')).toBe('mailto:contact@example.com');
+    });
   });
 });

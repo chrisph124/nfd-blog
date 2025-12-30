@@ -356,7 +356,7 @@ describe('Post', () => {
       const blok = createMockBlok();
       const { container } = render(<Post blok={blok} />);
 
-      const overlay = container.querySelector(String.raw`.bg-black\/60`);
+      const overlay = container.querySelector(String.raw`.bg-black\/70`);
       expect(overlay).toBeInTheDocument();
       expect(overlay).toHaveClass('absolute', 'inset-0', '-z-10');
     });

@@ -312,7 +312,7 @@ describe('Hero', () => {
       });
       const { container } = render(<Hero blok={blok} />);
 
-      const overlay = container.querySelector(String.raw`.bg-black\/75`);
+      const overlay = container.querySelector(String.raw`.bg-black\/70`);
       expect(overlay).toBeInTheDocument();
     });
   });
