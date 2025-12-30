@@ -26,6 +26,9 @@ export default function PostListClient({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Load more button classes (98 chars)
+  const LOAD_MORE_BUTTON_CLASSES = "px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors";
+
   const loadMore = async () => {
     setLoading(true);
     setError(null);
@@ -75,7 +78,7 @@ export default function PostListClient({
           <button
             onClick={loadMore}
             disabled={loading}
-            className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className={LOAD_MORE_BUTTON_CLASSES}
             aria-label="Load more posts"
           >
             {loading ? 'Loading...' : 'Load More Posts'}
