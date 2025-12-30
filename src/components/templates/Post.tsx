@@ -16,12 +16,15 @@ export default function Post({ blok, tags = [], createdAt }: Readonly<PostProps>
   const readingTime = getStoryReadingTime(body);
   const formattedDate = createdAt ? formatDate(createdAt) : '';
 
+  // Post hero heading classes (89 chars)
+  const POST_HERO_HEADING_CLASSES = "display-1 text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-lg text-center";
+
   return (
     <>
       <ReadingProgressBar
         height={4}
         position="fixed"
-        zIndex={50}
+        zIndex={40}
       />
       <article className="flex flex-col justify-center items-center gap-y-6 md:gap-y-12 -mt-10">
       <div className="relative flex items-center justify-center w-full min-h-[200px] md:min-h-[300px] overflow-hidden">
@@ -38,7 +41,7 @@ export default function Post({ blok, tags = [], createdAt }: Readonly<PostProps>
         )}
 
         {/* Dark Overlay - covers whole image */}
-        <div className="absolute inset-0 bg-black/60 -z-10" />
+        <div className="absolute inset-0 bg-black/70 -z-10" />
 
         <div className="flex flex-col items-center gap-4 max-w-[1280px] px-6 md:px-10 lg:px-15 xl:px-5">
           {/* Tags */}
@@ -58,7 +61,7 @@ export default function Post({ blok, tags = [], createdAt }: Readonly<PostProps>
 
           {/* Title */}
           {title && (
-            <h1 className="display-1 text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-lg text-center">
+            <h1 className={POST_HERO_HEADING_CLASSES}>
               {title}
             </h1>
           )}

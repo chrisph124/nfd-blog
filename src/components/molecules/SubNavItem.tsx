@@ -1,10 +1,11 @@
 import { memo } from 'react';
 import Link from "next/link";
 import type { StoryblokComponentProps, SubNavItemBlok } from "@/types/storyblok";
+import { normalizeStoryblokUrl } from "@/lib/utils";
 
 const SubNavItem = memo(({ blok }: StoryblokComponentProps<SubNavItemBlok>) => {
   const label = blok.label ?? "Link";
-  const href = blok.link?.cached_url ?? blok.link?.url ?? "#";
+  const href = normalizeStoryblokUrl(blok.link?.cached_url ?? blok.link?.url);
 
   return (
     <Link

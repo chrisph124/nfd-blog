@@ -4,6 +4,7 @@ import { memo } from 'react';
 import Link from 'next/link';
 import { HiArrowRight } from "react-icons/hi2";
 import type { CtaBlok } from '@/types/storyblok';
+import { normalizeStoryblokUrl, cn } from '@/lib/utils';
 
 interface CTAProps {
   blok: CtaBlok;
@@ -58,7 +59,8 @@ const Cta = memo(({ blok }: CTAProps) => {
   const wrapperClasses = `${wrapperStyles[cta_type || 'primary']}`;
 
   // Handle link navigation
-  const href = navigate_to?.cached_url || navigate_to?.url || '#';
+  const rawUrl = navigate_to?.cached_url || navigate_to?.url;
+  const href = normalizeStoryblokUrl(rawUrl);
   const target = navigate_to?.target || '_self';
   const isExternal = navigate_to?.linktype === 'url' || href.startsWith('http');
 
@@ -78,17 +80,17 @@ const Cta = memo(({ blok }: CTAProps) => {
         href={href}
         target={target}
         rel={target === '_blank' ? 'noopener noreferrer' : undefined}
-        className={`${baseWrapperStyles} ${wrapperClasses}`}
+        className={cn(baseWrapperStyles, wrapperClasses)}
       >
-        <span className={`${textClasses} cta-text`}>{content}</span>
+        <span className={cn(textClasses, "cta-text")}>{content}</span>
       </Link>
     );
   }
 
   // Render as Next.js Link for internal navigation
   return (
-    <Link href={href} className={`${baseWrapperStyles} ${wrapperClasses}`}>
-      <span className={`${textClasses} cta-text`}>{content}</span>
+    <Link href={href} className={cn(baseWrapperStyles, wrapperClasses)}>
+      <span className={cn(textClasses, "cta-text")}>{content}</span>
     </Link>
   );
 });

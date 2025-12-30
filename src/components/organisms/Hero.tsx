@@ -188,7 +188,7 @@ const Hero = memo(({ blok }: HeroProps) => {
 
     if (isHorizontal) {
       return cn(
-        "absolute inset-0 bg-black/75",
+        "absolute inset-0 bg-black/70",
         "lg:bg-transparent",
         position === "horizontal"
           ? "lg:bg-gradient-to-r"
@@ -196,7 +196,7 @@ const Hero = memo(({ blok }: HeroProps) => {
         "lg:from-black lg:to-transparent"
       );
     }
-    return "absolute inset-0 bg-black/75";
+    return "absolute inset-0 bg-black/70";
   };
 
   const getContainerClasses = () => {
