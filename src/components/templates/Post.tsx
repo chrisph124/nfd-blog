@@ -16,14 +16,17 @@ export default function Post({ blok, tags = [], createdAt }: Readonly<PostProps>
   const readingTime = getStoryReadingTime(body);
   const formattedDate = createdAt ? formatDate(createdAt) : '';
 
+  // Post hero heading classes (89 chars)
+  const POST_HERO_HEADING_CLASSES = "display-1 text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-lg text-center";
+
   return (
     <>
       <ReadingProgressBar
         height={4}
         position="fixed"
-        zIndex={50}
+        zIndex={40}
       />
-      <article className="flex flex-col justify-center items-center gap-y-6 md:gap-y-12">
+      <article className="flex flex-col justify-center items-center gap-y-6 md:gap-y-12 -mt-10">
       <div className="relative flex items-center justify-center w-full min-h-[200px] md:min-h-[300px] overflow-hidden">
         {/* Background Image */}
         {featured_image?.filename && (
@@ -38,9 +41,9 @@ export default function Post({ blok, tags = [], createdAt }: Readonly<PostProps>
         )}
 
         {/* Dark Overlay - covers whole image */}
-        <div className="absolute inset-0 bg-black/60 -z-10" />
+        <div className="absolute inset-0 bg-black/70 -z-10" />
 
-        <div className="flex flex-col items-center gap-4 max-w-[1240px] px-6 md:px-10 lg:px-15 2xl:px-20">
+        <div className="flex flex-col items-center gap-4 max-w-[1280px] px-6 md:px-10 lg:px-15 xl:px-5">
           {/* Tags */}
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-2 justify-center">
@@ -48,7 +51,7 @@ export default function Post({ blok, tags = [], createdAt }: Readonly<PostProps>
                 <Link
                   key={tag}
                   href={`/insight-hub/${tag}`}
-                  className="px-3 py-1 text-sm font-medium text-white bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors"
+                  className="px-3 py-1 text-sm font-bold text-white uppercase bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors"
                 >
                   {tag}
                 </Link>
@@ -58,7 +61,7 @@ export default function Post({ blok, tags = [], createdAt }: Readonly<PostProps>
 
           {/* Title */}
           {title && (
-            <h1 className="display-1 text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-lg text-center">
+            <h1 className={POST_HERO_HEADING_CLASSES}>
               {title}
             </h1>
           )}
@@ -74,7 +77,7 @@ export default function Post({ blok, tags = [], createdAt }: Readonly<PostProps>
         </div>
       </div>
 
-      <div className="max-w-[1240px] flex flex-col justify-center items-center px-6 md:px-10 lg:px-15 2xl:px-20 mx-auto gap-y-6 md:gap-y-12">
+      <div className="max-w-[1280px] flex flex-col justify-center items-center px-6 md:px-10 lg:px-15 xl:px-5 mx-auto gap-y-6 md:gap-y-12">
         {excerpt && (
           <h4 className="italic">
             {excerpt}

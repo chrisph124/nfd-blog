@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, memo } from "react";
 import { makeStoryblokEditable, StoryblokServerComponent } from "@/lib/storyblok-utils";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { HiChevronDown } from "react-icons/hi2";
 import type { TabsBlok, TabItemBlok } from "@/types/storyblok";
 import { cn } from "@/lib/utils";
 
@@ -21,8 +21,8 @@ const TabButton = memo(({ label, isActive, onClick }: TabButtonProps) => (
     type="button"
     onClick={onClick}
     className={cn(
-      "px-6 py-4 rounded-lg font-semibold text-base text-gray-700 transition-colors cursor-pointer",
-      isActive ? "cursor-default bg-blue-200 pointer-events-none" : "hover:bg-gray-100"
+      "px-6 py-4 rounded-lg font-semibold   transition-colors cursor-pointer",
+      isActive ? "cursor-default bg-primary-200 pointer-events-none" : "hover:bg-gray-100"
     )}
   >
     {label}
@@ -40,6 +40,10 @@ interface DropdownProps {
 const TabDropdown = memo(({ tabs, activeTab, onSelect }: DropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Dropdown button and panel classes
+  const DROPDOWN_BUTTON_CLASSES = "w-full px-4 py-3 bg-background border-2 border-gray-100 rounded-xl font-normal text-base text-gray-700 flex items-center justify-between";
+  const DROPDOWN_PANEL_CLASSES = "absolute z-10 w-full mt-1 bg-background border-2 border-gray-100 rounded-xl shadow-lg overflow-hidden";
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -62,13 +66,13 @@ const TabDropdown = memo(({ tabs, activeTab, onSelect }: DropdownProps) => {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-3 bg-white border-2 border-gray-100 rounded-xl font-normal text-base text-gray-700 flex items-center justify-between"
+        className={DROPDOWN_BUTTON_CLASSES}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
       >
         {/* eslint-disable-next-line security/detect-object-injection */}
         <span>{tabs[activeTab]?.label || "Select tab"}</span>
-        <ChevronDownIcon
+        <HiChevronDown
           className={cn("size-4 transition-transform text-gray-700", isOpen && "rotate-180")}
         />
       </button>
@@ -76,7 +80,7 @@ const TabDropdown = memo(({ tabs, activeTab, onSelect }: DropdownProps) => {
       {isOpen && (
         <div
           role="listbox"
-          className="absolute z-10 w-full mt-1 bg-white border-2 border-gray-100 rounded-xl shadow-lg overflow-hidden"
+          className={DROPDOWN_PANEL_CLASSES}
         >
           {tabs.map((tab, index) => (
             <button
@@ -87,7 +91,7 @@ const TabDropdown = memo(({ tabs, activeTab, onSelect }: DropdownProps) => {
               onClick={() => handleSelect(index)}
               className={cn(
                 "w-full px-4 py-3 text-left font-normal text-base text-gray-700 hover:bg-gray-100 transition-colors",
-                activeTab === index && "bg-blue-200"
+                activeTab === index && "bg-primary-200"
               )}
             >
               {tab.label ?? `Tab ${index + 1}`}

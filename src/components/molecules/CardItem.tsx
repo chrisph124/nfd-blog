@@ -30,9 +30,7 @@ export default function CardItem({ blok }: Readonly<CardItemProps>) {
         let storyIdentifier: string;
         const apiParams: Record<string, string> = { version: 'draft' };
 
-        if (typeof post_reference === 'number') {
-          storyIdentifier = post_reference.toString();
-        } else if (typeof post_reference === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(post_reference)) {
+        if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(post_reference)) {
           storyIdentifier = post_reference;
           apiParams.find_by = 'uuid';
         } else {
@@ -60,8 +58,8 @@ export default function CardItem({ blok }: Readonly<CardItemProps>) {
 
   if (loading) {
     return (
-      <div className="flex flex-col h-full bg-white rounded-xl shadow-sm animate-pulse max-w-full md:max-w-[320px]">
-        <div className="relative aspect-[16/10] w-full bg-gray-200 rounded-t-xl" />
+      <div className="flex flex-col h-full bg-background rounded-xl shadow-sm border border-gray-200 animate-pulse max-w-full lg:max-w-[320px]">
+        <div className="relative aspect-16/10 w-full bg-gray-200 rounded-t-xl" />
         <div className="flex flex-col gap-3 p-4 flex-1">
           <div className="h-4 bg-gray-200 rounded w-3/4" />
           <div className="h-4 bg-gray-200 rounded w-1/2" />

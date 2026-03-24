@@ -87,3 +87,38 @@ export function formatDate(dateString: string, locale: string = 'en-US'): string
     day: 'numeric',
   });
 }
+
+/**
+ * Normalize Storyblok URLs to ensure absolute paths for Next.js Link components
+ * Prevents relative path issues when navigating from nested routes (e.g., /insight-hub/category)
+ *
+ * @param url - URL from Storyblok (cached_url or url field)
+ * @returns Absolute path starting with '/' or original URL if external/already absolute
+ *
+ * @example
+ * normalizeStoryblokUrl('about') // '/about'
+ * normalizeStoryblokUrl('/about') // '/about'
+ * normalizeStoryblokUrl('https://example.com') // 'https://example.com'
+ * normalizeStoryblokUrl('') // '#'
+ */
+export function normalizeStoryblokUrl(url: string | undefined | null): string {
+  if (!url) return '#';
+
+  // Return as-is if already external URL
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('mailto:')) {
+    return url;
+  }
+
+  // Return as-is if already absolute path
+  if (url.startsWith('/')) {
+    return url;
+  }
+
+  // Return as-is for special cases
+  if (url === '#') {
+    return url;
+  }
+
+  // Convert relative path to absolute
+  return `/${url}`;
+}

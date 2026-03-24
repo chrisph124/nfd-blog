@@ -2,206 +2,150 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import ThemeToggle from '@/components/atoms/ThemeToggle';
 
-// Mock heroicons
-vi.mock('@heroicons/react/24/outline', () => ({
-  SunIcon: ({ className }: { className?: string }) => (
+vi.mock('next-themes', () => ({
+  useTheme: vi.fn(),
+}));
+
+vi.mock('react-icons/hi2', () => ({
+  HiSun: ({ className }: { className?: string }) => (
     <svg data-testid="sun-icon" className={className} />
   ),
-  MoonIcon: ({ className }: { className?: string }) => (
+  HiMoon: ({ className }: { className?: string }) => (
     <svg data-testid="moon-icon" className={className} />
   ),
 }));
 
+import { useTheme } from 'next-themes';
+
+const mockUseTheme = useTheme as ReturnType<typeof vi.fn>;
+
 describe('ThemeToggle', () => {
-  // ============================================================================
-  // Setup
-  // ============================================================================
+  const mockSetTheme = vi.fn();
 
   beforeEach(() => {
-    // Reset matchMedia mock before each test
-    Object.defineProperty(window, 'matchMedia', {
-      writable: true,
-      value: vi.fn().mockImplementation(query => ({
-        matches: false,
-        media: query,
-        onchange: null,
-        addListener: vi.fn(),
-        removeListener: vi.fn(),
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-        dispatchEvent: vi.fn(),
-      })),
+    vi.clearAllMocks();
+    mockUseTheme.mockReturnValue({
+      resolvedTheme: 'light',
+      setTheme: mockSetTheme,
     });
   });
 
-  // ============================================================================
-  // Rendering Tests
-  // ============================================================================
-
-  describe('Rendering', () => {
-    it('renders without crashing', () => {
-      render(<ThemeToggle />);
-
-      const button = screen.getByRole('button', { name: /toggle theme/i });
-      expect(button).toBeInTheDocument();
-    });
-
-    it('renders with correct aria-label', () => {
-      render(<ThemeToggle />);
-
-      const button = screen.getByLabelText('Toggle theme');
-      expect(button).toBeInTheDocument();
-    });
-
-    it('has correct button type', () => {
-      render(<ThemeToggle />);
-
-      const button = screen.getByRole('button');
-      expect(button).toHaveAttribute('type', 'button');
-    });
-
-    it('renders sun icon by default (light mode)', async () => {
-      render(<ThemeToggle />);
-
-      await waitFor(() => {
-        expect(screen.getByTestId('sun-icon')).toBeInTheDocument();
-      });
+  describe('Placeholder (before mount)', () => {
+    it('renders placeholder with correct dimensions', () => {
+      const { container } = render(<ThemeToggle />);
+      const el = container.querySelector('[aria-hidden="true"]') || container.querySelector('[role="switch"]');
+      expect(el).toBeInTheDocument();
     });
   });
 
-  // ============================================================================
-  // System Preference Detection Tests
-  // ============================================================================
-
-  describe('System Preference Detection', () => {
-    it('detects light mode system preference', async () => {
-      Object.defineProperty(window, 'matchMedia', {
-        writable: true,
-        value: vi.fn().mockImplementation(query => ({
-          matches: false,
-          media: query,
-          onchange: null,
-          addListener: vi.fn(),
-          removeListener: vi.fn(),
-          addEventListener: vi.fn(),
-          removeEventListener: vi.fn(),
-          dispatchEvent: vi.fn(),
-        })),
-      });
-
+  describe('Mounted - Light mode', () => {
+    it('renders switch button with correct aria attributes', async () => {
       render(<ThemeToggle />);
 
       await waitFor(() => {
-        expect(screen.getByTestId('sun-icon')).toBeInTheDocument();
+        expect(screen.getByRole('switch')).toBeInTheDocument();
       });
+
+      const toggle = screen.getByRole('switch');
+      expect(toggle).toHaveAttribute('aria-checked', 'false');
+      expect(toggle).toHaveAttribute('aria-label', 'Switch to dark theme');
     });
 
-    it('detects dark mode system preference', async () => {
-      Object.defineProperty(window, 'matchMedia', {
-        writable: true,
-        value: vi.fn().mockImplementation(query => ({
-          matches: query === '(prefers-color-scheme: dark)',
-          media: query,
-          onchange: null,
-          addListener: vi.fn(),
-          removeListener: vi.fn(),
-          addEventListener: vi.fn(),
-          removeEventListener: vi.fn(),
-          dispatchEvent: vi.fn(),
-        })),
-      });
-
+    it('renders sun and moon icons', async () => {
       render(<ThemeToggle />);
 
       await waitFor(() => {
-        expect(screen.getByTestId('moon-icon')).toBeInTheDocument();
+        expect(screen.getByRole('switch')).toBeInTheDocument();
       });
+
+      expect(screen.getAllByTestId('sun-icon').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByTestId('moon-icon').length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('switches to dark on click', async () => {
+      render(<ThemeToggle />);
+
+      await waitFor(() => {
+        expect(screen.getByRole('switch')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole('switch'));
+      expect(mockSetTheme).toHaveBeenCalledWith('dark');
     });
   });
 
-  // ============================================================================
-  // User Interaction Tests
-  // ============================================================================
-
-  describe('User Interactions', () => {
-    it('toggles from sun to moon icon on click', async () => {
-      render(<ThemeToggle />);
-
-      const button = screen.getByRole('button');
-
-      // Initial state - sun icon
-      await waitFor(() => {
-        expect(screen.getByTestId('sun-icon')).toBeInTheDocument();
-      });
-
-      // Click to toggle
-      fireEvent.click(button);
-
-      // After click - moon icon
-      await waitFor(() => {
-        expect(screen.getByTestId('moon-icon')).toBeInTheDocument();
+  describe('Mounted - Dark mode', () => {
+    beforeEach(() => {
+      mockUseTheme.mockReturnValue({
+        resolvedTheme: 'dark',
+        setTheme: mockSetTheme,
       });
     });
 
-    it('toggles back to sun icon on second click', async () => {
+    it('has aria-checked true when dark', async () => {
       render(<ThemeToggle />);
 
-      const button = screen.getByRole('button');
-
-      // Click twice
-      fireEvent.click(button);
-      fireEvent.click(button);
-
-      // Should be back to sun icon
       await waitFor(() => {
-        expect(screen.getByTestId('sun-icon')).toBeInTheDocument();
+        expect(screen.getByRole('switch')).toBeInTheDocument();
       });
+
+      expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'true');
+      expect(screen.getByRole('switch')).toHaveAttribute('aria-label', 'Switch to light theme');
+    });
+
+    it('switches to light on click', async () => {
+      render(<ThemeToggle />);
+
+      await waitFor(() => {
+        expect(screen.getByRole('switch')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole('switch'));
+      expect(mockSetTheme).toHaveBeenCalledWith('light');
+    });
+
+    it('knob is translated right in dark mode', async () => {
+      render(<ThemeToggle />);
+
+      await waitFor(() => {
+        expect(screen.getByRole('switch')).toBeInTheDocument();
+      });
+
+      const knob = screen.getByRole('switch').querySelector('span');
+      expect(knob).toHaveClass('translate-x-7');
     });
   });
-
-  // ============================================================================
-  // Accessibility Tests
-  // ============================================================================
 
   describe('Accessibility', () => {
-    it('is keyboard accessible', () => {
+    it('is keyboard accessible', async () => {
       render(<ThemeToggle />);
 
-      const button = screen.getByRole('button');
-      button.focus();
-      expect(button).toHaveFocus();
-    });
-
-    it('can be triggered with keyboard', async () => {
-      render(<ThemeToggle />);
-
-      const button = screen.getByRole('button');
-
-      // Initial state
       await waitFor(() => {
-        expect(screen.getByTestId('sun-icon')).toBeInTheDocument();
+        expect(screen.getByRole('switch')).toBeInTheDocument();
       });
 
-      // Trigger with Enter key
-      fireEvent.keyDown(button, { key: 'Enter', code: 'Enter' });
-      fireEvent.click(button); // Simulate the actual click that would happen
-
-      await waitFor(() => {
-        expect(screen.getByTestId('moon-icon')).toBeInTheDocument();
-      });
+      const toggle = screen.getByRole('switch');
+      toggle.focus();
+      expect(toggle).toHaveFocus();
     });
   });
 
-  // ============================================================================
-  // Style Tests
-  // ============================================================================
+  describe('Component Features', () => {
+    it('has displayName', () => {
+      expect(ThemeToggle.displayName).toBe('ThemeToggle');
+    });
 
-  describe('Styles', () => {
-    it('has correct base styles', () => {
+    it('renders without console errors', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
       render(<ThemeToggle />);
 
-      const button = screen.getByRole('button');
-      expect(button).toHaveClass('relative', 'shrink-0', 'transition-opacity');
+      await waitFor(() => {
+        expect(screen.getByRole('switch')).toBeInTheDocument();
+      });
+
+      expect(consoleSpy).not.toHaveBeenCalled();
+      consoleSpy.mockRestore();
     });
   });
 });

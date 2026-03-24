@@ -356,7 +356,7 @@ describe('Post', () => {
       const blok = createMockBlok();
       const { container } = render(<Post blok={blok} />);
 
-      const overlay = container.querySelector(String.raw`.bg-black\/60`);
+      const overlay = container.querySelector(String.raw`.bg-black\/70`);
       expect(overlay).toBeInTheDocument();
       expect(overlay).toHaveClass('absolute', 'inset-0', '-z-10');
     });
@@ -367,7 +367,7 @@ describe('Post', () => {
       });
       const { container } = render(<Post blok={blok} />);
 
-      const contentSection = container.querySelector(String.raw`.max-w-\[1240px\]`);
+      const contentSection = container.querySelector(String.raw`.max-w-\[1280px\]`);
       expect(contentSection).toBeInTheDocument();
     });
   });
@@ -668,7 +668,7 @@ describe('Post', () => {
       render(<Post blok={blok} />);
 
       // Check content containers have correct max-width
-      const contentContainers = document.querySelectorAll('.max-w-\\[1240px\\]');
+      const contentContainers = document.querySelectorAll(String.raw`.max-w-\[1280px\]`);
       expect(contentContainers.length).toBeGreaterThan(0);
 
       expect(screen.getByTestId('reading-progress')).toBeInTheDocument();

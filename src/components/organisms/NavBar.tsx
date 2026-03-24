@@ -3,8 +3,9 @@
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import Link from 'next/link';
-import { ChevronDownIcon } from '@heroicons/react/24/outline';
+import { HiChevronDown } from "react-icons/hi2";
 import type { NavItemBlok } from '@/types/storyblok';
+import { normalizeStoryblokUrl, cn } from '@/lib/utils';
 
 interface NavBarProps {
   navItems: NavItemBlok[];
@@ -15,10 +16,20 @@ const NavBar = memo(({ navItems }: NavBarProps) => {
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
   const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
+  // Desktop nav button classes
+  const DESKTOP_NAV_BUTTON_BASE = "flex gap-[4px] items-center text-[18px] leading-[24px] p-1 cursor-pointer transition-colors";
+  const DESKTOP_NAV_ACTIVE = "border-b border-primary-700 text-primary-800 font-bold";
+  const DESKTOP_NAV_INACTIVE = "text-foreground font-normal hover:text-primary-700";
+
+  // Dropdown chevron classes
+  const DROPDOWN_CHEVRON_BASE = "size-[14px] transition-transform duration-300 ease-in-out";
+  const DROPDOWN_CHEVRON_EXPANDED = "rotate-180";
+  const DROPDOWN_CHEVRON_COLLAPSED = "rotate-0";
+
   // Get active state for navigation item
   const getIsActive = useCallback((itemUrl: string) => {
     return (pathname === '/' && (itemUrl === '/' || itemUrl.includes('home'))) ||
-           (pathname !== '/' && itemUrl !== '/' && pathname === `/${itemUrl}`);
+           (pathname !== '/' && itemUrl !== '/' && pathname === itemUrl);
   }, [pathname]);
 
   // Toggle dropdown expansion
@@ -63,10 +74,10 @@ const NavBar = memo(({ navItems }: NavBarProps) => {
   }, [clearExpandedItems]);
 
   return (
-    <nav className="hidden lg:flex flex-grow items-center justify-center">
+    <nav className="hidden lg:flex flex-grow items-center justify-end">
       <div className="flex gap-[20px] items-center">
         {navItems.map((item) => {
-          const itemUrl = item.link?.cached_url ?? item.link?.url ?? '#';
+          const itemUrl = normalizeStoryblokUrl(item.link?.cached_url ?? item.link?.url);
           const isActive = getIsActive(itemUrl);
           const hasSubItems = item.sub_items && item.sub_items.length > 0;
           const isExpanded = expandedItems[item._uid] ?? false;
@@ -85,27 +96,27 @@ const NavBar = memo(({ navItems }: NavBarProps) => {
                 <>
                   <button
                     onClick={() => toggleDropdown(item._uid)}
-                    className={`flex gap-[4px] items-center text-[18px] leading-[24px] p-2 cursor-pointer transition-colors ${
-                      isActive
-                        ? 'border-b border-primary-700 text-primary-800 font-bold'
-                        : 'text-gray-700 font-normal hover:text-primary-700'
-                    }`}
+                    className={cn(
+                      DESKTOP_NAV_BUTTON_BASE,
+                      isActive ? DESKTOP_NAV_ACTIVE : DESKTOP_NAV_INACTIVE
+                    )}
                   >
                     {item.label}
-                    <ChevronDownIcon
-                      className={`size-[14px] transition-transform duration-300 ease-in-out ${
-                        isExpanded ? 'rotate-180' : 'rotate-0'
-                      }`}
+                    <HiChevronDown
+                      className={cn(
+                        DROPDOWN_CHEVRON_BASE,
+                        isExpanded ? DROPDOWN_CHEVRON_EXPANDED : DROPDOWN_CHEVRON_COLLAPSED
+                      )}
                     />
                   </button>
 
                   {/* Desktop Dropdown */}
                   {isExpanded && (
-                    <div className="absolute top-full left-0 min-w-[200px] bg-white shadow-lg rounded-[8px] py-[8px] z-50 border border-gray-200">
+                    <div className="absolute top-full left-0 min-w-[200px] bg-background shadow-lg rounded-[8px] py-[8px] z-60 border border-gray-200">
                       {item.sub_items?.map((subItem) => (
                         <Link
                           key={subItem._uid}
-                          href={subItem.link?.cached_url ?? subItem.link?.url ?? '#'}
+                          href={normalizeStoryblokUrl(subItem.link?.cached_url ?? subItem.link?.url)}
                           onClick={clearExpandedItems}
                           className="block w-full px-[16px] py-[8px] text-[16px] text-gray-700 hover:bg-gray-200 transition-all duration-200"
                         >
@@ -118,11 +129,10 @@ const NavBar = memo(({ navItems }: NavBarProps) => {
               ) : (
                 <Link
                   href={itemUrl}
-                  className={`flex gap-[4px] items-center text-[18px] leading-[24px] p-2 cursor-pointer transition-colors ${
-                    isActive
-                      ? 'border-b border-primary-700 text-primary-800 font-bold'
-                      : 'text-gray-700 font-normal hover:text-primary-700'
-                  }`}
+                  className={cn(
+                    DESKTOP_NAV_BUTTON_BASE,
+                    isActive ? DESKTOP_NAV_ACTIVE : DESKTOP_NAV_INACTIVE
+                  )}
                 >
                   {item.label}
                 </Link>

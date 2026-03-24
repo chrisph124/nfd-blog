@@ -9,8 +9,8 @@ vi.mock('next/navigation', () => ({
   usePathname: () => mockPathname(),
 }));
 
-vi.mock('@heroicons/react/24/outline', () => ({
-  ChevronDownIcon: ({ className }: { className?: string }) => (
+vi.mock('react-icons/hi2', () => ({
+  HiChevronDown: ({ className }: { className?: string }) => (
     <svg data-testid="chevron-down-icon" className={className} />
   ),
 }));
@@ -186,7 +186,7 @@ describe('NavBar', () => {
       render(<NavBar navItems={navItems} />);
 
       const link = screen.getByRole('link');
-      expect(link).toHaveClass('text-gray-700', 'font-normal');
+      expect(link).toHaveClass('text-foreground', 'font-normal');
     });
 
     it('marks home as active on root path', () => {
@@ -209,7 +209,7 @@ describe('NavBar', () => {
       const { container } = render(<NavBar navItems={navItems} />);
 
       const nav = container.querySelector('nav');
-      expect(nav).toHaveClass('flex-grow', 'items-center', 'justify-center');
+      expect(nav).toHaveClass('flex-grow', 'items-center', 'justify-end');
     });
 
     it('has gap between items', () => {

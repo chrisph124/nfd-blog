@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import { Nunito, Geist_Mono, Lora } from "next/font/google";
+import { Nunito, Lora, Bitcount_Prop_Single } from "next/font/google";
 import "./globals.css";
 import StoryblokProvider from "@/components/providers/StoryblokProvider";
+import ThemeProvider from "@/components/providers/ThemeProvider";
 import { getStoryblokApi } from "@/lib/storyblok";
 import Header from "@/components/organisms/Header";
 import Footer from "@/components/organisms/Footer";
@@ -13,9 +14,11 @@ const nunito = Nunito({
   display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const bitcountPropSingle = Bitcount_Prop_Single({
+  variable: "--font-bitcount-prop-single",
+  weight: ["400", "500", "600", "700", "800"],
   subsets: ["latin"],
+  display: "swap",
 });
 
 const lora = Lora({
@@ -50,19 +53,19 @@ export default async function RootLayout({
       console.error('Error fetching global components:', error);
     }
 
-    console.log(headerStory.content);
-    console.log(footerStory.content);
 
   return (
-    <html lang="en" className="h-full">
-        <body className={`${nunito.variable} ${geistMono.variable} ${lora.variable} antialiased flex flex-col min-h-full`}>
-          <StoryblokProvider>
-            {headerStory && <Header blok={headerStory.content.body[0]} />}
-            <main className="flex-grow">
-              {children}
-            </main>
-            {footerStory && <Footer blok={footerStory.content.body[0]} />}
-          </StoryblokProvider>
+    <html lang="en" className="h-full" suppressHydrationWarning>
+        <body className={`${nunito.variable} ${bitcountPropSingle.variable} ${lora.variable} antialiased flex flex-col min-h-full`}>
+          <ThemeProvider>
+            <StoryblokProvider>
+              {headerStory && <Header blok={headerStory.content.body[0]} />}
+              <main className="grow py-10">
+                {children}
+              </main>
+              {footerStory && <Footer blok={footerStory.content.body[0]} />}
+            </StoryblokProvider>
+          </ThemeProvider>
         </body>
       </html>
   );

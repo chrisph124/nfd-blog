@@ -3,22 +3,42 @@
 import { makeStoryblokEditable } from "@/lib/storyblok-utils";
 import { useState, useEffect, useCallback, memo } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { HiChevronDown } from "react-icons/hi2";
 import ThemeToggle from "@/components/atoms/ThemeToggle";
 import MenuToggle from "@/components/atoms/MenuToggle";
 import NavBar from "@/components/organisms/NavBar";
 import type { StoryblokComponentProps, HeaderBlok } from "@/types/storyblok";
 import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) => {
-  const logo =
-    blok.logo?.filename ??
-    "/assets/f8202cc6898638b4bbed0f7c48b140d1c452bb95.svg";
-  const logoAlt = blok.logo?.alt ?? "Logo";
   const title = blok.title ?? "The Folio";
   const navItems = blok.nav_items ?? [];
-  const enableTheme = blok.enableTheme ?? false;
+
+  // Mobile menu overlay classes
+  const MOBILE_OVERLAY_BASE = "fixed top-[70px] bottom-0 left-0 right-0 lg:hidden z-40 transition-opacity duration-300 ease-in-out";
+  const MOBILE_OVERLAY_OPEN = "opacity-100 pointer-events-auto";
+  const MOBILE_OVERLAY_CLOSED = "opacity-0 pointer-events-none";
+
+  // Mobile menu panel classes
+  const MOBILE_PANEL_BASE = "relative flex flex-col gap-[32px] px-[16px] py-[32px] h-full w-[90%] md:w-[70%] bg-gray-100 overflow-y-auto transition-transform duration-300 ease-in-out ml-auto";
+  const MOBILE_PANEL_OPEN = "translate-x-0";
+  const MOBILE_PANEL_CLOSED = "translate-x-full";
+
+  // Mobile nav item text classes
+  const MOBILE_NAV_ITEM_TEXT_BASE = "font-medium text-[24px] leading-[28px]";
+  const MOBILE_NAV_ITEM_ACTIVE_TEXT = "text-primary-800";
+  const MOBILE_NAV_ITEM_INACTIVE_TEXT = "text-gray-800";
+
+  // Chevron rotation classes
+  const CHEVRON_BASE = "size-[24px] transition-transform duration-300 ease-in-out";
+  const CHEVRON_EXPANDED = "rotate-180";
+  const CHEVRON_COLLAPSED = "rotate-0";
+
+  // Sub-items container classes
+  const SUB_ITEMS_BASE = "overflow-hidden transition-all duration-300 ease-in-out";
+  const SUB_ITEMS_EXPANDED = "max-h-[500px] opacity-100";
+  const SUB_ITEMS_COLLAPSED = "max-h-0 opacity-0";
 
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -83,21 +103,10 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
         {...makeStoryblokEditable(blok)}
         className="w-full sticky top-0 bg-background z-50 shadow-sm"
       >
-        <div className="flex h-[70px] lg:h-[90px] items-center w-full max-w-[1240px] px-6 md:px-10 lg:px-15 2xl:px-20 mx-auto">
+        <div className="flex h-[70px] lg:h-[90px] items-center w-full max-w-[1280px] px-6 md:px-10 lg:px-15 xl:px-5 mx-auto">
           {/* Logo Section - Fixed width */}
-          <Link href="/" className="flex gap-[14px] items-center flex-shrink-0">
-            <div className="relative shrink-0 size-[48px]">
-              <Image
-                src={logo}
-                alt={logoAlt}
-                width={48}
-                height={48}
-                className="object-contain"
-              />
-            </div>
-            <div className="flex flex-col font-medium justify-center text-[24px] text-black">
-              <p className="leading-[20px]">{title}</p>
-            </div>
+          <Link href="/">
+            <h2 className="h3 logo-font text-transparent bg-linear-to-r from-primary-700 to-secondary-900 bg-clip-text">{title}</h2>
           </Link>
 
           {/* Navigation - Desktop only */}
@@ -112,20 +121,19 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
             isOpen={isMenuOpen}
           />
 
-          {/* Theme Toggle - Always visible */}
-          <div className="flex gap-[20px] items-center flex-shrink-0">
-            {enableTheme && <ThemeToggle />}
+          {/* Theme Toggle - Desktop only */}
+          <div className="hidden lg:flex ml-6 items-center shrink-0">
+            <ThemeToggle />
           </div>
         </div>
       </header>
 
       {/* Mobile Menu Overlay - Now outside header so shadow shows properly */}
       <div
-        className={`fixed top-[70px] bottom-0 left-0 right-0 lg:hidden z-40 transition-opacity duration-300 ease-in-out ${
-          isMenuOpen
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
-        }`}
+        className={cn(
+          MOBILE_OVERLAY_BASE,
+          isMenuOpen ? MOBILE_OVERLAY_OPEN : MOBILE_OVERLAY_CLOSED
+        )}
       >
         {/* Backdrop button */}
         <button
@@ -143,9 +151,10 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
 
         {/* Menu panel */}
         <aside
-          className={`relative flex flex-col gap-[32px] px-[16px] py-[32px] h-full w-[90%] md:w-[70%] bg-zinc-100 overflow-y-auto transition-transform duration-300 ease-in-out ml-auto ${
-            isMenuOpen ? "translate-x-0" : "translate-x-full"
-          }`}
+          className={cn(
+            MOBILE_PANEL_BASE,
+            isMenuOpen ? MOBILE_PANEL_OPEN : MOBILE_PANEL_CLOSED
+          )}
           aria-label="Mobile navigation menu"
         >
           {/* Hero Typography */}
@@ -174,25 +183,29 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
                         className="flex items-center justify-between w-full"
                       >
                         <p
-                          className={`font-medium text-[24px] leading-[28px] ${
-                            isActive ? "text-primary-800" : "text-gray-800"
-                          }`}
+                          className={cn(
+                            MOBILE_NAV_ITEM_TEXT_BASE,
+                            isActive ? MOBILE_NAV_ITEM_ACTIVE_TEXT : MOBILE_NAV_ITEM_INACTIVE_TEXT
+                          )}
                         >
                           {item.label}
                         </p>
-                        <ChevronDownIcon
-                          className={`size-[24px] transition-transform duration-300 ease-in-out ${
-                            isExpanded ? "rotate-180" : "rotate-0"
-                          } ${isActive ? "text-primary-800" : "text-gray-800"}`}
+                        <HiChevronDown
+                          className={cn(
+                            CHEVRON_BASE,
+                            isExpanded ? CHEVRON_EXPANDED : CHEVRON_COLLAPSED,
+                            isActive ? "text-primary-800" : "text-gray-800"
+                          )}
                         />
                       </button>
 
                       {/* Sub Items with smooth animation */}
                       {renderItems[item._uid] && (
                         <div
-                          className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                            isExpanded ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
-                          }`}
+                          className={cn(
+                            SUB_ITEMS_BASE,
+                            isExpanded ? SUB_ITEMS_EXPANDED : SUB_ITEMS_COLLAPSED
+                          )}
                         >
                           <div className="flex flex-col bg-secondary-100 rounded-[10px] py-[12px]">
                             {item.sub_items?.map((subItem) => (
@@ -206,7 +219,7 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
                                 onClick={closeMobileMenu}
                                 className="flex items-center justify-between px-[16px] py-[12px] hover:bg-secondary-200 transition-colors"
                               >
-                                <p className="font-medium text-[18px] leading-[28px] text-gray-700">
+                                <p className="font-medium text-[18px] leading-[28px] text-foreground">
                                   {subItem.label}
                                 </p>
                               </Link>
@@ -223,9 +236,10 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
                       className="flex items-center justify-between p-[16px] w-full"
                     >
                       <p
-                        className={`font-medium text-[24px] leading-[28px] ${
-                          isActive ? "text-primary-800" : "text-gray-800"
-                        }`}
+                        className={cn(
+                          MOBILE_NAV_ITEM_TEXT_BASE,
+                          isActive ? MOBILE_NAV_ITEM_ACTIVE_TEXT : MOBILE_NAV_ITEM_INACTIVE_TEXT
+                        )}
                       >
                         {item.label}
                       </p>
@@ -239,6 +253,12 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
                 </div>
               );
             })}
+          </div>
+
+          {/* Theme Toggle - Mobile, pinned to bottom */}
+          <div className="mt-auto flex items-center justify-between px-[16px] pt-[16px] border-t border-gray-300">
+            <span className="text-[16px] font-medium text-gray-600">Theme</span>
+            <ThemeToggle />
           </div>
         </aside>
       </div>

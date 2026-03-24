@@ -1,4 +1,4 @@
-import { SbBlokData, type StoryblokRichTextNode } from "@storyblok/react/rsc";
+import { SbBlokData, StoryblokRichTextNode } from "@storyblok/react/rsc";
 
 // ============================================================================
 // Base Storyblok Types
@@ -8,11 +8,10 @@ import { SbBlokData, type StoryblokRichTextNode } from "@storyblok/react/rsc";
  * Base interface for all Storyblok bloks
  * Extends SbBlokData which includes _uid and component
  */
-export interface StoryblokBlok extends Omit<SbBlokData, keyof Record<string, unknown>> {
+export interface StoryblokBlok extends SbBlokData {
   _uid: string;
   component: string;
   _editable?: string;
-  [key: string]: unknown;
 }
 
 /**
@@ -57,7 +56,7 @@ export interface StoryblokLink {
  */
 export interface CardItemBlok extends StoryblokBlok {
   component: 'card_item';
-  post_reference?: string | number;
+  post_reference?: string;
 }
 
 /**
@@ -137,6 +136,7 @@ export interface HeroBlockBlok extends StoryblokBlok {
   heading_tag?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
   sub_heading?: string;
   image?: StoryblokAsset;
+  image_type?: 'auto' | 'full' | 'half';
   cta_group?: (CtaBlok)[];
   content_alignment?: 'left' | 'center' | 'right';
   position?: 'vertical' | 'vertical-reverse' | 'horizontal' | 'horizontal-reverse';
@@ -188,12 +188,20 @@ export interface PostBlok extends StoryblokBlok {
 }
 
 /**
+ * post_list component
+ */
+export interface PostListBlok extends StoryblokBlok {
+  component: 'post_list';
+  posts_per_page?: number;
+}
+
+/**
  * richtext component
  */
-export interface RichtextBlok extends StoryblokBlok {
+export type RichtextBlok = Omit<StoryblokBlok, 'component' | 'content'> & {
   component: 'richtext';
   content?: StoryblokRichTextNode<string> | null;
-}
+};
 
 /**
  * section_wrapper component
@@ -271,6 +279,7 @@ export type AnyBlok =
   | NavItemBlok
   | PageBlok
   | PostBlok
+  | PostListBlok
   | RichtextBlok
   | SectionWrapperBlok
   | SubNavItemBlok

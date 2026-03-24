@@ -3,9 +3,9 @@ import { render, screen } from '@testing-library/react';
 import NavItem from '@/components/molecules/NavItem';
 import type { NavItemBlok } from '@/types/storyblok';
 
-// Mock heroicons
-vi.mock('@heroicons/react/24/outline', () => ({
-  ChevronDownIcon: ({ className }: { className?: string }) => (
+// Mock react-icons/hi2
+vi.mock('react-icons/hi2', () => ({
+  HiChevronDown: ({ className }: { className?: string }) => (
     <svg data-testid="chevron-down-icon" className={className} />
   ),
 }));
@@ -132,7 +132,7 @@ describe('NavItem', () => {
       render(<NavItem blok={blok} />);
 
       const link = screen.getByRole('link');
-      expect(link).toHaveClass('text-gray-700', 'font-normal');
+      expect(link).toHaveClass('text-foreground', 'font-normal');
     });
   });
 

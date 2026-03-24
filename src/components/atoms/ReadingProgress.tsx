@@ -16,11 +16,11 @@ interface ReadingProgressBarProps {
 const ReadingProgressBar = memo<ReadingProgressBarProps>(({
   height = 4,
   className,
-  color = 'bg-gradient-to-r from-indigo-400 to-cyan-400',
-  backgroundColor = 'bg-gray-200 dark:bg-gray-700',
+  color = 'bg-gradient-to-r from-secondary-400 to-neon-cyan-400',
+  backgroundColor = 'bg-gray-200',
   position = 'fixed',
   showPercentage = false,
-  zIndex = 50,
+  zIndex = 40,
 }) => {
   const [progress, setProgress] = useState<number>(0);
   const [isClient, setIsClient] = useState<boolean>(false);
@@ -80,7 +80,7 @@ const ReadingProgressBar = memo<ReadingProgressBarProps>(({
     // Return placeholder with same dimensions to prevent layout shift
     return (
       <div
-        className={cn('top-[66px] lg:top-[86px] left-0 w-full', backgroundColor, className)}
+        className={cn('top-[66px] lg:top-[90px] left-0 w-full', backgroundColor, className)}
         style={{
           height: `${height}px`,
           position,
@@ -98,14 +98,14 @@ const ReadingProgressBar = memo<ReadingProgressBarProps>(({
 
     if (pos && ALLOWED_POSITIONS.includes(pos as AllowedPosition)) {
       const positionClassesMap = {
-        fixed: 'fixed top-[66px] lg:top-[86px] left-0 w-full',
-        sticky: 'sticky top-[66px] lg:top-[86px] left-0 w-full',
+        fixed: 'fixed top-[66px] lg:top-[90px] left-0 w-full',
+        sticky: 'sticky top-[66px] lg:top-[90px] left-0 w-full',
       };
       return positionClassesMap[pos as AllowedPosition];
     }
 
     // Default fallback for invalid positions
-    return 'fixed top-[66px] lg:top-[86px] left-0 w-full';
+    return 'fixed top-[66px] lg:top-[90px] left-0 w-full';
   };
 
   const positionClasses = getPositionClasses(position);

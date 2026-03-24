@@ -3,9 +3,9 @@ import { render, screen } from '@testing-library/react';
 import Cta from '@/components/atoms/Cta';
 import type { CtaBlok } from '@/types/storyblok';
 
-// Mock heroicons
-vi.mock('@heroicons/react/24/outline', () => ({
-  ArrowRightIcon: ({ className }: { className?: string }) => (
+// Mock react-icons/hi2
+vi.mock('react-icons/hi2', () => ({
+  HiArrowRight: ({ className }: { className?: string }) => (
     <svg data-testid="arrow-right-icon" className={className} />
   ),
 }));
@@ -77,61 +77,177 @@ describe('Cta', () => {
 
   describe('Props Handling', () => {
     describe('CTA Types', () => {
-      it('applies primary styles', () => {
+      it('applies primary styles with wrapper/text separation', () => {
         const blok = createMockBlok({ cta_type: 'primary' });
         render(<Cta blok={blok} />);
 
         const link = screen.getByRole('link');
-        expect(link).toHaveClass('bg-primary-700', 'text-gray-50');
+        const textSpan = link.querySelector('span.cta-text');
+
+        // Wrapper styles
+        expect(link).toHaveClass('group', 'rounded-2xl', 'bg-primary-700');
+        expect(link.className).toContain('hover:bg-primary-50');
+        expect(link.className).toContain('hover:border-transparent');
+
+        // Text gradient styles
+        expect(textSpan).toHaveClass('text-transparent', 'bg-clip-text');
+        expect(textSpan).toHaveClass('from-primary-50', 'to-primary-50');
+        expect(textSpan!.className).toContain('group-hover:from-primary-700');
+        expect(textSpan!.className).toContain('group-hover:to-secondary-900');
+
+        // Verify nested structure
+        const labelSpan = textSpan?.querySelector('span.whitespace-nowrap');
+        expect(labelSpan).toBeInTheDocument();
+        expect(labelSpan).toHaveTextContent('Click me');
       });
 
-      it('applies primary-reverse styles', () => {
+      it('applies primary-reverse styles with wrapper/text separation', () => {
         const blok = createMockBlok({ cta_type: 'primary-reverse' });
         render(<Cta blok={blok} />);
 
         const link = screen.getByRole('link');
-        expect(link).toHaveClass('bg-primary-50', 'text-primary-700');
+        const textSpan = link.querySelector('span.cta-text');
+
+        // Wrapper styles
+        expect(link).toHaveClass('group', 'rounded-2xl', 'bg-primary-50');
+        expect(link.className).toContain('hover:bg-primary-50');
+        expect(link.className).toContain('hover:border-transparent');
+
+        // Text gradient styles
+        expect(textSpan).toHaveClass('text-transparent', 'bg-clip-text');
+        expect(textSpan).toHaveClass('from-primary-700', 'to-primary-700');
+        expect(textSpan!.className).toContain('group-hover:from-primary-700');
+        expect(textSpan!.className).toContain('group-hover:to-secondary-900');
+
+        // Verify nested structure
+        const labelSpan = textSpan?.querySelector('span.whitespace-nowrap');
+        expect(labelSpan).toBeInTheDocument();
+        expect(labelSpan).toHaveTextContent('Click me');
       });
 
-      it('applies primary-outlined styles', () => {
+      it('applies primary-outlined styles with wrapper/text separation', () => {
         const blok = createMockBlok({ cta_type: 'primary-outlined' });
         render(<Cta blok={blok} />);
 
         const link = screen.getByRole('link');
-        expect(link).toHaveClass('border-2', 'border-primary-700');
+        const textSpan = link.querySelector('span.cta-text');
+
+        // Wrapper styles
+        expect(link).toHaveClass('group', 'rounded-2xl', 'bg-transparent');
+        expect(link).toHaveClass('border-2', 'border-primary-400');
+        expect(link.className).toContain('hover:bg-primary-50');
+        expect(link.className).toContain('hover:border-transparent');
+
+        // Text gradient styles
+        expect(textSpan).toHaveClass('text-transparent', 'bg-clip-text');
+        expect(textSpan).toHaveClass('from-primary-400', 'to-primary-400');
+        expect(textSpan!.className).toContain('group-hover:from-primary-700');
+        expect(textSpan!.className).toContain('group-hover:to-secondary-900');
+
+        // Verify nested structure
+        const labelSpan = textSpan?.querySelector('span.whitespace-nowrap');
+        expect(labelSpan).toBeInTheDocument();
+        expect(labelSpan).toHaveTextContent('Click me');
       });
 
-      it('applies secondary styles', () => {
+      it('applies secondary styles with wrapper/text separation', () => {
         const blok = createMockBlok({ cta_type: 'secondary' });
         render(<Cta blok={blok} />);
 
         const link = screen.getByRole('link');
-        expect(link).toHaveClass('bg-secondary-700', 'text-gray-50');
+        const textSpan = link.querySelector('span.cta-text');
+
+        // Wrapper styles
+        expect(link).toHaveClass('group', 'rounded-2xl', 'bg-secondary-700');
+        expect(link.className).toContain('hover:bg-secondary-50');
+        expect(link.className).toContain('hover:border-transparent');
+
+        // Text gradient styles
+        expect(textSpan).toHaveClass('text-transparent', 'bg-clip-text');
+        expect(textSpan).toHaveClass('from-secondary-50', 'to-secondary-50');
+        expect(textSpan!.className).toContain('group-hover:from-secondary-700');
+        expect(textSpan!.className).toContain('group-hover:to-secondary-900');
+
+        // Verify nested structure
+        const labelSpan = textSpan?.querySelector('span.whitespace-nowrap');
+        expect(labelSpan).toBeInTheDocument();
+        expect(labelSpan).toHaveTextContent('Click me');
       });
 
-      it('applies secondary-reverse styles', () => {
+      it('applies secondary-reverse styles with wrapper/text separation', () => {
         const blok = createMockBlok({ cta_type: 'secondary-reverse' });
         render(<Cta blok={blok} />);
 
         const link = screen.getByRole('link');
-        expect(link).toHaveClass('bg-secondary-50', 'text-secondary-700');
+        const textSpan = link.querySelector('span.cta-text');
+
+        // Wrapper styles
+        expect(link).toHaveClass('group', 'rounded-2xl', 'bg-secondary-50');
+        expect(link.className).toContain('hover:bg-secondary-50');
+        expect(link.className).toContain('hover:border-transparent');
+
+        // Text gradient styles
+        expect(textSpan).toHaveClass('text-transparent', 'bg-clip-text');
+        expect(textSpan).toHaveClass('from-secondary-700', 'to-secondary-700');
+        expect(textSpan!.className).toContain('group-hover:from-secondary-700');
+        expect(textSpan!.className).toContain('group-hover:to-secondary-900');
+
+        // Verify nested structure
+        const labelSpan = textSpan?.querySelector('span.whitespace-nowrap');
+        expect(labelSpan).toBeInTheDocument();
+        expect(labelSpan).toHaveTextContent('Click me');
       });
 
-      it('applies secondary-outlined styles', () => {
+      it('applies secondary-outlined styles with wrapper/text separation', () => {
         const blok = createMockBlok({ cta_type: 'secondary-outlined' });
         render(<Cta blok={blok} />);
 
         const link = screen.getByRole('link');
-        expect(link).toHaveClass('border-2', 'border-secondary-700');
+        const textSpan = link.querySelector('span.cta-text');
+
+        // Wrapper styles
+        expect(link).toHaveClass('group', 'rounded-2xl', 'bg-transparent');
+        expect(link).toHaveClass('border-2', 'border-secondary-400');
+        expect(link.className).toContain('hover:bg-secondary-50');
+        expect(link.className).toContain('hover:border-transparent');
+
+        // Text gradient styles
+        expect(textSpan).toHaveClass('text-transparent', 'bg-clip-text');
+        expect(textSpan).toHaveClass('from-secondary-400', 'to-secondary-400');
+        expect(textSpan!.className).toContain('group-hover:from-secondary-700');
+        expect(textSpan!.className).toContain('group-hover:to-secondary-900');
+
+        // Verify nested structure
+        const labelSpan = textSpan?.querySelector('span.whitespace-nowrap');
+        expect(labelSpan).toBeInTheDocument();
+        expect(labelSpan).toHaveTextContent('Click me');
       });
 
-      it('applies link styles and shows arrow icon', () => {
+      it('applies link styles with wrapper/text separation and shows arrow icon', () => {
         const blok = createMockBlok({ cta_type: 'link' });
         render(<Cta blok={blok} />);
 
         const link = screen.getByRole('link');
-        expect(link).toHaveClass('bg-transparent', 'text-primary-900');
-        expect(screen.getByTestId('arrow-right-icon')).toBeInTheDocument();
+        const textSpan = link.querySelector('span.cta-text');
+
+        // Wrapper styles
+        expect(link).toHaveClass('group', 'rounded-2xl', 'bg-transparent');
+        expect(link).toHaveClass('no-underline', 'hover:underline', 'hover:decoration-primary-700', 'p-0');
+
+        // Text gradient styles (no group-hover for link type)
+        expect(textSpan).toHaveClass('text-transparent', 'bg-clip-text');
+        expect(textSpan).toHaveClass('from-primary-700', 'to-primary-900');
+        expect(textSpan).toHaveClass('pointer', 'px-0', 'py-0');
+
+        // Verify arrow icon and its class
+        const arrowIcon = screen.getByTestId('arrow-right-icon');
+        expect(arrowIcon).toBeInTheDocument();
+        expect(arrowIcon).toHaveClass('size-5', 'text-primary-900');
+
+        // Verify nested structure
+        const labelSpan = textSpan?.querySelector('span.whitespace-nowrap');
+        expect(labelSpan).toBeInTheDocument();
+        expect(labelSpan).toHaveTextContent('Click me');
       });
     });
 
@@ -141,7 +257,11 @@ describe('Cta', () => {
         render(<Cta blok={blok} />);
 
         const link = screen.getByRole('link');
-        expect(link).toHaveClass('px-3', 'py-2');
+        const textSpan = link.querySelector('span.cta-text');
+
+        // Size is now applied to text span, not wrapper
+        expect(textSpan).toHaveClass('px-4', 'py-3');
+        expect(link).not.toHaveClass('px-4', 'py-3');
       });
 
       it('applies large size styles', () => {
@@ -149,7 +269,11 @@ describe('Cta', () => {
         render(<Cta blok={blok} />);
 
         const link = screen.getByRole('link');
-        expect(link).toHaveClass('px-12', 'py-6');
+        const textSpan = link.querySelector('span.cta-text');
+
+        // Size is now applied to text span, not wrapper
+        expect(textSpan).toHaveClass('px-12', 'py-6');
+        expect(link).not.toHaveClass('px-12', 'py-6');
       });
 
       it('applies full size styles', () => {
@@ -157,7 +281,11 @@ describe('Cta', () => {
         render(<Cta blok={blok} />);
 
         const link = screen.getByRole('link');
-        expect(link).toHaveClass('w-full', 'px-8', 'py-5');
+        const textSpan = link.querySelector('span.cta-text');
+
+        // Size is now applied to text span, not wrapper
+        expect(textSpan).toHaveClass('w-full', 'px-8', 'py-5');
+        expect(link).not.toHaveClass('w-full', 'px-8', 'py-5');
       });
     });
 
@@ -167,7 +295,12 @@ describe('Cta', () => {
         render(<Cta blok={blok} />);
 
         const link = screen.getByRole('link');
+        const textSpan = link.querySelector('span.cta-text');
+
+        // Verify default primary styles
         expect(link).toHaveClass('bg-primary-700');
+        expect(textSpan).toHaveClass('text-transparent', 'bg-clip-text');
+        expect(textSpan).toHaveClass('from-primary-50', 'to-primary-50');
       });
 
       it('uses hug as default cta_size', () => {
@@ -175,7 +308,11 @@ describe('Cta', () => {
         render(<Cta blok={blok} />);
 
         const link = screen.getByRole('link');
-        expect(link).toHaveClass('px-3', 'py-2');
+        const textSpan = link.querySelector('span.cta-text');
+
+        // Size is now applied to text span
+        expect(textSpan).toHaveClass('px-4', 'py-3');
+        expect(link).not.toHaveClass('px-4', 'py-3');
       });
     });
   });
@@ -308,27 +445,113 @@ describe('Cta', () => {
   // ============================================================================
 
   describe('Styles', () => {
-    it('applies base styles to all CTAs', () => {
+    it('applies base wrapper and text styles to all CTAs', () => {
       const blok = createMockBlok();
       render(<Cta blok={blok} />);
 
       const link = screen.getByRole('link');
+      const textSpan = link.querySelector('span.cta-text');
+
+      // Wrapper base styles (cn() with tailwind-merge optimizes class order)
       expect(link).toHaveClass(
+        'group',
+        'rounded-2xl',
+        'duration-300',
+        'transition-opacity'
+      );
+
+      // Text span base styles
+      expect(textSpan).toHaveClass(
         'box-border',
         'flex',
+        'gap-2',
         'items-center',
         'justify-center',
         'font-semibold',
-        'rounded-xl'
+        'rounded-2xl',
+        'tracking-wide',
+        'text-transparent',
+        'bg-clip-text'
       );
     });
 
-    it('applies transition styles', () => {
+    it('applies transition styles with correct duration', () => {
       const blok = createMockBlok();
       render(<Cta blok={blok} />);
 
       const link = screen.getByRole('link');
-      expect(link).toHaveClass('transition-all', 'duration-200');
+      const textSpan = link.querySelector('span.cta-text');
+
+      // Both wrapper and text have transition classes (cn() optimizes with tailwind-merge)
+      expect(link).toHaveClass('duration-300', 'transition-opacity');
+      expect(textSpan).toHaveClass('duration-300', 'transition-opacity');
+    });
+
+    it('applies group class for hover pattern', () => {
+      const blok = createMockBlok();
+      render(<Cta blok={blok} />);
+
+      const link = screen.getByRole('link');
+
+      // Verify group class present for all CTAs
+      expect(link).toHaveClass('group');
+    });
+  });
+
+  // ============================================================================
+  // Gradient Text Effects Tests
+  // ============================================================================
+
+  describe('Gradient Text Effects', () => {
+    it('applies text-transparent and bg-clip-text to all non-link types', () => {
+      const types = ['primary', 'primary-reverse', 'primary-outlined', 'secondary', 'secondary-reverse', 'secondary-outlined'];
+
+      types.forEach(type => {
+        const { container } = render(<Cta blok={createMockBlok({ cta_type: type as CtaBlok['cta_type'] })} />);
+        const textSpan = container.querySelector('span.cta-text');
+
+        expect(textSpan).toHaveClass('text-transparent', 'bg-clip-text');
+      });
+    });
+
+    it('applies correct gradient colors for primary variant', () => {
+      render(<Cta blok={createMockBlok({ cta_type: 'primary' })} />);
+      const textSpan = screen.getByRole('link').querySelector('span.cta-text');
+
+      expect(textSpan).toHaveClass('from-primary-50', 'to-primary-50');
+      expect(textSpan!.className).toContain('group-hover:from-primary-700');
+      expect(textSpan!.className).toContain('group-hover:to-secondary-900');
+    });
+
+    it('applies correct gradient colors for secondary variants', () => {
+      const { container } = render(<Cta blok={createMockBlok({ cta_type: 'secondary' })} />);
+      const textSpan = container.querySelector('span.cta-text');
+
+      expect(textSpan).toHaveClass('from-secondary-50', 'to-secondary-50');
+      expect(textSpan!.className).toContain('group-hover:from-secondary-700');
+      expect(textSpan!.className).toContain('group-hover:to-secondary-900');
+    });
+
+    it('applies link variant gradient without group-hover classes', () => {
+      const { container } = render(<Cta blok={createMockBlok({ cta_type: 'link' })} />);
+      const textSpan = container.querySelector('span.cta-text');
+
+      expect(textSpan).toHaveClass('text-transparent', 'bg-clip-text');
+      expect(textSpan).toHaveClass('from-primary-700', 'to-primary-900');
+      expect(textSpan!.className).not.toContain('group-hover:from-');
+      expect(textSpan!.className).not.toContain('group-hover:to-');
+    });
+
+    it('verifies cta-text class present on all variants', () => {
+      const types = ['primary', 'primary-reverse', 'primary-outlined', 'secondary', 'secondary-reverse', 'secondary-outlined', 'link'];
+
+      types.forEach(type => {
+        const { container } = render(<Cta blok={createMockBlok({ cta_type: type as CtaBlok['cta_type'] })} />);
+        const textSpan = container.querySelector('span.cta-text');
+
+        expect(textSpan).toBeInTheDocument();
+        expect(textSpan).toHaveClass('cta-text');
+      });
     });
   });
 
@@ -352,13 +575,17 @@ describe('Cta', () => {
       expect(link).toBeInTheDocument();
     });
 
-    it('wraps label text in span with whitespace-nowrap', () => {
+    it('wraps label text in nested span structure with whitespace-nowrap', () => {
       const blok = createMockBlok({ label: 'Test Label' });
       const { container } = render(<Cta blok={blok} />);
 
-      const span = container.querySelector('span');
-      expect(span).toHaveClass('whitespace-nowrap');
-      expect(span).toHaveTextContent('Test Label');
+      const textSpan = container.querySelector('span.cta-text');
+      const labelSpan = textSpan?.querySelector('span.whitespace-nowrap');
+
+      expect(textSpan).toBeInTheDocument();
+      expect(labelSpan).toBeInTheDocument();
+      expect(labelSpan).toHaveClass('whitespace-nowrap');
+      expect(labelSpan).toHaveTextContent('Test Label');
     });
   });
 });

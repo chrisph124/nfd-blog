@@ -26,15 +26,15 @@ vi.mock('next/image', () => ({
   ),
 }));
 
-vi.mock('@heroicons/react/24/outline', () => ({
-  ChevronDownIcon: ({ className }: { className?: string }) => (
+vi.mock('@react-icons/hi2/HiChevronDown', () => ({
+  HiChevronDown: ({ className }: { className?: string }) => (
     <svg data-testid="chevron-down-icon" className={className} />
   ),
 }));
 
 // Mock child components
 vi.mock('@/components/atoms/ThemeToggle', () => ({
-  default: () => <button data-testid="theme-toggle">Theme</button>,
+  default: () => <button role="switch" aria-label="Switch to dark theme">Theme</button>,
 }));
 
 vi.mock('@/components/atoms/MenuToggle', () => ({
@@ -116,29 +116,23 @@ describe('Header', () => {
       expect(screen.getByText('My Blog')).toBeInTheDocument();
     });
 
-    it('renders logo image', () => {
-      const blok = createMockBlok();
-      const { getByTestId } = render(<Header blok={blok} />);
+    it('renders logo as text with gradient', () => {
+      const blok = createMockBlok({ title: 'Test Site' });
+      render(<Header blok={blok} />);
 
-      const logoImage = getByTestId('next-image');
-      expect(logoImage).toBeInTheDocument();
-      expect(logoImage).toHaveAttribute('alt', 'Test Logo');
-    });
-
-    it('renders default logo when not provided', () => {
-      const blok = createMockBlok({ logo: undefined });
-      const { getByTestId } = render(<Header blok={blok} />);
-
-      const img = getByTestId('next-image');
-      expect(img).toBeInTheDocument();
-      expect(img).toHaveAttribute('src', expect.stringContaining('.svg'));
+      const logoText = screen.getByText('Test Site');
+      expect(logoText).toBeInTheDocument();
+      expect(logoText).toHaveClass('logo-font', 'text-transparent', 'bg-clip-text');
     });
 
     it('renders default title when not provided', () => {
-      const blok = createMockBlok({ title: undefined });
+      const blok = createMockBlok({ title: undefined, logo: undefined });
       render(<Header blok={blok} />);
 
-      expect(screen.getByText('The Folio')).toBeInTheDocument();
+      // Default title is 'The Folio' per Header.tsx:19
+      const defaultTitle = screen.getByText('The Folio');
+      expect(defaultTitle).toBeInTheDocument();
+      expect(defaultTitle).toHaveClass('logo-font', 'text-transparent', 'bg-clip-text');
     });
   });
 
@@ -168,18 +162,11 @@ describe('Header', () => {
   });
 
   describe('Theme Toggle', () => {
-    it('shows theme toggle when enabled', () => {
-      const blok = createMockBlok({ enableTheme: true });
-      const { getByTestId } = render(<Header blok={blok} />);
+    it('always renders theme toggle', () => {
+      const blok = createMockBlok();
+      render(<Header blok={blok} />);
 
-      expect(getByTestId('theme-toggle')).toBeInTheDocument();
-    });
-
-    it('hides theme toggle when disabled', () => {
-      const blok = createMockBlok({ enableTheme: false });
-      const { queryByTestId } = render(<Header blok={blok} />);
-
-      expect(queryByTestId('theme-toggle')).not.toBeInTheDocument();
+      expect(screen.getAllByRole('switch').length).toBeGreaterThanOrEqual(1);
     });
   });
 

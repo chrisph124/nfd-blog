@@ -173,8 +173,13 @@ describe('SectionWrapper', () => {
       const blok = createMockBlok();
       const { container } = render(<SectionWrapper blok={blok} />);
 
+      // Section has base layout classes
       const section = container.querySelector('section');
-      expect(section).toHaveClass('relative', 'w-full', 'max-w-[1240px]', 'flex', 'flex-col', 'gap-10', 'lg:gap-20', 'py-10', 'lg:py-12', 'px-6', 'md:px-10', 'lg:px-15', '2xl:px-20', 'mx-auto');
+      expect(section).toHaveClass('relative', 'w-full', 'flex', 'flex-col', 'gap-10', 'lg:gap-20', 'py-10', 'lg:py-12');
+
+      // Inner div has responsive padding and max-width (z-10 content layer)
+      const contentWrapper = container.querySelector('section > div:not(.absolute)');
+      expect(contentWrapper).toHaveClass('w-full', 'max-w-[1280px]', 'relative', 'z-10', 'flex', 'flex-col', 'px-6', 'md:px-10', 'lg:px-15', 'xl:px-5', 'mx-auto');
     });
 
     it('heading has correct typography', () => {
@@ -182,7 +187,7 @@ describe('SectionWrapper', () => {
       render(<SectionWrapper blok={blok} />);
 
       const heading = screen.getByRole('heading');
-      expect(heading).toHaveClass('font-bold', 'text-blue-900');
+      expect(heading).toHaveClass('font-bold', 'text-primary-900');
     });
   });
 });

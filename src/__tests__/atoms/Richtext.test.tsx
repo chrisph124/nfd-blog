@@ -4,16 +4,27 @@ import type { RichtextBlok } from '@/types/storyblok';
 import type { StoryblokRichTextNode } from '@storyblok/react/rsc';
 import type { RichTextNode, RichTextElementNode } from '@/__tests__/types/test-mocks';
 
-// Test interfaces for type safety
-interface TestRichtextBlok extends Omit<RichtextBlok, 'content'> {
-  content: StoryblokRichTextNode<string> | null | undefined;
-}
+// Re-export RichtextBlok as TestRichtextBlok for test code compatibility
+type TestRichtextBlok = RichtextBlok;
 
 interface TestRichTextContent {
   type?: string;
   content?: unknown[];
   attrs?: Record<string, unknown>;
   text?: string;
+}
+
+// Helper function to create test bloks with proper type assertions
+// Bypasses strict index signature checking for test purposes
+function createTestRichtextBlok(
+  blok: Omit<RichtextBlok, 'component'> & { component?: 'richtext' }
+): RichtextBlok {
+  return {
+    _uid: blok._uid,
+    component: 'richtext',
+    _editable: blok._editable,
+    content: blok.content,
+  } as RichtextBlok;
 }
 
 // Mock storyblokEditable
@@ -91,7 +102,7 @@ describe('Richtext Component', () => {
         'prose-a:no-underline',
         'hover:prose-a:underline',
         'prose-img:rounded-xl',
-        'prose-code:bg-gray-100',
+        'prose-code:bg-gray-200',
         'prose-code:px-2',
         'prose-code:py-1',
         'prose-code:rounded',
@@ -128,11 +139,11 @@ describe('Richtext Component', () => {
     });
 
     it('returns null when rendered content is null', () => {
-      const blokWithNullContent: RichtextBlok = {
+      const blokWithNullContent = createTestRichtextBlok({
         _uid: 'test-richtext-null-content',
-        component: 'richtext',
+        // @ts-expect-error - Testing null content edge case, index signature doesn't accept null in tests
         content: null,
-      };
+      });
 
       const { container } = render(<Richtext blok={blokWithNullContent} />);
       expect(container.firstChild).toBeNull();
@@ -169,11 +180,11 @@ describe('Richtext Component', () => {
 
   describe('Storyblok Integration', () => {
     it('applies storyblokEditable props to the element', () => {
-      const customBlok: RichtextBlok = {
+      const customBlok = createTestRichtextBlok({
         _uid: 'custom-richtext-uid',
-        component: 'richtext',
+        // @ts-expect-error - Content with nullable type, index signature doesn't accept in tests
         content: mockBlok.content,
-      };
+      });
 
       render(<Richtext blok={customBlok} />);
 
@@ -183,11 +194,11 @@ describe('Richtext Component', () => {
     });
 
     it('handles different blok UIDs correctly', () => {
-      const anotherBlok: RichtextBlok = {
+      const anotherBlok = createTestRichtextBlok({
         _uid: 'another-richtext-uid',
-        component: 'richtext',
+        // @ts-expect-error - Content with nullable type, index signature doesn't accept in tests
         content: mockBlok.content,
-      };
+      });
 
       render(<Richtext blok={anotherBlok} />);
 
@@ -304,42 +315,40 @@ describe('Richtext Component', () => {
 describe('renderRichText Edge Cases', () => {
   it('handles renderRichText returning empty string', () => {
     // Create a test case where renderRichText might return null/empty
-    const blokWithNullContent: TestRichtextBlok = {
+    const blokWithNullContent = createTestRichtextBlok({
       _uid: 'test-null-content',
-      component: 'richtext',
+      // @ts-expect-error - Testing null content edge case, index signature doesn't accept null in tests
       content: null,
-    };
+    });
 
     const { container } = render(<Richtext blok={blokWithNullContent} />);
     expect(container.firstChild).toBeNull();
   });
 
   it('handles undefined content gracefully', () => {
-    const blok: TestRichtextBlok = {
+    const blok = createTestRichtextBlok({
       _uid: 'test-undefined-content',
-      component: 'richtext',
       content: undefined,
-    };
+    });
 
     expect(() => render(<Richtext blok={blok} />)).not.toThrow();
   });
 
   it('handles null content gracefully', () => {
-    const blok: TestRichtextBlok = {
+    const blok = createTestRichtextBlok({
       _uid: 'test-null-content',
-      component: 'richtext',
+      // @ts-expect-error - Testing null content edge case, index signature doesn't accept null in tests
       content: null,
-    };
+    });
 
     expect(() => render(<Richtext blok={blok} />)).not.toThrow();
   });
 
   it('handles undefined content gracefully', () => {
-    const blok: TestRichtextBlok = {
+    const blok = createTestRichtextBlok({
       _uid: 'test-undefined-content-2',
-      component: 'richtext',
       content: undefined,
-    };
+    });
 
     expect(() => render(<Richtext blok={blok} />)).not.toThrow();
   });

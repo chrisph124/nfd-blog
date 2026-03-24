@@ -234,7 +234,7 @@ describe('CardItem', () => {
       // Check for skeleton structure using container query
       const skeleton = container.querySelector('.animate-pulse');
       expect(skeleton).toBeInTheDocument();
-      expect(skeleton).toHaveClass('bg-white', 'rounded-xl');
+      expect(skeleton).toHaveClass('bg-background', 'rounded-xl', 'max-w-full', 'lg:max-w-[320px]');
     });
 
     it('transitions from loading to content state', async () => {

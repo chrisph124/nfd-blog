@@ -140,6 +140,31 @@ export default function MyComponent({ blok }) {
 ## Documentation
 
 - [scripts/README.md](scripts/README.md) - Type generation script documentation
+- [docs/](docs/) - Comprehensive project documentation
+  - [api-documentation.md](docs/api-documentation.md) - API routes and endpoints documentation
+  - [system-architecture.md](docs/system-architecture.md) - System architecture overview
+  - [code-standards.md](docs/code-standards.md) - Code standards and best practices
+  - [project-overview-pdr.md](docs/project-overview-pdr.md) - Project requirements and specifications
+- [SECURITY.md](SECURITY.md) - Security policy and vulnerability information
+
+## Security
+
+This project takes security seriously. Key security features include:
+
+- **Regular Security Updates**: Dependencies are regularly updated and audited
+- **CVE Patches**: All critical React CVEs are patched (see [SECURITY.md](SECURITY.md))
+- **XSS Prevention**: Input sanitization and content security policies
+- **Type Safety**: Strict TypeScript configuration prevents runtime errors
+- **Environment Security**: Secure handling of API keys and secrets
+
+### Recent Security Updates
+
+As of December 15, 2025, the following React CVEs have been patched:
+- CVE-2025-55184: React Server Components vulnerability
+- CVE-2025-67779: React DOM XSS vulnerability
+- CVE-2025-55183: React Server Actions request forgery
+
+For detailed security practices and guidelines, see [docs/security-considerations-best-practices.md](docs/security-considerations-best-practices.md).
 
 ## Learn More
 
