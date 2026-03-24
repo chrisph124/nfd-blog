@@ -91,7 +91,7 @@ const Card = memo(({ story }: CardProps) => {
   return (
     <article
       className={cn(
-        'group relative flex flex-row md:flex-col h-full bg-white rounded-xl shadow-sm',
+        'group relative flex flex-row md:flex-col h-full bg-background rounded-xl shadow-sm border border-gray-200',
         'transition-all duration-200 hover:shadow-md max-w-full lg:max-w-[320px] xl:max-w-full'
       )}
     >

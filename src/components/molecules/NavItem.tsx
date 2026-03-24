@@ -13,7 +13,7 @@ const NavItem = memo(({ blok }: StoryblokComponentProps<NavItemBlok>) => {
   // Navigation item classes
   const NAV_ITEM_BASE_CLASSES = "flex gap-[4px] items-center hover:text-primary-700 transition-colors";
   const NAV_ITEM_ACTIVE_CLASSES = "border-b border-primary-700 text-primary-800 font-bold";
-  const NAV_ITEM_INACTIVE_CLASSES = "text-black font-normal";
+  const NAV_ITEM_INACTIVE_CLASSES = "text-foreground font-normal";
 
   return (
     <Link
