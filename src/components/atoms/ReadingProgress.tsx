@@ -16,8 +16,8 @@ interface ReadingProgressBarProps {
 const ReadingProgressBar = memo<ReadingProgressBarProps>(({
   height = 4,
   className,
-  color = 'bg-gradient-to-r from-indigo-400 to-cyan-400',
-  backgroundColor = 'bg-gray-200 dark:bg-gray-700',
+  color = 'bg-gradient-to-r from-secondary-400 to-neon-cyan-400',
+  backgroundColor = 'bg-gray-200',
   position = 'fixed',
   showPercentage = false,
   zIndex = 40,
