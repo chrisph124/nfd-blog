@@ -187,7 +187,7 @@ describe('SectionWrapper', () => {
       render(<SectionWrapper blok={blok} />);
 
       const heading = screen.getByRole('heading');
-      expect(heading).toHaveClass('font-bold', 'text-blue-900');
+      expect(heading).toHaveClass('font-bold', 'text-primary-900');
     });
   });
 });

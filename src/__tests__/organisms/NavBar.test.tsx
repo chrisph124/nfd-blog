@@ -186,7 +186,7 @@ describe('NavBar', () => {
       render(<NavBar navItems={navItems} />);
 
       const link = screen.getByRole('link');
-      expect(link).toHaveClass('text-black', 'font-normal');
+      expect(link).toHaveClass('text-foreground', 'font-normal');
     });
 
     it('marks home as active on root path', () => {

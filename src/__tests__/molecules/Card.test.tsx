@@ -220,7 +220,7 @@ describe('Card', () => {
       const { container } = render(<Card story={story} />);
 
       const article = container.querySelector('article');
-      expect(article).toHaveClass('group', 'relative', 'flex', 'h-full', 'bg-white', 'rounded-xl');
+      expect(article).toHaveClass('group', 'relative', 'flex', 'h-full', 'bg-background', 'rounded-xl');
     });
 
     it('applies responsive flex direction (flex-row md:flex-col)', () => {

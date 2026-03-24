@@ -102,7 +102,7 @@ describe('Richtext Component', () => {
         'prose-a:no-underline',
         'hover:prose-a:underline',
         'prose-img:rounded-xl',
-        'prose-code:bg-gray-100',
+        'prose-code:bg-gray-200',
         'prose-code:px-2',
         'prose-code:py-1',
         'prose-code:rounded',

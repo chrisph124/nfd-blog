@@ -34,7 +34,7 @@ vi.mock('@react-icons/hi2/HiChevronDown', () => ({
 
 // Mock child components
 vi.mock('@/components/atoms/ThemeToggle', () => ({
-  default: () => <button data-testid="theme-toggle">Theme</button>,
+  default: () => <button role="switch" aria-label="Switch to dark theme">Theme</button>,
 }));
 
 vi.mock('@/components/atoms/MenuToggle', () => ({
@@ -162,18 +162,11 @@ describe('Header', () => {
   });
 
   describe('Theme Toggle', () => {
-    it('shows theme toggle when enabled', () => {
-      const blok = createMockBlok({ enableTheme: true });
-      const { getByTestId } = render(<Header blok={blok} />);
+    it('always renders theme toggle', () => {
+      const blok = createMockBlok();
+      render(<Header blok={blok} />);
 
-      expect(getByTestId('theme-toggle')).toBeInTheDocument();
-    });
-
-    it('hides theme toggle when disabled', () => {
-      const blok = createMockBlok({ enableTheme: false });
-      const { queryByTestId } = render(<Header blok={blok} />);
-
-      expect(queryByTestId('theme-toggle')).not.toBeInTheDocument();
+      expect(screen.getAllByRole('switch').length).toBeGreaterThanOrEqual(1);
     });
   });
 

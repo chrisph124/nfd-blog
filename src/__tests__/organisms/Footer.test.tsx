@@ -42,7 +42,7 @@ describe('Footer', () => {
       const blok = createMockBlok();
       render(<Footer blok={blok} />);
 
-      expect(screen.getByText('nofan.dev')).toBeInTheDocument();
+      expect(screen.getByText('notesof.dev')).toBeInTheDocument();
     });
 
     it('renders hardcoded copyright text', () => {
@@ -133,7 +133,7 @@ describe('Footer', () => {
       render(<Footer blok={blok} />);
 
       const footer = screen.getByRole('contentinfo');
-      expect(footer).toHaveClass('bg-gray-800', 'text-white');
+      expect(footer).toHaveClass('bg-surface-inverted', 'text-on-surface-inverted');
     });
 
     it('has full width', () => {
@@ -149,7 +149,7 @@ describe('Footer', () => {
       render(<Footer blok={blok} />);
 
       const githubLink = screen.getByLabelText('GitHub https://github.com/chrisph124');
-      expect(githubLink).toHaveClass('hover:text-primary-400');
+      expect(githubLink).toHaveClass('text-on-surface-inverted', 'hover:text-primary-400');
     });
   });
 

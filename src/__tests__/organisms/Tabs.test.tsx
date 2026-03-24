@@ -91,7 +91,7 @@ describe('Tabs', () => {
       const tabButtons = screen.getAllByRole('button');
       const firstTab = tabButtons.find(btn => btn.textContent === 'Tab 1');
 
-      expect(firstTab).toHaveClass('bg-blue-200');
+      expect(firstTab).toHaveClass('bg-primary-200');
     });
 
     it('updates active styles when switching tabs', () => {
@@ -104,8 +104,8 @@ describe('Tabs', () => {
 
       fireEvent.click(secondTab!);
 
-      expect(secondTab).toHaveClass('bg-blue-200');
-      expect(firstTab).not.toHaveClass('bg-blue-200');
+      expect(secondTab).toHaveClass('bg-primary-200');
+      expect(firstTab).not.toHaveClass('bg-primary-200');
     });
   });
 
