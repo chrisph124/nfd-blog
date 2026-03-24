@@ -14,7 +14,6 @@ import { cn } from "@/lib/utils";
 const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) => {
   const title = blok.title ?? "The Folio";
   const navItems = blok.nav_items ?? [];
-  const enableTheme = blok.enableTheme ?? false;
 
   // Mobile menu overlay classes
   const MOBILE_OVERLAY_BASE = "fixed top-[70px] bottom-0 left-0 right-0 lg:hidden z-40 transition-opacity duration-300 ease-in-out";
@@ -22,7 +21,7 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
   const MOBILE_OVERLAY_CLOSED = "opacity-0 pointer-events-none";
 
   // Mobile menu panel classes
-  const MOBILE_PANEL_BASE = "relative flex flex-col gap-[32px] px-[16px] py-[32px] h-full w-[90%] md:w-[70%] bg-zinc-100 overflow-y-auto transition-transform duration-300 ease-in-out ml-auto";
+  const MOBILE_PANEL_BASE = "relative flex flex-col gap-[32px] px-[16px] py-[32px] h-full w-[90%] md:w-[70%] bg-gray-100 overflow-y-auto transition-transform duration-300 ease-in-out ml-auto";
   const MOBILE_PANEL_OPEN = "translate-x-0";
   const MOBILE_PANEL_CLOSED = "translate-x-full";
 
@@ -122,9 +121,9 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
             isOpen={isMenuOpen}
           />
 
-          {/* Theme Toggle - Always visible */}
-          <div className="flex gap-[20px] items-center shrink-0">
-            {enableTheme && <ThemeToggle />}
+          {/* Theme Toggle - Desktop only */}
+          <div className="hidden lg:flex ml-6 items-center shrink-0">
+            <ThemeToggle />
           </div>
         </div>
       </header>
@@ -220,7 +219,7 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
                                 onClick={closeMobileMenu}
                                 className="flex items-center justify-between px-[16px] py-[12px] hover:bg-secondary-200 transition-colors"
                               >
-                                <p className="font-medium text-[18px] leading-[28px] text-black">
+                                <p className="font-medium text-[18px] leading-[28px] text-foreground">
                                   {subItem.label}
                                 </p>
                               </Link>
@@ -254,6 +253,12 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
                 </div>
               );
             })}
+          </div>
+
+          {/* Theme Toggle - Mobile, pinned to bottom */}
+          <div className="mt-auto flex items-center justify-between px-[16px] pt-[16px] border-t border-gray-300">
+            <span className="text-[16px] font-medium text-gray-600">Theme</span>
+            <ThemeToggle />
           </div>
         </aside>
       </div>
