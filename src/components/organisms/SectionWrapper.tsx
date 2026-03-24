@@ -23,7 +23,7 @@ const SectionHeader = memo(({ heading, navigateTo }: SectionHeaderProps) => {
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between w-full gap-4">
       {heading && (
-        <h2 className="font-bold text-4xl leading-[48px] text-blue-900">
+        <h2 className="font-bold text-4xl leading-[48px] text-primary-900">
           {heading}
         </h2>
       )}
