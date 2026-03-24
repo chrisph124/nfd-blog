@@ -141,6 +141,10 @@ export default function MyComponent({ blok }) {
 
 - [scripts/README.md](scripts/README.md) - Type generation script documentation
 - [docs/](docs/) - Comprehensive project documentation
+  - [api-documentation.md](docs/api-documentation.md) - API routes and endpoints documentation
+  - [system-architecture.md](docs/system-architecture.md) - System architecture overview
+  - [code-standards.md](docs/code-standards.md) - Code standards and best practices
+  - [project-overview-pdr.md](docs/project-overview-pdr.md) - Project requirements and specifications
 - [SECURITY.md](SECURITY.md) - Security policy and vulnerability information
 
 ## Security
