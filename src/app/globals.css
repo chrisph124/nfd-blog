@@ -66,6 +66,80 @@
   --neon-cyan-700: #00CCCA;
   --neon-cyan-800: #00B3B2;
   --neon-cyan-900: #009A99;
+
+  /* Semantic surface tokens */
+  --surface-inverted: #1F2937;
+  --on-surface-inverted: #F9FAFB;
+}
+
+/* Dark theme overrides — only semantic aliases swap, raw --white/--black stay fixed */
+[data-theme="dark"] {
+  --background: #161616;
+  --foreground: #FAF9F6;
+
+  /* Gray scale inverted */
+  --gray-50: #111827;
+  --gray-100: #1F2937;
+  --gray-200: #374151;
+  --gray-300: #4B5563;
+  --gray-400: #9CA3AF;
+  --gray-500: #6B7280;
+  --gray-600: #D1D5DB;
+  --gray-700: #E5E7EB;
+  --gray-800: #F3F4F6;
+  --gray-900: #F9FAFB;
+
+  /* Primary scale inverted */
+  --primary-50: #1E3A8A;
+  --primary-100: #1E40AF;
+  --primary-200: #1D4ED8;
+  --primary-300: #2563EB;
+  --primary-400: #3B82F6;
+  --primary-500: #60A5FA;
+  --primary-600: #93C5FD;
+  --primary-700: #BFDBFE;
+  --primary-800: #DBEAFE;
+  --primary-900: #EFF6FF;
+
+  /* Secondary scale inverted */
+  --secondary-50: #312E81;
+  --secondary-100: #3730A3;
+  --secondary-200: #4338CA;
+  --secondary-300: #4F46E5;
+  --secondary-400: #6366F1;
+  --secondary-500: #818CF8;
+  --secondary-600: #A5B4FC;
+  --secondary-700: #C7D2FE;
+  --secondary-800: #E0E7FF;
+  --secondary-900: #F9FAFB;
+
+  /* Viva Magenta scale inverted */
+  --viva-magenta-50: #451822;
+  --viva-magenta-100: #631A2B;
+  --viva-magenta-200: #801F36;
+  --viva-magenta-300: #A02844;
+  --viva-magenta-400: #BE3455;
+  --viva-magenta-500: #EE8198;
+  --viva-magenta-600: #F6B3C1;
+  --viva-magenta-700: #FAD4DD;
+  --viva-magenta-800: #FDEEF1;
+  --viva-magenta-900: #FEF7F9;
+
+  /* Neon Cyan scale inverted */
+  --neon-cyan-50: #009A99;
+  --neon-cyan-100: #00B3B2;
+  --neon-cyan-200: #00CCCA;
+  --neon-cyan-300: #00E5E3;
+  --neon-cyan-400: #00FEFC;
+  --neon-cyan-500: #33F8F4;
+  --neon-cyan-600: #66FAF7;
+  --neon-cyan-700: #99FCFA;
+  --neon-cyan-800: #CCFEFD;
+  --neon-cyan-900: #F0FFFE;
+
+  /* Semantic surface tokens */
+  --surface-inverted: #111827;
+  --on-surface-inverted: #F9FAFB;
 }
 
 @theme inline {
@@ -136,6 +210,10 @@
   --color-neon-cyan-700: var(--neon-cyan-700);
   --color-neon-cyan-800: var(--neon-cyan-800);
   --color-neon-cyan-900: var(--neon-cyan-900);
+
+  /* Semantic surface tokens */
+  --color-surface-inverted: var(--surface-inverted);
+  --color-on-surface-inverted: var(--on-surface-inverted);
 
   /* Font families */
   --font-sans: var(--font-nunito);
