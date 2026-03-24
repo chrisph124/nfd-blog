@@ -22,7 +22,7 @@ const TabButton = memo(({ label, isActive, onClick }: TabButtonProps) => (
     onClick={onClick}
     className={cn(
       "px-6 py-4 rounded-lg font-semibold   transition-colors cursor-pointer",
-      isActive ? "cursor-default bg-blue-200 pointer-events-none" : "hover:bg-gray-100"
+      isActive ? "cursor-default bg-primary-200 pointer-events-none" : "hover:bg-gray-100"
     )}
   >
     {label}
@@ -42,8 +42,8 @@ const TabDropdown = memo(({ tabs, activeTab, onSelect }: DropdownProps) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Dropdown button and panel classes
-  const DROPDOWN_BUTTON_CLASSES = "w-full px-4 py-3 bg-white border-2 border-gray-100 rounded-xl font-normal text-base text-gray-700 flex items-center justify-between";
-  const DROPDOWN_PANEL_CLASSES = "absolute z-10 w-full mt-1 bg-white border-2 border-gray-100 rounded-xl shadow-lg overflow-hidden";
+  const DROPDOWN_BUTTON_CLASSES = "w-full px-4 py-3 bg-background border-2 border-gray-100 rounded-xl font-normal text-base text-gray-700 flex items-center justify-between";
+  const DROPDOWN_PANEL_CLASSES = "absolute z-10 w-full mt-1 bg-background border-2 border-gray-100 rounded-xl shadow-lg overflow-hidden";
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -91,7 +91,7 @@ const TabDropdown = memo(({ tabs, activeTab, onSelect }: DropdownProps) => {
               onClick={() => handleSelect(index)}
               className={cn(
                 "w-full px-4 py-3 text-left font-normal text-base text-gray-700 hover:bg-gray-100 transition-colors",
-                activeTab === index && "bg-blue-200"
+                activeTab === index && "bg-primary-200"
               )}
             >
               {tab.label ?? `Tab ${index + 1}`}
