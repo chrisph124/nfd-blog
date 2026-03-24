@@ -2,6 +2,8 @@ import { getStoryblokApi } from '@/lib/storyblok';
 import CardList from '@/components/organisms/CardList';
 import type { StoryblokStory, PostBlok } from '@/types/storyblok';
 
+export const revalidate = 3600; // Revalidate every 1 hour
+
 interface TagPageProps {
   params: Promise<{
     tag: string;

@@ -3,6 +3,8 @@ import { StoryblokStory } from '@storyblok/react/rsc';
 import { notFound } from 'next/navigation';
 import type { StoryblokLinksResponse, StoryblokStoryLink } from '@/types/storyblok';
 
+export const revalidate = 3600; // Revalidate every 1 hour
+
 interface PageProps {
   params: Promise<{
     slug: string[];
