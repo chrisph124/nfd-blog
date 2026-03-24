@@ -19,7 +19,7 @@ const NavBar = memo(({ navItems }: NavBarProps) => {
   // Desktop nav button classes
   const DESKTOP_NAV_BUTTON_BASE = "flex gap-[4px] items-center text-[18px] leading-[24px] p-1 cursor-pointer transition-colors";
   const DESKTOP_NAV_ACTIVE = "border-b border-primary-700 text-primary-800 font-bold";
-  const DESKTOP_NAV_INACTIVE = "text-black font-normal hover:text-primary-700";
+  const DESKTOP_NAV_INACTIVE = "text-foreground font-normal hover:text-primary-700";
 
   // Dropdown chevron classes
   const DROPDOWN_CHEVRON_BASE = "size-[14px] transition-transform duration-300 ease-in-out";
@@ -112,7 +112,7 @@ const NavBar = memo(({ navItems }: NavBarProps) => {
 
                   {/* Desktop Dropdown */}
                   {isExpanded && (
-                    <div className="absolute top-full left-0 min-w-[200px] bg-white shadow-lg rounded-[8px] py-[8px] z-60 border border-gray-200">
+                    <div className="absolute top-full left-0 min-w-[200px] bg-background shadow-lg rounded-[8px] py-[8px] z-60 border border-gray-200">
                       {item.sub_items?.map((subItem) => (
                         <Link
                           key={subItem._uid}

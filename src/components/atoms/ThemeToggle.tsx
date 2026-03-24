@@ -1,35 +1,51 @@
 'use client';
 
-import { useState, useEffect, useCallback, memo } from 'react';
-import { HiSun, HiMoon } from "react-icons/hi2";
+import { useState, useEffect, memo } from 'react';
+import { useTheme } from 'next-themes';
+import { HiSun, HiMoon } from 'react-icons/hi2';
 
 const ThemeToggle = memo(() => {
-  const [isDark, setIsDark] = useState<boolean>(false);
+  const [mounted, setMounted] = useState(false);
+  const { resolvedTheme, setTheme } = useTheme();
 
-  useEffect(() => {
-    // Check system preference on mount
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    setIsDark(prefersDark);
-  }, []);
+  useEffect(() => setMounted(true), []);
 
-  const toggleTheme = useCallback((): void => {
-    setIsDark(prev => !prev);
-    // You can add localStorage and document.documentElement.classList logic here later
-    // For now, this uses CSS media query for dark mode
-  }, []);
+  const isDark = resolvedTheme === 'dark';
+
+  const toggle = () => setTheme(isDark ? 'light' : 'dark');
+
+  // Placeholder matching pill dimensions to prevent layout shift
+  if (!mounted) {
+    return <div className="h-7 w-14 rounded-full bg-gray-200" aria-hidden="true" />;
+  }
 
   return (
     <button
-      onClick={toggleTheme}
-      className="relative shrink-0 size-[21px] hover:opacity-70 transition-opacity"
-      aria-label="Toggle theme"
       type="button"
+      role="switch"
+      aria-checked={isDark}
+      aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+      onClick={toggle}
+      className="relative flex h-7 w-14 shrink-0 cursor-pointer items-center rounded-full bg-gray-700 p-0.5 transition-colors duration-300"
     >
-      {isDark ? (
-        <HiMoon className="size-full text-gray-700" />
-      ) : (
-        <HiSun className="size-full text-gray-700" />
-      )}
+      {/* Sun icon (left) */}
+      <HiSun className="absolute left-1.5 size-4 text-gray-300" />
+
+      {/* Moon icon (right) */}
+      <HiMoon className="absolute right-1.5 size-3.5 text-gray-300" />
+
+      {/* Sliding knob */}
+      <span
+        className={`flex size-6 items-center justify-center rounded-full bg-white shadow-md transition-transform duration-300 ${
+          isDark ? 'translate-x-7' : 'translate-x-0'
+        }`}
+      >
+        {isDark ? (
+          <HiMoon className="size-3.5 text-gray-700" />
+        ) : (
+          <HiSun className="size-4 text-amber-500" />
+        )}
+      </span>
     </button>
   );
 });
