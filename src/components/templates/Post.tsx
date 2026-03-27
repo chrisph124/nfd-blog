@@ -27,7 +27,7 @@ export default function Post({ blok, tags = [], createdAt }: Readonly<PostProps>
         zIndex={40}
       />
       <article className="flex flex-col justify-center items-center gap-y-6 md:gap-y-12 -mt-10">
-      <div className="relative flex items-center justify-center w-full min-h-[200px] md:min-h-[300px] overflow-hidden">
+      <div className="relative flex items-center justify-center w-full min-h-[300px] xl:min-h-[500px] overflow-hidden">
         {/* Background Image */}
         {featured_image?.filename && (
           <Image
@@ -79,7 +79,7 @@ export default function Post({ blok, tags = [], createdAt }: Readonly<PostProps>
 
       <div className="max-w-[1280px] flex flex-col justify-center items-center px-6 md:px-10 lg:px-15 xl:px-5 mx-auto gap-y-6 md:gap-y-12">
         {excerpt && (
-          <h4 className="italic">
+          <h4 className="italic text-center xl:px-15">
             {excerpt}
           </h4>
         )}

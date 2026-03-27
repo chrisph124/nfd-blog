@@ -14,38 +14,27 @@ const ThemeToggle = memo(() => {
 
   const toggle = () => setTheme(isDark ? 'light' : 'dark');
 
-  // Placeholder matching pill dimensions to prevent layout shift
+  // Placeholder matching button dimensions to prevent layout shift
   if (!mounted) {
-    return <div className="h-7 w-14 rounded-full bg-gray-200" aria-hidden="true" />;
+    return <div className="xl:size-10 size-9 rounded-full bg-gray-200" aria-hidden="true" />;
   }
 
   return (
     <button
       type="button"
-      role="switch"
-      aria-checked={isDark}
       aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
       onClick={toggle}
-      className="relative flex h-7 w-14 shrink-0 cursor-pointer items-center rounded-full bg-gray-700 p-0.5 transition-colors duration-300"
+      className={`flex xl:size-10 size-9 shrink-0 cursor-pointer items-center justify-center rounded-full border transition-all duration-300 ${
+        isDark
+          ? 'border-orange-700/30 bg-gray-800 shadow-[0_0_12px_2px_rgba(234,88,12,0.25),inset_0_1px_1px_rgba(255,255,255,0.06)] hover:shadow-[0_0_16px_4px_rgba(234,88,12,0.35)]'
+          : 'border-neon-cyan-700/30 bg-gray-100 shadow-[0_0_12px_2px_rgba(0,204,202,0.25),inset_0_1px_1px_rgba(255,255,255,0.6)] hover:shadow-[0_0_16px_4px_rgba(0,204,202,0.35)]'
+      }`}
     >
-      {/* Sun icon (left) */}
-      <HiSun className="absolute left-1.5 size-4 text-gray-300" />
-
-      {/* Moon icon (right) */}
-      <HiMoon className="absolute right-1.5 size-3.5 text-gray-300" />
-
-      {/* Sliding knob */}
-      <span
-        className={`flex size-6 items-center justify-center rounded-full bg-white shadow-md transition-transform duration-300 ${
-          isDark ? 'translate-x-7' : 'translate-x-0'
-        }`}
-      >
-        {isDark ? (
-          <HiMoon className="size-3.5 text-gray-700" />
-        ) : (
-          <HiSun className="size-4 text-amber-500" />
-        )}
-      </span>
+      {isDark ? (
+        <HiSun className="xl:size-5 size-4 text-orange-500" />
+      ) : (
+        <HiMoon className="xl:size-5 size-4 text-neon-cyan-700" />
+      )}
     </button>
   );
 });

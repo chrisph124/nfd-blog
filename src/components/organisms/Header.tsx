@@ -115,6 +115,11 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
           {/* Mobile/Tablet: Spacer */}
           <div className="flex-grow lg:hidden" />
 
+          {/* Theme Toggle - Mobile, next to burger */}
+          <div className="lg:hidden flex items-center mr-4">
+            <ThemeToggle />
+          </div>
+
           {/* Mobile Menu Toggle */}
           <MenuToggle
             onClick={handleMenuToggle}
@@ -255,11 +260,6 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
             })}
           </div>
 
-          {/* Theme Toggle - Mobile, pinned to bottom */}
-          <div className="mt-auto flex items-center justify-between px-[16px] pt-[16px] border-t border-gray-300">
-            <span className="text-[16px] font-medium text-gray-600">Theme</span>
-            <ThemeToggle />
-          </div>
         </aside>
       </div>
     </>
