@@ -106,7 +106,7 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
         <div className="flex h-[70px] lg:h-[90px] items-center w-full max-w-[1280px] px-6 md:px-10 lg:px-15 xl:px-5 mx-auto">
           {/* Logo Section - Fixed width */}
           <Link href="/">
-            <h2 className="h3 logo-font text-transparent bg-linear-to-r from-primary-700 to-secondary-900 bg-clip-text">{title}</h2>
+            <span className="h4 logo-font text-transparent bg-linear-to-r from-primary-700 to-secondary-900 bg-clip-text">{title}</span>
           </Link>
 
           {/* Navigation - Desktop only */}
