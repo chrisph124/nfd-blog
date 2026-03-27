@@ -101,7 +101,7 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
     <>
       <header
         {...makeStoryblokEditable(blok)}
-        className="w-full sticky top-0 bg-background z-50 shadow-sm"
+        className="w-full sticky top-0 bg-background z-50 shadow-sm dark:shadow-white/20"
       >
         <div className="flex h-[70px] lg:h-[90px] items-center w-full max-w-[1280px] px-6 md:px-10 lg:px-15 xl:px-5 mx-auto">
           {/* Logo Section - Fixed width */}

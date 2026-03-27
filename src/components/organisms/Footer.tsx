@@ -15,7 +15,7 @@ const SOCIAL_LINKS = [
 
 const Footer = memo(({ blok }: StoryblokComponentProps<FooterBlok>) => {
   return (
-    <footer {...makeStoryblokEditable(blok)} className="bg-surface-inverted text-on-surface-inverted w-full">
+    <footer {...makeStoryblokEditable(blok)} className="bg-surface-inverted text-on-surface-inverted w-full shadow-sm dark:shadow-white/20">
       <div className="py-6 max-w-[1280px] px-6 md:px-10 lg:px-15 xl:px-5 mx-auto">
         {/* Mobile/Tablet: Stacked column layout */}
         {/* Desktop: 3-column layout (domain, copyright, social) */}
