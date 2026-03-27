@@ -1,0 +1,101 @@
+import Image from "next/image";
+import Link from "next/link";
+import { StoryblokServerComponent } from "@/lib/storyblok-utils";
+import { getStoryReadingTime, formatDate } from "@/lib/utils";
+import ReadingProgressBar from "@/components/atoms/ReadingProgress";
+import type { PostBlok } from "@/types/storyblok";
+
+interface PostProps {
+  blok: PostBlok;
+  tags?: string[];
+  createdAt?: string;
+}
+
+export default function Post({ blok, tags = [], createdAt }: Readonly<PostProps>) {
+  const { title = "", featured_image, excerpt, body } = blok;
+  const readingTime = getStoryReadingTime(body);
+  const formattedDate = createdAt ? formatDate(createdAt) : '';
+
+  // Post hero heading classes (89 chars)
+  const POST_HERO_HEADING_CLASSES = "display-1 text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-lg text-center";
+
+  return (
+    <>
+      <ReadingProgressBar
+        height={4}
+        position="fixed"
+        zIndex={40}
+      />
+      <article className="flex flex-col justify-center items-center gap-y-6 md:gap-y-12 -mt-10">
+      <div className="relative flex items-center justify-center w-full min-h-[300px] xl:min-h-[500px] overflow-hidden">
+        {/* Background Image */}
+        {featured_image?.filename && (
+          <Image
+            src={featured_image.filename}
+            alt={featured_image.alt || title}
+            fill
+            className="object-cover -z-10"
+            sizes="(max-width: 1024px) 100vw, 896px"
+            priority
+          />
+        )}
+
+        {/* Dark Overlay - covers whole image */}
+        <div className="absolute inset-0 bg-black/70 -z-10" />
+
+        <div className="flex flex-col items-center gap-4 max-w-[1280px] px-6 md:px-10 lg:px-15 xl:px-5">
+          {/* Tags */}
+          {tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 justify-center">
+              {tags.map((tag) => (
+                <Link
+                  key={tag}
+                  href={`/insight-hub/${tag}`}
+                  className="px-3 py-1 text-sm font-bold text-white uppercase bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors"
+                >
+                  {tag}
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {/* Title */}
+          {title && (
+            <h1 className={POST_HERO_HEADING_CLASSES}>
+              {title}
+            </h1>
+          )}
+
+          {/* Date and Reading Time */}
+          {(formattedDate || readingTime) && (
+            <div className="flex items-center gap-2 text-sm font-medium text-white/80">
+              {formattedDate && <span>{formattedDate}</span>}
+              {formattedDate && readingTime && <span>•</span>}
+              {readingTime && <span>{readingTime}</span>}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="max-w-[1280px] flex flex-col justify-center items-center px-6 md:px-10 lg:px-15 xl:px-5 mx-auto gap-y-6 md:gap-y-12">
+        {excerpt && (
+          <h2 className="h3 italic text-center xl:px-15">
+            {excerpt}
+          </h2>
+        )}
+
+        {body && body.length > 0 && (
+          <section className="prose prose-lg max-w-4xl flex flex-col gap-y-6">
+            {body.map((nestedBlok) => (
+              <StoryblokServerComponent
+                blok={nestedBlok}
+                key={nestedBlok._uid}
+              />
+            ))}
+          </section>
+        )}
+      </div>
+    </article>
+    </>
+  );
+}
