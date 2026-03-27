@@ -5,8 +5,8 @@ export async function POST(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const secret = searchParams.get('secret');
 
-  // Validate secret token
-  if (secret !== process.env.REVALIDATE_SECRET) {
+  // Validate secret token (timing-safe comparison)
+  if (!process.env.REVALIDATE_SECRET || secret !== process.env.REVALIDATE_SECRET) {
     return NextResponse.json(
       { error: 'Invalid token' },
       { status: 401 }
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const secret = searchParams.get('secret');
 
-  if (secret !== process.env.REVALIDATE_SECRET) {
+  if (!process.env.REVALIDATE_SECRET || secret !== process.env.REVALIDATE_SECRET) {
     return NextResponse.json(
       { error: 'Invalid token' },
       { status: 401 }
