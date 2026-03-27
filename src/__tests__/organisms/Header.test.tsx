@@ -34,7 +34,7 @@ vi.mock('@react-icons/hi2/HiChevronDown', () => ({
 
 // Mock child components
 vi.mock('@/components/atoms/ThemeToggle', () => ({
-  default: () => <button role="switch" aria-label="Switch to dark theme">Theme</button>,
+  default: () => <button role="switch" aria-checked="false" aria-label="Switch to dark theme">Theme</button>,
 }));
 
 vi.mock('@/components/atoms/MenuToggle', () => ({

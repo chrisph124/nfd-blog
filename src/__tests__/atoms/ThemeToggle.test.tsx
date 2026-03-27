@@ -31,45 +31,44 @@ describe('ThemeToggle', () => {
   });
 
   describe('Placeholder (before mount)', () => {
-    it('renders placeholder with correct dimensions', () => {
+    it('renders and mounts without crashing', () => {
       const { container } = render(<ThemeToggle />);
-      const el = container.querySelector('[aria-hidden="true"]') || container.querySelector('[role="switch"]');
+      // Component either shows placeholder or mounted button
+      const el = container.querySelector('[aria-hidden="true"]') || container.querySelector('button');
       expect(el).toBeInTheDocument();
     });
   });
 
   describe('Mounted - Light mode', () => {
-    it('renders switch button with correct aria attributes', async () => {
+    it('renders button with correct aria-label', async () => {
       render(<ThemeToggle />);
 
       await waitFor(() => {
-        expect(screen.getByRole('switch')).toBeInTheDocument();
+        expect(screen.getByRole('button')).toBeInTheDocument();
       });
 
-      const toggle = screen.getByRole('switch');
-      expect(toggle).toHaveAttribute('aria-checked', 'false');
-      expect(toggle).toHaveAttribute('aria-label', 'Switch to dark theme');
+      const btn = screen.getByRole('button');
+      expect(btn).toHaveAttribute('aria-label', 'Switch to dark theme');
     });
 
-    it('renders sun and moon icons', async () => {
+    it('renders moon icon in light mode', async () => {
       render(<ThemeToggle />);
 
       await waitFor(() => {
-        expect(screen.getByRole('switch')).toBeInTheDocument();
+        expect(screen.getByRole('button')).toBeInTheDocument();
       });
 
-      expect(screen.getAllByTestId('sun-icon').length).toBeGreaterThanOrEqual(1);
-      expect(screen.getAllByTestId('moon-icon').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByTestId('moon-icon')).toBeInTheDocument();
     });
 
     it('switches to dark on click', async () => {
       render(<ThemeToggle />);
 
       await waitFor(() => {
-        expect(screen.getByRole('switch')).toBeInTheDocument();
+        expect(screen.getByRole('button')).toBeInTheDocument();
       });
 
-      fireEvent.click(screen.getByRole('switch'));
+      fireEvent.click(screen.getByRole('button'));
       expect(mockSetTheme).toHaveBeenCalledWith('dark');
     });
   });
@@ -82,37 +81,35 @@ describe('ThemeToggle', () => {
       });
     });
 
-    it('has aria-checked true when dark', async () => {
+    it('renders button with correct aria-label in dark mode', async () => {
       render(<ThemeToggle />);
 
       await waitFor(() => {
-        expect(screen.getByRole('switch')).toBeInTheDocument();
+        expect(screen.getByRole('button')).toBeInTheDocument();
       });
 
-      expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'true');
-      expect(screen.getByRole('switch')).toHaveAttribute('aria-label', 'Switch to light theme');
+      expect(screen.getByRole('button')).toHaveAttribute('aria-label', 'Switch to light theme');
+    });
+
+    it('renders sun icon in dark mode', async () => {
+      render(<ThemeToggle />);
+
+      await waitFor(() => {
+        expect(screen.getByRole('button')).toBeInTheDocument();
+      });
+
+      expect(screen.getByTestId('sun-icon')).toBeInTheDocument();
     });
 
     it('switches to light on click', async () => {
       render(<ThemeToggle />);
 
       await waitFor(() => {
-        expect(screen.getByRole('switch')).toBeInTheDocument();
+        expect(screen.getByRole('button')).toBeInTheDocument();
       });
 
-      fireEvent.click(screen.getByRole('switch'));
+      fireEvent.click(screen.getByRole('button'));
       expect(mockSetTheme).toHaveBeenCalledWith('light');
-    });
-
-    it('knob is translated right in dark mode', async () => {
-      render(<ThemeToggle />);
-
-      await waitFor(() => {
-        expect(screen.getByRole('switch')).toBeInTheDocument();
-      });
-
-      const knob = screen.getByRole('switch').querySelector('span');
-      expect(knob).toHaveClass('translate-x-7');
     });
   });
 
@@ -121,12 +118,12 @@ describe('ThemeToggle', () => {
       render(<ThemeToggle />);
 
       await waitFor(() => {
-        expect(screen.getByRole('switch')).toBeInTheDocument();
+        expect(screen.getByRole('button')).toBeInTheDocument();
       });
 
-      const toggle = screen.getByRole('switch');
-      toggle.focus();
-      expect(toggle).toHaveFocus();
+      const btn = screen.getByRole('button');
+      btn.focus();
+      expect(btn).toHaveFocus();
     });
   });
 
@@ -141,7 +138,7 @@ describe('ThemeToggle', () => {
       render(<ThemeToggle />);
 
       await waitFor(() => {
-        expect(screen.getByRole('switch')).toBeInTheDocument();
+        expect(screen.getByRole('button')).toBeInTheDocument();
       });
 
       expect(consoleSpy).not.toHaveBeenCalled();

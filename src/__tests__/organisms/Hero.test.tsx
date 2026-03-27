@@ -465,7 +465,7 @@ describe('Hero', () => {
           },
           image_type: 'full',
         });
-        const { container } = render(<Hero blok={blok} />);
+        render(<Hero blok={blok} />);
 
         const figure = screen.getByRole('figure');
         expect(figure).toHaveClass('w-full', 'lg:w-4/5');
@@ -481,7 +481,7 @@ describe('Hero', () => {
           },
           image_type: 'full',
         });
-        const { container } = render(<Hero blok={blok} />);
+        render(<Hero blok={blok} />);
 
         const figure = screen.getByRole('figure');
         expect(figure).toHaveClass('w-full');
@@ -546,7 +546,7 @@ describe('Hero', () => {
           },
           image_type: 'half',
         });
-        const { container } = render(<Hero blok={blok} />);
+        render(<Hero blok={blok} />);
 
         const figure = screen.getByRole('figure');
         expect(figure).toHaveClass('w-full', 'lg:w-1/2');

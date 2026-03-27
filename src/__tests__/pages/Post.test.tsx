@@ -349,7 +349,7 @@ describe('Post', () => {
 
       const heroSection = container.querySelector('.relative.flex.items-center.justify-center');
       expect(heroSection).toBeInTheDocument();
-      expect(heroSection).toHaveClass('min-h-[200px]', 'md:min-h-[300px]');
+      expect(heroSection).toHaveClass('min-h-[300px]', 'xl:min-h-[500px]');
     });
 
     it('has dark overlay on hero image', () => {
@@ -656,7 +656,7 @@ describe('Post', () => {
       expect(article).toHaveClass('gap-y-6', 'md:gap-y-12');
 
       const heroSection = container.querySelector('.relative.flex.items-center.justify-center');
-      expect(heroSection).toHaveClass('min-h-[200px]', 'md:min-h-[300px]');
+      expect(heroSection).toHaveClass('min-h-[300px]', 'xl:min-h-[500px]');
 
       expect(screen.getByTestId('reading-progress')).toBeInTheDocument();
     });
