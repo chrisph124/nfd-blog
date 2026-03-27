@@ -264,7 +264,7 @@
 
   /* Body text - Mobile/Tablet: 17px, Desktop: 18px */
   --font-size-body-1: 1.0625rem; /* 17px */
-  --line-height-body-1: 1.2;
+  --line-height-body-1: 1.3;
   --font-weight-body-1: 400;
 
   /* Legacy support */
