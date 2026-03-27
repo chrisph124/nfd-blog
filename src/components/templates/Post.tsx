@@ -43,7 +43,7 @@ export default function Post({ blok, tags = [], createdAt }: Readonly<PostProps>
         {/* Dark Overlay - covers whole image */}
         <div className="absolute inset-0 bg-black/70 -z-10" />
 
-        <div className="flex flex-col items-center gap-4 max-w-[1280px] px-6 md:px-10 lg:px-15 xl:px-5">
+        <div className="flex flex-col items-center gap-4 max-w-[1280px] px-4 md:px-8 lg:px-12 xl:px-5">
           {/* Tags */}
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-2 justify-center">
@@ -77,15 +77,15 @@ export default function Post({ blok, tags = [], createdAt }: Readonly<PostProps>
         </div>
       </div>
 
-      <div className="max-w-[1280px] flex flex-col justify-center items-center px-6 md:px-10 lg:px-15 xl:px-5 mx-auto gap-y-6 md:gap-y-12">
+      <div className="max-w-[1280px] flex flex-col justify-center items-center px-4 md:px-8 lg:px-12 xl:px-5 mx-auto gap-y-6 md:gap-y-12">
         {excerpt && (
-          <h2 className="h4 italic text-center xl:px-15">
+          <h2 className="h4 italic text-center md:px-2 lg:px-4 xl:px-16">
             {excerpt}
           </h2>
         )}
 
         {body && body.length > 0 && (
-          <section className="prose prose-lg max-w-4xl flex flex-col gap-y-6">
+          <section className="prose prose-lg max-w-5xl flex flex-col gap-y-6">
             {body.map((nestedBlok) => (
               <StoryblokServerComponent
                 blok={nestedBlok}

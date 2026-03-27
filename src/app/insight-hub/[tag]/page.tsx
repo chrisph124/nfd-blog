@@ -30,7 +30,7 @@ export default async function TagPage({ params }: TagPageProps) {
   const categoryTitle = formatTitle(tag);
 
   return (
-    <div className="max-w-[1280px] px-6 md:px-10 lg:px-15 xl:px-5 mx-auto my-6">
+    <div className="max-w-[1280px] px-4 md:px-8 lg:px-12 xl:px-5 mx-auto my-6">
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-gray-900 mb-2">{categoryTitle}</h1>
       </div>

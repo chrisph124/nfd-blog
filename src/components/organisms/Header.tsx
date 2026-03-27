@@ -103,7 +103,7 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
         {...makeStoryblokEditable(blok)}
         className="w-full sticky top-0 bg-background z-50 shadow-sm dark:shadow-white/20"
       >
-        <div className="flex h-[70px] lg:h-[90px] items-center w-full max-w-[1280px] px-6 md:px-10 lg:px-15 xl:px-5 mx-auto">
+        <div className="flex h-[70px] lg:h-[90px] items-center w-full max-w-[1280px] px-4 md:px-8 lg:px-12 xl:px-5 mx-auto">
           {/* Logo Section - Fixed width */}
           <Link href="/">
             <span className="h4 logo-font text-transparent bg-linear-to-r from-primary-700 to-secondary-900 bg-clip-text">{title}</span>

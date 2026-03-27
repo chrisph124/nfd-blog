@@ -58,7 +58,7 @@ export default function PostListClient({
   };
 
   return (
-    <div className="flex flex-col gap-6 max-w-[1280px] px-6 md:px-10 lg:px-15 xl:px-5 mx-auto">
+    <div className="flex flex-col gap-6 max-w-[1280px] px-4 md:px-8 lg:px-12 xl:px-5 mx-auto">
       {/* Posts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
         {posts.map((story) => (
