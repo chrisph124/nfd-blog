@@ -162,13 +162,6 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
           )}
           aria-label="Mobile navigation menu"
         >
-          {/* Hero Typography */}
-          <div className="flex flex-col gap-[10px] h-[200px] items-center justify-center rounded-[8px] bg-gradient-to-br from-primary-600 to-secondary-900">
-            <p className="font-semibold text-[26px] leading-[40px] text-center text-gray-50 max-w-[202px]">
-              Discover our world of digital art.
-            </p>
-          </div>
-
           {/* Menu Items */}
           <div className="flex flex-col gap-[12px]">
             {/* Navigation Items from Storyblok */}
