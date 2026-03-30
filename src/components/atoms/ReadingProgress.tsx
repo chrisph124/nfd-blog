@@ -80,7 +80,7 @@ const ReadingProgressBar = memo<ReadingProgressBarProps>(({
     // Return placeholder with same dimensions to prevent layout shift
     return (
       <div
-        className={cn('top-[66px] lg:top-[90px] left-0 w-full', backgroundColor, className)}
+        className={cn('top-[70px] lg:top-[90px] left-0 w-full', backgroundColor, className)}
         style={{
           height: `${height}px`,
           position,
@@ -98,14 +98,14 @@ const ReadingProgressBar = memo<ReadingProgressBarProps>(({
 
     if (pos && ALLOWED_POSITIONS.includes(pos as AllowedPosition)) {
       const positionClassesMap = {
-        fixed: 'fixed top-[66px] lg:top-[90px] left-0 w-full',
-        sticky: 'sticky top-[66px] lg:top-[90px] left-0 w-full',
+        fixed: 'fixed top-[70px] lg:top-[90px] left-0 w-full',
+        sticky: 'sticky top-[70px] lg:top-[90px] left-0 w-full',
       };
       return positionClassesMap[pos as AllowedPosition];
     }
 
     // Default fallback for invalid positions
-    return 'fixed top-[66px] lg:top-[90px] left-0 w-full';
+    return 'fixed top-[70px] lg:top-[90px] left-0 w-full';
   };
 
   const positionClasses = getPositionClasses(position);
