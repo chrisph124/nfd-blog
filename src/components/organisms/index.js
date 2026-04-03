@@ -5,3 +5,4 @@ export { default as NavBar } from './NavBar';
 export { default as Hero } from './Hero';
 export { default as Tabs } from './Tabs';
 export { default as SectionWrapper } from './SectionWrapper';
+export { default as ContentCards } from './ContentCards';
