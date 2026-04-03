@@ -29,17 +29,19 @@ const ImageCarousel = memo(({ images, hideOnMobile }: ImageCarouselProps) => {
 
   const handleMouseEnter = useCallback(() => {
     // Pause autoplay on hover — handled via emblaApi for testability
-    if (emblaApi?.plugins?.autoplay) {
+    const autoplay = emblaApi?.plugins?.()?.autoplay;
+    if (autoplay) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (emblaApi.plugins.autoplay as any).stop();
+      (autoplay as any).stop();
     }
   }, [emblaApi]);
 
   const handleMouseLeave = useCallback(() => {
     // Resume autoplay on leave — handled via emblaApi for testability
-    if (emblaApi?.plugins?.autoplay) {
+    const autoplay = emblaApi?.plugins?.()?.autoplay;
+    if (autoplay) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (emblaApi.plugins.autoplay as any).play();
+      (autoplay as any).play();
     }
   }, [emblaApi]);
 

@@ -50,12 +50,12 @@ vi.mock('embla-carousel-react', () => ({
     {
       scrollPrev: mockScrollPrev,
       scrollNext: mockScrollNext,
-      plugins: {
+      plugins: () => ({
         autoplay: {
           stop: mockAutoplayStop,
           play: mockAutoplayPlay,
         },
-      },
+      }),
     },
   ],
 }));
