@@ -2,7 +2,7 @@
 
 import { memo } from 'react';
 import Link from 'next/link';
-import { HiArrowRight } from "react-icons/hi2";
+import { HiArrowUpRight } from "react-icons/hi2";
 import type { CtaBlok } from '@/types/storyblok';
 import { normalizeStoryblokUrl, cn } from '@/lib/utils';
 
@@ -69,7 +69,7 @@ const Cta = memo(({ blok }: CTAProps) => {
   const content = (
     <>
       <span className="whitespace-nowrap">{label}</span>
-      {isLink && <HiArrowRight className="size-5 text-primary-900" />}
+      {isLink && <HiArrowUpRight className="size-5 text-primary-900" />}
     </>
   );
 
