@@ -8,6 +8,9 @@ vi.mock('react-icons/hi2', () => ({
   HiArrowRight: ({ className }: { className?: string }) => (
     <svg data-testid="arrow-right-icon" className={className} />
   ),
+  HiArrowUpRight: ({ className }: { className?: string }) => (
+    <svg data-testid="arrow-up-right-icon" className={className} />
+  ),
 }));
 
 // Helper function to create mock blok
@@ -240,7 +243,7 @@ describe('Cta', () => {
         expect(textSpan).toHaveClass('pointer', 'px-0', 'py-0');
 
         // Verify arrow icon and its class
-        const arrowIcon = screen.getByTestId('arrow-right-icon');
+        const arrowIcon = screen.getByTestId('arrow-up-right-icon');
         expect(arrowIcon).toBeInTheDocument();
         expect(arrowIcon).toHaveClass('size-5', 'text-primary-900');
 
@@ -422,7 +425,7 @@ describe('Cta', () => {
       const blok = createMockBlok({ cta_type: 'link' });
       render(<Cta blok={blok} />);
 
-      expect(screen.getByTestId('arrow-right-icon')).toBeInTheDocument();
+      expect(screen.getByTestId('arrow-up-right-icon')).toBeInTheDocument();
     });
 
     it('does not show arrow icon for primary type', () => {

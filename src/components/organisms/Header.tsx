@@ -101,9 +101,9 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
     <>
       <header
         {...makeStoryblokEditable(blok)}
-        className="w-full sticky top-0 bg-background z-50 shadow-sm"
+        className="w-full sticky top-0 bg-background z-50 shadow-sm dark:shadow-white/20"
       >
-        <div className="flex h-[70px] lg:h-[90px] items-center w-full max-w-[1280px] px-6 md:px-10 lg:px-15 xl:px-5 mx-auto">
+        <div className="flex h-[70px] lg:h-[90px] items-center w-full max-w-[1280px] px-4 md:px-8 lg:px-12 xl:px-5 mx-auto">
           {/* Logo Section - Fixed width */}
           <Link href="/">
             <span className="h4 logo-font text-transparent bg-linear-to-r from-primary-700 to-secondary-900 bg-clip-text">{title}</span>
@@ -162,13 +162,6 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
           )}
           aria-label="Mobile navigation menu"
         >
-          {/* Hero Typography */}
-          <div className="flex flex-col gap-[10px] h-[200px] items-center justify-center rounded-[8px] bg-gradient-to-br from-primary-600 to-secondary-900">
-            <p className="font-semibold text-[26px] leading-[40px] text-center text-gray-50 max-w-[202px]">
-              Discover our world of digital art.
-            </p>
-          </div>
-
           {/* Menu Items */}
           <div className="flex flex-col gap-[12px]">
             {/* Navigation Items from Storyblok */}

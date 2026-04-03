@@ -142,7 +142,7 @@ const HeroContent = memo(
 
         <HeadingTag className="font-bold text-white">{heading}</HeadingTag>
 
-        {subHeading && <p className="text-gray-200">{subHeading}</p>}
+        {subHeading && <p className="text-white">{subHeading}</p>}
 
         {ctaGroup && ctaGroup.length > 0 && (
           <section

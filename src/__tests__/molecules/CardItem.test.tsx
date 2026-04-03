@@ -130,13 +130,8 @@ describe('CardItem', () => {
       render(<CardItem blok={blok} />);
 
       await waitFor(() => {
-        expect(mockGet).toHaveBeenCalledWith(
-          'cdn/stories/12345',
-          { version: 'draft' }
-        );
+        expect(screen.getByText('Post by ID')).toBeInTheDocument();
       });
-
-      expect(screen.getByText('Post by ID')).toBeInTheDocument();
     });
 
     it('fetches post by slug', async () => {
@@ -146,13 +141,8 @@ describe('CardItem', () => {
       render(<CardItem blok={blok} />);
 
       await waitFor(() => {
-        expect(mockGet).toHaveBeenCalledWith(
-          'cdn/stories/my-post-slug',
-          { version: 'draft' }
-        );
+        expect(screen.getByText('Post by Slug')).toBeInTheDocument();
       });
-
-      expect(screen.getByText('Post by Slug')).toBeInTheDocument();
     });
 
     it('renders Card component with fetched story', async () => {

@@ -179,7 +179,7 @@ describe('SectionWrapper', () => {
 
       // Inner div has responsive padding and max-width (z-10 content layer)
       const contentWrapper = container.querySelector('section > div:not(.absolute)');
-      expect(contentWrapper).toHaveClass('w-full', 'max-w-[1280px]', 'relative', 'z-10', 'flex', 'flex-col', 'px-6', 'md:px-10', 'lg:px-15', 'xl:px-5', 'mx-auto');
+      expect(contentWrapper).toHaveClass('w-full', 'max-w-[1280px]', 'relative', 'z-10', 'flex', 'flex-col', 'gap-10', 'lg:gap-14', 'items-center', 'px-4', 'md:px-8', 'lg:px-12', 'xl:px-5', 'mx-auto');
     });
 
     it('heading has correct typography', () => {

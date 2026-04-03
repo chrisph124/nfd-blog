@@ -63,7 +63,7 @@ describe('Feature', () => {
 
       const innerDiv = container.querySelector(String.raw`.max-w-\[1280px\]`);
       expect(innerDiv).toBeInTheDocument();
-      expect(innerDiv).toHaveClass('px-6', 'md:px-10', 'lg:px-15', 'xl:px-5');
+      expect(innerDiv).toHaveClass('px-4', 'md:px-8', 'lg:px-12', 'xl:px-5');
     });
 
     it('has centered content with margin', () => {
