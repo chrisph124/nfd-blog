@@ -340,7 +340,7 @@ describe('Post', () => {
       const { container } = render(<Post blok={blok} />);
 
       const proseDiv = container.querySelector('.prose');
-      expect(proseDiv).toHaveClass('prose', 'prose-lg', 'max-w-4xl');
+      expect(proseDiv).toHaveClass('prose', 'prose-lg', 'max-w-5xl', 'flex', 'flex-col', 'gap-y-6');
     });
 
     it('has hero section with correct minimum height', () => {
@@ -492,7 +492,7 @@ describe('Post', () => {
       render(<Post blok={blok} />);
 
       // Check that prose classes are applied to the correct element
-      const proseSection = document.querySelector('.prose.prose-lg.max-w-4xl.flex.flex-col.gap-y-6');
+      const proseSection = document.querySelector('.prose.prose-lg.max-w-5xl.flex.flex-col.gap-y-6');
       expect(proseSection).toBeInTheDocument();
 
       // ReadingProgress should still be present
