@@ -77,6 +77,29 @@ export interface ContentBlockBlok extends StoryblokBlok {
 }
 
 /**
+ * content_cards component — two-block layout with configurable ratios
+ */
+export interface ContentCardsBlok extends StoryblokBlok {
+  component: 'content_cards';
+  blocks?: ContentCardBlockBlok[];
+  layout?: '5/5' | '6/4' | '4/6';
+}
+
+/**
+ * content_card_block component — nestable block within content_cards
+ */
+export type ContentCardBlockBlok = Omit<StoryblokBlok, 'component'> & {
+  component: 'content_card_block';
+  variant?: 'primary' | 'secondary';
+  title?: string;
+  subtitle?: string;
+  description?: StoryblokRichTextNode<string> | null;
+  cta_group?: CtaBlok[];
+  images?: StoryblokAsset[];
+  hide_image_mobile?: boolean;
+};
+
+/**
  * cta component
  */
 export interface CtaBlok extends StoryblokBlok {
@@ -269,6 +292,8 @@ export interface StoryblokComponentProps<T extends StoryblokBlok = StoryblokBlok
 export type AnyBlok =
   | CardItemBlok
   | ContentBlockBlok
+  | ContentCardsBlok
+  | ContentCardBlockBlok
   | CtaBlok
   | FeatureBlok
   | FooterBlok
