@@ -5,6 +5,7 @@ import { makeStoryblokEditable } from '@/lib/storyblok-utils';
 import { getStoryblokApi } from '@/lib/storyblok';
 import type { CardItemBlok, StoryblokStory, PostBlok } from '@/types/storyblok';
 import Card from './Card';
+import { CardSkeleton } from '@/components/atoms/Skeleton';
 
 interface CardItemProps {
   blok: CardItemBlok;
@@ -57,15 +58,7 @@ export default function CardItem({ blok }: Readonly<CardItemProps>) {
   }
 
   if (loading) {
-    return (
-      <div className="flex flex-col h-full bg-background rounded-xl shadow-sm border border-gray-200 animate-pulse max-w-full lg:max-w-[320px]">
-        <div className="relative aspect-16/10 w-full bg-gray-200 rounded-t-xl" />
-        <div className="flex flex-col gap-3 p-4 flex-1">
-          <div className="h-4 bg-gray-200 rounded w-3/4" />
-          <div className="h-4 bg-gray-200 rounded w-1/2" />
-        </div>
-      </div>
-    );
+    return <CardSkeleton />;
   }
 
   if (error || !story) {

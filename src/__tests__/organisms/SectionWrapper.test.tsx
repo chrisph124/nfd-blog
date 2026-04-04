@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
+import React from 'react';
 import { render, screen } from '@testing-library/react';
 import SectionWrapper from '@/components/organisms/SectionWrapper';
 import type { SectionWrapperBlok, StoryblokBlok, CtaBlok } from '@/types/storyblok';
@@ -21,6 +22,31 @@ vi.mock('next/image', () => ({
     />
   ),
 }));
+
+// Mock motion/react-m for ScrollReveal
+vi.mock('motion/react-m', () => {
+  return new Proxy({}, {
+    get: (_: unknown, prop: string) => {
+      // eslint-disable-next-line react/display-name
+      return React.forwardRef(
+        (
+          {
+            children,
+            className,
+            ...htmlProps
+          }: Record<string, unknown>,
+          ref: unknown
+        ) => {
+          return React.createElement(
+            prop,
+            { ...htmlProps, className, ref },
+            children as React.ReactNode
+          );
+        }
+      );
+    },
+  });
+});
 
 const createMockCta = (uid: string): CtaBlok => ({
   _uid: uid,

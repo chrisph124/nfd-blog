@@ -1,6 +1,39 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import React from 'react';
 import { render, screen, cleanup } from '@testing-library/react';
 import ReadingProgressBar from '@/components/atoms/ReadingProgress';
+
+// Mock motion/react
+vi.mock('motion/react', () => {
+  return {
+    useScroll: () => ({
+      scrollYProgress: { get: () => 0, on: vi.fn(() => vi.fn()) },
+    }),
+    useSpring: (value: unknown) => value,
+    m: new Proxy({}, {
+      get: (_: unknown, prop: string) => {
+        // eslint-disable-next-line react/display-name
+        return React.forwardRef(
+          (
+            {
+              children,
+              style,
+              className,
+              ...htmlProps
+            }: Record<string, unknown>,
+            ref: unknown
+          ) => {
+            return React.createElement(
+              prop,
+              { ...htmlProps, style, className, ref },
+              children as React.ReactNode
+            );
+          }
+        );
+      },
+    }),
+  };
+});
 
 // Mock console methods to prevent test pollution
 const consoleSpy = {
@@ -10,46 +43,11 @@ const consoleSpy = {
 
 describe('ReadingProgressBar', () => {
   beforeEach(() => {
-    // Setup window mocks
-    Object.defineProperty(window, 'scrollY', {
-      writable: true,
-      value: 0,
-    });
-
-    Object.defineProperty(window, 'innerHeight', {
-      writable: true,
-      value: 800,
-    });
-
-    Object.defineProperty(window, 'requestAnimationFrame', {
-      writable: true,
-      value: vi.fn((cb) => setTimeout(cb, 0)),
-    });
-
-    Object.defineProperty(window, 'addEventListener', {
-      writable: true,
-      value: vi.fn(),
-    });
-
-    Object.defineProperty(window, 'removeEventListener', {
-      writable: true,
-      value: vi.fn(),
-    });
-
-    Object.defineProperty(document, 'documentElement', {
-      writable: true,
-      value: {
-        scrollHeight: 2000,
-      },
-    });
-
-    // Clear all mocks
     vi.clearAllMocks();
   });
 
   afterEach(() => {
     cleanup();
-    // Restore console mocks
     consoleSpy.error.mockClear();
     consoleSpy.warn.mockClear();
   });
@@ -59,291 +57,220 @@ describe('ReadingProgressBar', () => {
       expect(() => {
         render(<ReadingProgressBar />);
       }).not.toThrow();
+    });
 
+    it('renders progress bar container', () => {
+      render(<ReadingProgressBar />);
       expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    });
+
+    it('has role="progressbar"', () => {
+      render(<ReadingProgressBar />);
+      const progressBar = screen.getByRole('progressbar');
+      expect(progressBar).toHaveAttribute('role', 'progressbar');
+    });
+
+    it('has aria-label attribute', () => {
+      render(<ReadingProgressBar />);
+      const progressBar = screen.getByRole('progressbar');
+      expect(progressBar).toHaveAttribute('aria-label', 'Reading progress');
     });
 
     it('renders with default props', () => {
       render(<ReadingProgressBar />);
-
-      const progressBar = screen.getByRole('progressbar');
-      expect(progressBar).toHaveAttribute('aria-valuemin', '0');
-      expect(progressBar).toHaveAttribute('aria-valuemax', '100');
-      expect(progressBar).toHaveAttribute('aria-label', expect.stringContaining('Reading progress:'));
-    });
-
-    it('renders with custom props', () => {
-      render(
-        <ReadingProgressBar
-          height={6}
-          color="bg-red-600"
-          backgroundColor="bg-gray-300"
-          position="sticky"
-          showPercentage={true}
-          zIndex={100}
-          className="custom-class"
-        />
-      );
-
       const progressBar = screen.getByRole('progressbar');
       expect(progressBar).toBeInTheDocument();
-      expect(progressBar).toHaveClass('custom-class');
+      expect(progressBar).toHaveStyle({ height: '4px' });
     });
+  });
 
-    it('has correct accessibility attributes', () => {
-      render(<ReadingProgressBar />);
-
+  describe('Position Classes', () => {
+    it('applies fixed position classes by default', () => {
+      render(<ReadingProgressBar position="fixed" />);
       const progressBar = screen.getByRole('progressbar');
-      expect(progressBar).toHaveAttribute('role', 'progressbar');
-      expect(progressBar).toHaveAttribute('aria-valuemin', '0');
-      expect(progressBar).toHaveAttribute('aria-valuemax', '100');
-      expect(progressBar).toHaveAttribute('aria-label', expect.stringContaining('Reading progress:'));
+      expect(progressBar).toHaveClass('fixed', 'top-[70px]', 'left-0', 'w-full');
+    });
+
+    it('applies sticky position classes when position="sticky"', () => {
+      const { container } = render(<ReadingProgressBar position="sticky" />);
+      const progressBar = screen.getByRole('progressbar');
+      expect(progressBar).toHaveClass('sticky', 'top-[70px]', 'left-0', 'w-full');
+    });
+
+    it('applies responsive top margin for lg breakpoint', () => {
+      const { container } = render(<ReadingProgressBar />);
+      const progressBar = screen.getByRole('progressbar');
+      expect(progressBar).toHaveClass('lg:top-[90px]');
     });
   });
 
-  describe('Progress Calculation Logic', () => {
-    it('calculates progress correctly for different scenarios', () => {
-      // Test with different scroll positions and document heights
-      const testCases = [
-        { scrollY: 0, innerHeight: 800, scrollHeight: 2000, expected: 0 },      // At top: 0%
-        { scrollY: 600, innerHeight: 800, scrollHeight: 2000, expected: 50 },     // Half scroll: 50%
-        { scrollY: 1200, innerHeight: 800, scrollHeight: 2000, expected: 100 },  // Bottom: 100%
-        { scrollY: 0, innerHeight: 800, scrollHeight: 600, expected: 100 },       // Content shorter than viewport
-      ];
-
-      testCases.forEach(({ scrollY, innerHeight, scrollHeight, expected }) => {
-        // Update window properties
-        Object.defineProperty(window, 'scrollY', { writable: true, value: scrollY });
-        Object.defineProperty(window, 'innerHeight', { writable: true, value: innerHeight });
-        Object.defineProperty(document, 'documentElement', {
-          writable: true,
-          value: { scrollHeight },
-        });
-
-        const { unmount } = render(<ReadingProgressBar />);
-
-        expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', String(expected));
-
-        unmount();
-      });
-    });
-  });
-
-  describe('Event Listeners', () => {
-    it('adds scroll and resize event listeners', () => {
-      render(<ReadingProgressBar />);
-
-      expect(window.addEventListener).toHaveBeenCalledWith('scroll', expect.any(Function), { passive: true });
-      expect(window.addEventListener).toHaveBeenCalledWith('resize', expect.any(Function), { passive: true });
-    });
-
-    it('removes event listeners on unmount', () => {
-      const { unmount } = render(<ReadingProgressBar />);
-      unmount();
-
-      expect(window.removeEventListener).toHaveBeenCalledWith('scroll', expect.any(Function));
-      expect(window.removeEventListener).toHaveBeenCalledWith('resize', expect.any(Function));
-    });
-  });
-
-  describe('Performance Features', () => {
-    it('uses requestAnimationFrame for smooth updates', () => {
-      render(<ReadingProgressBar />);
-
-      // requestAnimationFrame is called in the scroll handler and resize handler
-      // We check if the mock was set up correctly
-      expect(typeof window.requestAnimationFrame).toBe('function');
-    });
-
-    it('uses passive event listeners for better performance', () => {
-      render(<ReadingProgressBar />);
-
-      expect(window.addEventListener).toHaveBeenCalledWith('scroll', expect.any(Function), { passive: true });
-      expect(window.addEventListener).toHaveBeenCalledWith('resize', expect.any(Function), { passive: true });
-    });
-  });
-
-  describe('Styling and Layout', () => {
-    it('applies correct height style', () => {
+  describe('Styling & Props', () => {
+    it('applies custom height prop', () => {
       render(<ReadingProgressBar height={6} />);
-
       const progressBar = screen.getByRole('progressbar');
       expect(progressBar).toHaveStyle({ height: '6px' });
     });
 
-    it('applies correct z-index', () => {
-      render(<ReadingProgressBar zIndex={100} />);
+    it('applies custom color class', () => {
+      const { container } = render(
+        <ReadingProgressBar color="bg-red-600" />
+      );
+      const progressIndicator = container.querySelector('div[class*="h-full"]');
+      expect(progressIndicator).toHaveClass('bg-red-600');
+    });
 
+    it('applies custom backgroundColor class', () => {
+      render(<ReadingProgressBar backgroundColor="bg-gray-300" />);
+      const progressBar = screen.getByRole('progressbar');
+      expect(progressBar).toHaveClass('bg-gray-300');
+    });
+
+    it('applies custom zIndex', () => {
+      render(<ReadingProgressBar zIndex={100} />);
       const progressBar = screen.getByRole('progressbar');
       expect(progressBar).toHaveStyle({ zIndex: '100' });
     });
 
     it('applies custom className', () => {
       render(<ReadingProgressBar className="custom-progress-bar" />);
-
       const progressBar = screen.getByRole('progressbar');
       expect(progressBar).toHaveClass('custom-progress-bar');
     });
+  });
 
-    it('has correct child elements', () => {
+  describe('Progress Indicator', () => {
+    it('renders motion div as progress indicator', () => {
       render(<ReadingProgressBar />);
-
       const progressBar = screen.getByRole('progressbar');
+      const indicator = progressBar.querySelector('div[class*="h-full"]');
+      expect(indicator).toBeInTheDocument();
+    });
 
-      // Should have progress bar as child element
-      expect(progressBar.children.length).toBeGreaterThanOrEqual(1);
+    it('applies color classes to progress indicator', () => {
+      render(<ReadingProgressBar />);
+      const progressBar = screen.getByRole('progressbar');
+      const indicator = progressBar.querySelector('div[class*="h-full"]');
+      expect(indicator).toHaveClass('origin-left');
+    });
 
-      // Progress bar should be present
-      const progressElement = progressBar.querySelector('[style*="width"]');
-      expect(progressElement).toBeInTheDocument();
+    it('applies custom color to progress indicator', () => {
+      render(
+        <ReadingProgressBar color="bg-custom-color" />
+      );
+      const progressBar = screen.getByRole('progressbar');
+      const indicator = progressBar.querySelector('div[class*="h-full"]');
+      expect(indicator).toHaveClass('bg-custom-color');
     });
   });
 
-  describe('Percentage Display', () => {
-    it('does not show percentage by default', () => {
+  describe('No showPercentage prop', () => {
+    it('does not render sr-only percentage text', () => {
       render(<ReadingProgressBar />);
-
-      expect(screen.queryByText(/% complete/)).not.toBeInTheDocument();
-    });
-
-    it('shows percentage when showPercentage is true', () => {
-      render(<ReadingProgressBar showPercentage={true} />);
-
-      // Should have sr-only text with percentage
-      expect(screen.getByText(/\d+% complete/)).toBeInTheDocument();
-    });
-  });
-
-  describe('Error Handling', () => {
-    it('produces no console errors or warnings during normal operation', () => {
-      render(<ReadingProgressBar />);
-
-      expect(consoleSpy.error).not.toHaveBeenCalled();
-      expect(consoleSpy.warn).not.toHaveBeenCalled();
-    });
-
-    it('handles invalid window state gracefully', () => {
-      // Simulate invalid window state
-      Object.defineProperty(window, 'innerHeight', { writable: true, value: 0 });
-
-      expect(() => {
-        render(<ReadingProgressBar />);
-      }).not.toThrow();
+      expect(screen.queryByText(/reading in progress/i)).not.toBeInTheDocument();
     });
   });
 
   describe('Component Features', () => {
-    it('has displayName for debugging', () => {
+    it('has displayName set', () => {
       expect(ReadingProgressBar.displayName).toBe('ReadingProgressBar');
     });
 
-    it('renders with memo optimization', () => {
+    it('is memoized component', () => {
       const { rerender } = render(<ReadingProgressBar />);
+      const firstProgressBar = screen.getByRole('progressbar');
 
-      const progressBar = screen.getByRole('progressbar');
-
-      // Re-render with same props
       rerender(<ReadingProgressBar />);
+      const secondProgressBar = screen.getByRole('progressbar');
 
-      // Should still be the same element
-      expect(progressBar).toBeInTheDocument();
+      expect(firstProgressBar).toBeInTheDocument();
+      expect(secondProgressBar).toBeInTheDocument();
     });
   });
 
-  describe('Event Handler Execution', () => {
-    it('executes scroll callback with requestAnimationFrame', () => {
-      const { unmount } = render(<ReadingProgressBar />);
-
-      // Get the scroll handler that was added
-      const scrollHandler = (window.addEventListener as vi.MockedFunction<typeof window.addEventListener>).mock.calls
-        .find(call => call[0] === 'scroll')?.[1] as (() => void) | undefined;
-
-      // Execute the scroll handler
-      scrollHandler();
-
-      // Verify requestAnimationFrame was called
-      expect(window.requestAnimationFrame).toHaveBeenCalled();
-
-      unmount();
-    });
-
-    it('executes resize callback with requestAnimationFrame', () => {
+  describe('Accessibility', () => {
+    it('has proper ARIA attributes', () => {
       render(<ReadingProgressBar />);
-
-      // Get the resize handler
-      const resizeHandlers = (window.addEventListener as vi.MockedFunction<typeof window.addEventListener>).mock.calls
-        .filter(call => call[0] === 'resize');
-
-      // Find the resize handler from the setup effect
-      const resizeHandler = resizeHandlers[1]?.[1] as (() => void) | undefined; // Second resize call is from setup
-
-      if (resizeHandler) {
-        resizeHandler();
-        expect(window.requestAnimationFrame).toHaveBeenCalled();
-      }
+      const progressBar = screen.getByRole('progressbar');
+      expect(progressBar).toHaveAttribute('role', 'progressbar');
+      expect(progressBar).toHaveAttribute('aria-label', 'Reading progress');
     });
 
-    it('executes resize handler and calls requestAnimationFrame callback', () => {
+    it('does not render any sr-only text', () => {
       render(<ReadingProgressBar />);
+      const progressBar = screen.getByRole('progressbar');
+      expect(progressBar.querySelector('.sr-only')).not.toBeInTheDocument();
+    });
+  });
 
-      // Get the resize handler
-      const resizeHandlers = (window.addEventListener as vi.MockedFunction<typeof window.addEventListener>).mock.calls
-        .filter(call => call[0] === 'resize');
-      const resizeHandler = resizeHandlers[1]?.[1] as (() => void) | undefined;
-
-      if (resizeHandler) {
-        // Execute the resize handler
-        resizeHandler();
-
-        // Get the requestAnimationFrame callback and execute it
-        const raCallback = (window.requestAnimationFrame as vi.MockedFunction<typeof window.requestAnimationFrame>).mock.calls[0]?.[0] as FrameRequestCallback | undefined;
-        expect(typeof raCallback).toBe('function');
-
-        // Execute the requestAnimationFrame callback to cover lines 65-66
-        raCallback();
-      }
+  describe('Motion Integration', () => {
+    it('renders motion div for progress indicator', () => {
+      render(<ReadingProgressBar />);
+      const progressBar = screen.getByRole('progressbar');
+      const indicator = progressBar.querySelector('div:last-child');
+      expect(indicator).toBeInTheDocument();
     });
 
-    it('handles rapid scroll events efficiently', () => {
-      const { unmount } = render(<ReadingProgressBar />);
+    it('applies style to motion div', () => {
+      render(<ReadingProgressBar />);
+      const progressBar = screen.getByRole('progressbar');
+      const indicator = progressBar.querySelector('div[class*="h-full"]');
+      expect(indicator).toHaveClass('origin-left');
+    });
+  });
 
-      const scrollHandler = (window.addEventListener as vi.MockedFunction<typeof window.addEventListener>).mock.calls
-        .find(call => call[0] === 'scroll')?.[1] as (() => void) | undefined;
+  describe('Multiple Instances', () => {
+    it('can render multiple progress bars independently', () => {
+      render(
+        <>
+          <ReadingProgressBar height={4} color="bg-blue-600" />
+          <ReadingProgressBar height={6} color="bg-red-600" position="sticky" />
+        </>
+      );
 
-      // Simulate rapid scroll events
-      for (let i = 0; i < 10; i++) {
-        scrollHandler();
-      }
-
-      // Should use requestAnimationFrame for each call
-      expect(window.requestAnimationFrame).toHaveBeenCalledTimes(10);
-
-      unmount();
+      const progressBars = screen.getAllByRole('progressbar');
+      expect(progressBars).toHaveLength(2);
     });
 
-    it('cleans up event listeners on unmount', () => {
-      const { unmount } = render(<ReadingProgressBar />);
+    it('each progress bar maintains its own styling', () => {
+      render(
+        <>
+          <ReadingProgressBar height={4} className="bar-1" />
+          <ReadingProgressBar height={8} className="bar-2" />
+        </>
+      );
 
-      // Verify event listeners were added
-      expect(window.addEventListener).toHaveBeenCalledWith('scroll', expect.any(Function), { passive: true });
-      expect(window.addEventListener).toHaveBeenCalledWith('resize', expect.any(Function), { passive: true });
+      const progressBars = screen.getAllByRole('progressbar');
+      expect(progressBars[0]).toHaveStyle({ height: '4px' });
+      expect(progressBars[0]).toHaveClass('bar-1');
+      expect(progressBars[1]).toHaveStyle({ height: '8px' });
+      expect(progressBars[1]).toHaveClass('bar-2');
+    });
+  });
 
-      unmount();
-
-      // Verify event listeners were removed
-      expect(window.removeEventListener).toHaveBeenCalledWith('scroll', expect.any(Function));
-      expect(window.removeEventListener).toHaveBeenCalledWith('resize', expect.any(Function));
+  describe('Error Handling', () => {
+    it('produces no console errors during normal operation', () => {
+      render(<ReadingProgressBar />);
+      expect(consoleSpy.error).not.toHaveBeenCalled();
     });
 
-    it('verifies scroll and resize event listener setup', () => {
-      const { unmount } = render(<ReadingProgressBar />);
+    it('produces no console warnings during normal operation', () => {
+      render(<ReadingProgressBar />);
+      expect(consoleSpy.warn).not.toHaveBeenCalled();
+    });
 
-      // Verify correct event listeners were added
-      expect(window.addEventListener).toHaveBeenCalledWith('scroll', expect.any(Function), { passive: true });
-      expect(window.addEventListener).toHaveBeenCalledWith('resize', expect.any(Function), { passive: true });
-      expect(window.addEventListener).toHaveBeenCalledWith('resize', expect.any(Function), { passive: true });
-
-      unmount();
+    it('handles all props combinations without crashing', () => {
+      expect(() => {
+        render(
+          <ReadingProgressBar
+            height={8}
+            className="custom"
+            color="bg-purple-600"
+            backgroundColor="bg-gray-400"
+            position="sticky"
+            zIndex={50}
+          />
+        );
+      }).not.toThrow();
     });
   });
 });

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import PostListClient from '@/components/organisms/PostListClient';
 import type { StoryblokStory, PostBlok } from '@/types/storyblok';
@@ -9,6 +10,31 @@ vi.mock('@/components/molecules/Card', () => ({
     <div data-testid={`card-${story.uuid}`}>{story.name}</div>
   ),
 }));
+
+// Mock motion/react-m for ScrollReveal
+vi.mock('motion/react-m', () => {
+  return new Proxy({}, {
+    get: (_: unknown, prop: string) => {
+      // eslint-disable-next-line react/display-name
+      return React.forwardRef(
+        (
+          {
+            children,
+            className,
+            ...htmlProps
+          }: Record<string, unknown>,
+          ref: unknown
+        ) => {
+          return React.createElement(
+            prop,
+            { ...htmlProps, className, ref },
+            children as React.ReactNode
+          );
+        }
+      );
+    },
+  });
+});
 
 // Mock fetch
 global.fetch = vi.fn();
