@@ -92,13 +92,13 @@ describe('ReadingProgressBar', () => {
     });
 
     it('applies sticky position classes when position="sticky"', () => {
-      const { container } = render(<ReadingProgressBar position="sticky" />);
+      render(<ReadingProgressBar position="sticky" />);
       const progressBar = screen.getByRole('progressbar');
       expect(progressBar).toHaveClass('sticky', 'top-[70px]', 'left-0', 'w-full');
     });
 
     it('applies responsive top margin for lg breakpoint', () => {
-      const { container } = render(<ReadingProgressBar />);
+      render(<ReadingProgressBar />);
       const progressBar = screen.getByRole('progressbar');
       expect(progressBar).toHaveClass('lg:top-[90px]');
     });

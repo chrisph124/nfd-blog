@@ -40,7 +40,7 @@ class MockIntersectionObserver {
   thresholds: ReadonlyArray<number> = [];
 }
 
-global.IntersectionObserver = MockIntersectionObserver as any;
+global.IntersectionObserver = MockIntersectionObserver as typeof IntersectionObserver;
 
 // Mock storyblokEditable and renderRichText
 vi.mock('@storyblok/react/rsc', () => ({

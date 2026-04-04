@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import RichtextReveal from '@/components/atoms/RichtextReveal';
@@ -10,6 +11,7 @@ let mockObserverInstance: MockIntersectionObserver | null = null;
 class MockIntersectionObserver implements IntersectionObserver {
   constructor(callback: IntersectionObserverCallback) {
     mockObserverCallback = callback;
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     mockObserverInstance = this;
   }
 
@@ -37,7 +39,7 @@ class MockIntersectionObserver implements IntersectionObserver {
 }
 
 // Setup mock before tests
-global.IntersectionObserver = MockIntersectionObserver as any;
+global.IntersectionObserver = MockIntersectionObserver as typeof IntersectionObserver;
 
 describe('RichtextReveal Component', () => {
   beforeEach(() => {
@@ -357,8 +359,6 @@ describe('RichtextReveal Component', () => {
 
   describe('Observer Configuration', () => {
     it('creates observer with correct rootMargin', () => {
-      const initialInstance = mockObserverInstance;
-
       render(
         <RichtextReveal>
           <img src="test.jpg" alt="test" />
@@ -500,7 +500,7 @@ describe('RichtextReveal Component', () => {
     });
 
     it('handles elements added dynamically after mount', () => {
-      const { container, rerender } = render(
+      const { rerender } = render(
         <RichtextReveal>
           <img src="1.jpg" alt="1" />
         </RichtextReveal>
@@ -533,7 +533,7 @@ describe('RichtextReveal Component', () => {
     });
 
     it('handles observer callback with empty entries', () => {
-      const { container } = render(
+      render(
         <RichtextReveal>
           <img src="test.jpg" alt="test" />
         </RichtextReveal>
