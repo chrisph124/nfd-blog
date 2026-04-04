@@ -22,7 +22,18 @@ export default function ScrollReveal({
   as: Tag = 'div',
 }: Readonly<ScrollRevealProps>) {
   const shouldReduceMotion = useReducedMotion();
-  const Component = m[Tag] as React.ComponentType<HTMLMotionProps<typeof Tag>>;
+
+  const getComponent = (tag: MotionTag) => {
+    switch (tag) {
+      case 'div': return m.div;
+      case 'section': return m.section;
+      case 'li': return m.li;
+      case 'article': return m.article;
+      case 'span': return m.span;
+    }
+  };
+
+  const Component = getComponent(Tag) as React.ComponentType<HTMLMotionProps<MotionTag>>;
 
   if (shouldReduceMotion) {
     return <Component className={cn(className)}>{children}</Component>;

@@ -29,10 +29,12 @@ const ReadingProgressBar = memo<ReadingProgressBarProps>(({
     restDelta: 0.001,
   });
 
-  const positionClasses = {
+  const positionMap: Record<string, string> = {
     fixed: 'fixed top-[70px] lg:top-[90px] left-0 w-full',
     sticky: 'sticky top-[70px] lg:top-[90px] left-0 w-full',
-  }[position] || 'fixed top-[70px] lg:top-[90px] left-0 w-full';
+  };
+  // eslint-disable-next-line security/detect-object-injection -- position is typed to 'fixed' | 'sticky'
+  const positionClasses = positionMap[position] || positionMap['fixed'];
 
   return (
     <div
