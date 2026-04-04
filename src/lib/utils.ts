@@ -122,3 +122,15 @@ export function normalizeStoryblokUrl(url: string | undefined | null): string {
   // Convert relative path to absolute
   return `/${url}`;
 }
+
+/**
+ * Inject lazy loading attributes into raw HTML for performance optimization
+ * - Adds loading="lazy" to <img> and <iframe> tags
+ * - Adds preload="none" to <video> tags
+ */
+export function injectLazyLoading(html: string): string {
+  return html
+    .replace(/<img(?!\s[^>]*loading=)/gi, '<img loading="lazy"')
+    .replace(/<iframe(?!\s[^>]*loading=)/gi, '<iframe loading="lazy"')
+    .replace(/<video(?!\s[^>]*preload=)/gi, '<video preload="none"');
+}

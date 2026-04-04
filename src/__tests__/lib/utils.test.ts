@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { cn, getReadingTime, getStoryReadingTime, formatDate, normalizeStoryblokUrl } from '@/lib/utils';
+import { cn, getReadingTime, getStoryReadingTime, formatDate, normalizeStoryblokUrl, injectLazyLoading } from '@/lib/utils';
 
 // Test interfaces for type safety
 interface TestTextContent {
@@ -433,6 +433,238 @@ describe('normalizeStoryblokUrl', () => {
     it('handles Storyblok external links', () => {
       expect(normalizeStoryblokUrl('https://github.com/user')).toBe('https://github.com/user');
       expect(normalizeStoryblokUrl('mailto:contact@example.com')).toBe('mailto:contact@example.com');
+    });
+  });
+});
+
+describe('injectLazyLoading', () => {
+  describe('Image tag handling', () => {
+    it('adds loading="lazy" to img tags without loading attribute', () => {
+      const html = '<img src="test.jpg" alt="test" />';
+      expect(injectLazyLoading(html)).toBe('<img loading="lazy" src="test.jpg" alt="test" />');
+    });
+
+    it('does not double-add loading attribute if already present', () => {
+      const html = '<img loading="eager" src="test.jpg" alt="test" />';
+      expect(injectLazyLoading(html)).toBe('<img loading="eager" src="test.jpg" alt="test" />');
+    });
+
+    it('handles multiple img tags', () => {
+      const html = '<img src="1.jpg" /><img src="2.jpg" /><img src="3.jpg" />';
+      const result = injectLazyLoading(html);
+      expect(result).toContain('<img loading="lazy" src="1.jpg" />');
+      expect(result).toContain('<img loading="lazy" src="2.jpg" />');
+      expect(result).toContain('<img loading="lazy" src="3.jpg" />');
+    });
+
+    it('preserves existing img attributes when adding loading', () => {
+      const html = '<img class="responsive" src="image.jpg" alt="descriptive" width="800" />';
+      const result = injectLazyLoading(html);
+      expect(result).toContain('loading="lazy"');
+      expect(result).toContain('class="responsive"');
+      expect(result).toContain('src="image.jpg"');
+      expect(result).toContain('alt="descriptive"');
+      expect(result).toContain('width="800"');
+    });
+
+    it('handles case-insensitive img tags', () => {
+      const html = '<IMG src="test.jpg" /><Img src="test2.jpg" />';
+      const result = injectLazyLoading(html);
+      // Note: The regex replacement normalizes to lowercase tags
+      expect(result).toContain('<img loading="lazy"');
+      expect(result.includes('loading="lazy"')).toBe(true);
+    });
+  });
+
+  describe('Iframe tag handling', () => {
+    it('adds loading="lazy" to iframe tags without loading attribute', () => {
+      const html = '<iframe src="https://example.com" title="test"></iframe>';
+      expect(injectLazyLoading(html)).toBe('<iframe loading="lazy" src="https://example.com" title="test"></iframe>');
+    });
+
+    it('does not double-add loading attribute to iframes if already present', () => {
+      const html = '<iframe loading="eager" src="https://example.com"></iframe>';
+      expect(injectLazyLoading(html)).toBe('<iframe loading="eager" src="https://example.com"></iframe>');
+    });
+
+    it('handles multiple iframe tags', () => {
+      const html = '<iframe src="1.html"></iframe><iframe src="2.html"></iframe>';
+      const result = injectLazyLoading(html);
+      expect(result).toContain('<iframe loading="lazy" src="1.html"></iframe>');
+      expect(result).toContain('<iframe loading="lazy" src="2.html"></iframe>');
+    });
+
+    it('preserves iframe attributes', () => {
+      const html = '<iframe class="embedded" src="video.html" width="560" height="315"></iframe>';
+      const result = injectLazyLoading(html);
+      expect(result).toContain('loading="lazy"');
+      expect(result).toContain('class="embedded"');
+      expect(result).toContain('width="560"');
+      expect(result).toContain('height="315"');
+    });
+
+    it('handles case-insensitive iframe tags', () => {
+      const html = '<IFRAME src="test.html"></IFRAME><IFrame src="test2.html"></IFrame>';
+      const result = injectLazyLoading(html);
+      // Note: The regex replacement normalizes to lowercase tags
+      expect(result).toContain('<iframe loading="lazy"');
+      expect(result.includes('loading="lazy"')).toBe(true);
+    });
+  });
+
+  describe('Video tag handling', () => {
+    it('adds preload="none" to video tags without preload attribute', () => {
+      const html = '<video src="video.mp4"></video>';
+      expect(injectLazyLoading(html)).toBe('<video preload="none" src="video.mp4"></video>');
+    });
+
+    it('does not double-add preload attribute if already present', () => {
+      const html = '<video preload="auto" src="video.mp4"></video>';
+      expect(injectLazyLoading(html)).toBe('<video preload="auto" src="video.mp4"></video>');
+    });
+
+    it('handles multiple video tags', () => {
+      const html = '<video src="1.mp4"></video><video src="2.mp4"></video>';
+      const result = injectLazyLoading(html);
+      expect(result).toContain('<video preload="none" src="1.mp4"></video>');
+      expect(result).toContain('<video preload="none" src="2.mp4"></video>');
+    });
+
+    it('preserves video attributes', () => {
+      const html = '<video class="video-player" width="640" height="480" controls></video>';
+      const result = injectLazyLoading(html);
+      expect(result).toContain('preload="none"');
+      expect(result).toContain('class="video-player"');
+      expect(result).toContain('width="640"');
+      expect(result).toContain('controls');
+    });
+
+    it('handles case-insensitive video tags', () => {
+      const html = '<VIDEO src="test.mp4"></VIDEO><Video src="test2.mp4"></Video>';
+      const result = injectLazyLoading(html);
+      // Note: The regex replacement normalizes to lowercase tags
+      expect(result).toContain('<video preload="none"');
+      expect(result.includes('preload="none"')).toBe(true);
+    });
+
+    it('handles video tags with child source elements', () => {
+      const html = '<video><source src="video.mp4" type="video/mp4"></source></video>';
+      const result = injectLazyLoading(html);
+      expect(result).toContain('<video preload="none"');
+      expect(result).toContain('<source src="video.mp4"');
+    });
+  });
+
+  describe('Mixed content', () => {
+    it('handles HTML with all media types together', () => {
+      const html = `
+        <p>Some text</p>
+        <img src="image.jpg" alt="test" />
+        <iframe src="embed.html"></iframe>
+        <video src="video.mp4"></video>
+        <p>More text</p>
+      `;
+      const result = injectLazyLoading(html);
+      expect(result).toContain('<img loading="lazy"');
+      expect(result).toContain('<iframe loading="lazy"');
+      expect(result).toContain('<video preload="none"');
+    });
+
+    it('preserves non-media tags unchanged', () => {
+      const html = '<div><p>Test paragraph</p><span>span content</span></div>';
+      const result = injectLazyLoading(html);
+      expect(result).toBe(html);
+    });
+
+    it('handles complex HTML structure', () => {
+      const html = `
+        <article>
+          <h1>Title</h1>
+          <figure>
+            <img src="featured.jpg" alt="featured" />
+            <figcaption>Image caption</figcaption>
+          </figure>
+          <section>
+            <p>Content with <img src="inline.jpg" /> inline image</p>
+          </section>
+        </article>
+      `;
+      const result = injectLazyLoading(html);
+      expect(result).toContain('<img loading="lazy" src="featured.jpg"');
+      expect(result).toContain('<img loading="lazy" src="inline.jpg"');
+    });
+  });
+
+  describe('Edge cases', () => {
+    it('handles empty string', () => {
+      expect(injectLazyLoading('')).toBe('');
+    });
+
+    it('handles string with no media tags', () => {
+      const html = '<div><p>Just text</p></div>';
+      expect(injectLazyLoading(html)).toBe(html);
+    });
+
+    it('handles malformed HTML gracefully', () => {
+      const html = '<img src="test.jpg" <iframe src="test.html">';
+      const result = injectLazyLoading(html);
+      expect(result).toContain('loading="lazy"');
+    });
+
+    it('handles self-closing vs non-self-closing tags', () => {
+      const html1 = '<img src="test.jpg" />';
+      const html2 = '<img src="test.jpg">';
+      expect(injectLazyLoading(html1)).toContain('loading="lazy"');
+      expect(injectLazyLoading(html2)).toContain('loading="lazy"');
+    });
+
+    it('handles attributes with special characters', () => {
+      const html = '<img src="test.jpg" alt="Test & special chars" data-info="a|b" />';
+      const result = injectLazyLoading(html);
+      expect(result).toContain('loading="lazy"');
+      expect(result).toContain('alt="Test & special chars"');
+      expect(result).toContain('data-info="a|b"');
+    });
+
+    it('handles attributes with quotes inside values', () => {
+      const html = '<img src="test.jpg" alt=\'Image with "quotes"\' />';
+      const result = injectLazyLoading(html);
+      expect(result).toContain('loading="lazy"');
+    });
+
+    it('handles very long HTML strings', () => {
+      const images = Array.from({ length: 100 }, (_, i) => `<img src="image-${i}.jpg" />`).join('\n');
+      const result = injectLazyLoading(images);
+      const matches = result.match(/loading="lazy"/g);
+      expect(matches?.length).toBe(100);
+    });
+
+    it('handles tags with multiple spaces before tag name', () => {
+      const html = '<img  src="test.jpg" />';
+      const result = injectLazyLoading(html);
+      expect(result).toContain('loading="lazy"');
+    });
+
+    it('does not modify src attribute values', () => {
+      const html = '<img src="loading.jpg" />';
+      const result = injectLazyLoading(html);
+      expect(result).toContain('src="loading.jpg"');
+    });
+  });
+
+  describe('Performance', () => {
+    it('handles large documents with many media elements efficiently', () => {
+      const largeHtml = Array.from({ length: 1000 }, () =>
+        '<img src="test.jpg" /><iframe src="test.html"></iframe><video src="test.mp4"></video>'
+      ).join('\n');
+
+      const start = performance.now();
+      const result = injectLazyLoading(largeHtml);
+      const end = performance.now();
+
+      expect(result).toContain('loading="lazy"');
+      expect(result).toContain('preload="none"');
+      expect(end - start).toBeLessThan(100); // Should complete quickly
     });
   });
 });
