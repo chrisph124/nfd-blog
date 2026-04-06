@@ -119,6 +119,7 @@ const VideoEmbed = ({ youtubeUrl, title, autoplay, loop, muted, controls }: Vide
       className="absolute inset-0 w-full h-full"
       src={`https://www.youtube.com/embed/${videoId}?${params}`}
       title={title}
+      loading="lazy"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
       allowFullScreen
     />
@@ -145,6 +146,7 @@ const VideoFile = ({ filename, altText, caption, aspectRatio, autoplay, loop, mu
       <div className={`relative w-full md:w-[85%] rounded-xl overflow-hidden ${getAspectRatioClass(aspectRatio, 'aspect-video')}`}>
         <video
           className="absolute inset-0 w-full h-full object-cover"
+          preload={autoplay ? 'auto' : 'none'}
           {...(autoplay && { autoPlay: true })}
           {...(loop && { loop: true })}
           {...(muted && { muted: true })}

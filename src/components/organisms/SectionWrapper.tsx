@@ -5,6 +5,7 @@ import { makeStoryblokEditable, StoryblokServerComponent } from "@/lib/storyblok
 import Image from "next/image";
 import type { SectionWrapperBlok } from "@/types/storyblok";
 import { cn } from "@/lib/utils";
+import ScrollReveal from "@/components/atoms/ScrollReveal";
 
 interface SectionWrapperProps {
   blok: SectionWrapperBlok;
@@ -66,14 +67,16 @@ const SectionWrapper = memo(({ blok }: SectionWrapperProps) => {
       )}
 
       <div className="w-full max-w-[1280px] relative z-10 flex flex-col gap-10 lg:gap-14 items-center px-4 md:px-8 lg:px-12 xl:px-5 mx-auto">
-        <SectionHeader heading={heading} navigateTo={navigate_to} />
+        <ScrollReveal>
+          <SectionHeader heading={heading} navigateTo={navigate_to} />
+        </ScrollReveal>
 
         {childrens && childrens.length > 0 && (
-          <div className="w-full">
+          <ScrollReveal className="w-full">
             {childrens.map((child) => (
               <StoryblokServerComponent key={child._uid} blok={child} />
             ))}
-          </div>
+          </ScrollReveal>
         )}
       </div>
     </section>

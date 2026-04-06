@@ -77,7 +77,7 @@ const ImageCarousel = memo(({ images, hideOnMobile }: ImageCarouselProps) => {
         onMouseLeave={handleMouseLeave}
       >
         <div className="flex">
-          {images.map((image) => (
+          {images.map((image, index) => (
             <div key={image.id} className="flex-[0_0_100%]">
               <div className="group relative aspect-video w-full overflow-hidden">
                 <Image
@@ -86,6 +86,7 @@ const ImageCarousel = memo(({ images, hideOnMobile }: ImageCarouselProps) => {
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
                   sizes="(max-width: 768px) 100vw, 50vw"
+                  loading={index === 0 ? 'eager' : 'lazy'}
                 />
               </div>
             </div>
