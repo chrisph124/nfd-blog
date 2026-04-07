@@ -1,14 +1,15 @@
 'use client';
 
-import { useState, useEffect, memo } from 'react';
+import { useSyncExternalStore, memo } from 'react';
 import { useTheme } from 'next-themes';
 import { HiSun, HiMoon } from 'react-icons/hi2';
 
-const ThemeToggle = memo(() => {
-  const [mounted, setMounted] = useState(false);
-  const { resolvedTheme, setTheme } = useTheme();
+const emptySubscribe = () => () => {};
+const useHydrated = () => useSyncExternalStore(emptySubscribe, () => true, () => false);
 
-  useEffect(() => setMounted(true), []);
+const ThemeToggle = memo(() => {
+  const mounted = useHydrated();
+  const { resolvedTheme, setTheme } = useTheme();
 
   const isDark = resolvedTheme === 'dark';
 
