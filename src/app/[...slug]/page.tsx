@@ -11,25 +11,31 @@ interface PageProps {
   }>;
 }
 
-export default async function CatchAllPage({ params }: PageProps) {
-  const { slug } = await params;
-  const fullSlug = slug.join('/');
-
+async function fetchStory(fullSlug: string) {
   try {
     const storyblokApi = getStoryblokApi();
     const { data } = await storyblokApi.get(`cdn/stories/${fullSlug}`, {
       version: 'draft',
     });
-
-    return (
-      <div className="page">
-        <StoryblokStory story={data.story} />
-      </div>
-    );
+    return data.story;
   } catch (error) {
     console.error(`Error fetching story for slug: ${fullSlug}`, error);
-    notFound();
+    return null;
   }
+}
+
+export default async function CatchAllPage({ params }: PageProps) {
+  const { slug } = await params;
+  const fullSlug = slug.join('/');
+
+  const story = await fetchStory(fullSlug);
+  if (!story) notFound();
+
+  return (
+    <div className="page">
+      <StoryblokStory story={story} />
+    </div>
+  );
 }
 
 // Generate static params for nested pages

@@ -10,54 +10,57 @@ interface PageProps {
   }>;
 }
 
+async function fetchStoryBySlug(slug: string) {
+  const storyblokApi = getStoryblokApi();
+
+  // Try fetching as a post first (from posts/ folder)
+  try {
+    const { data } = await storyblokApi.get(`cdn/stories/posts/${slug}`, {
+      version: 'draft',
+    });
+    return { story: data.story as StoryType<PostBlok>, source: 'posts' as const };
+  } catch {
+    // If not found in posts/, try fetching as a regular page
+  }
+
+  try {
+    const { data } = await storyblokApi.get(`cdn/stories/${slug}`, {
+      version: 'draft',
+    });
+    return { story: data.story as StoryType<PostBlok>, source: 'pages' as const };
+  } catch {
+    return null;
+  }
+}
+
 export default async function DynamicPage({ params }: PageProps) {
   const { slug } = await params;
 
-  try {
-    const storyblokApi = getStoryblokApi();
-
-    // Try fetching as a post first (from posts/ folder)
-    try {
-      const { data } = await storyblokApi.get(`cdn/stories/posts/${slug}`, {
-        version: 'draft',
-      });
-
-      const story = data.story as StoryType<PostBlok>;
-
-      // If it's a post, render Post component with tags and created date
-      if (story.content.component === 'post') {
-        return (
-          <div className="page">
-            <Post
-              blok={story.content}
-              tags={story.tag_list}
-              createdAt={story.first_published_at || story.created_at}
-            />
-          </div>
-        );
-      }
-
-      return (
-        <div className="page">
-          <StoryblokStory story={story} />
-        </div>
-      );
-    } catch {
-      // If not found in posts/, try fetching as a regular page
-      const { data } = await storyblokApi.get(`cdn/stories/${slug}`, {
-        version: 'draft',
-      });
-
-      return (
-        <div className="page">
-          <StoryblokStory story={data.story} />
-        </div>
-      );
-    }
-  } catch (error) {
-    console.error(`Error fetching story for slug: ${slug}`, error);
+  const result = await fetchStoryBySlug(slug);
+  if (!result) {
+    console.error(`Error fetching story for slug: ${slug}`);
     notFound();
   }
+
+  const { story, source } = result;
+
+  if (source === 'posts' && story.content.component === 'post') {
+    return (
+      <div className="page">
+        <Post
+          blok={story.content}
+          tags={story.tag_list}
+          createdAt={story.first_published_at || story.created_at}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="page">
+      <StoryblokStory story={story} />
+    </div>
+  );
 }
 
 // Generate static params for known pages (optional, for static generation)
