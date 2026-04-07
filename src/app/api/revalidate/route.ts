@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
 
     // If reload is true, also revalidate API routes
     if (reload) {
-      revalidateTag('posts');
+      revalidateTag('posts', 'page');
     }
 
     return NextResponse.json({
