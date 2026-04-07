@@ -1,33 +1,11 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, act } from '@testing-library/react';
 import type { RichtextBlok } from '@/types/storyblok';
 import type { StoryblokRichTextNode } from '@storyblok/react/rsc';
 
-// Mock the markdown-utils module
-vi.mock('@/lib/markdown-utils', () => ({
-  resolveContentToHtml: vi.fn((content: unknown): string | null => {
-    if (!content) return null;
-    if (typeof content === 'object' && content !== null) {
-      // Include lazy loading attributes to match pipeline behavior
-      return '<p>Mock rich text content</p><img src="test.jpg" alt="test" loading="lazy" /><video src="test.mp4" preload="none"></video>';
-    }
-    return content as string;
-  }),
-  isRichTextJson: (content: unknown): boolean => {
-    if (!content || typeof content !== 'object') return false;
-    const obj = content as Record<string, unknown>;
-    return obj.type === 'doc' || obj.type === 'ruxt';
-  },
-  isMarkdownHtml: (content: unknown): content is string => {
-    if (typeof content !== 'string') return false;
-    return /<(p|h[1-6]|ul|ol|li|pre|blockquote|img|iframe|video)/i.test(content);
-  },
-  markdownToStoryblokRichtext: (markdown: string): string => markdown,
-}));
-
-// Mock the pipeline module
-vi.mock('@/lib/richtext-pipeline', () => ({
-  processRichtext: vi.fn(async (html: string) => html),
+// Mock renderRichText from @storyblok/react/rsc
+vi.mock('@storyblok/react/rsc', () => ({
+  renderRichText: vi.fn(() => '<p>Rendered rich text content</p>'),
 }));
 
 // Mock IntersectionObserver for RichtextReveal component
@@ -53,31 +31,12 @@ vi.mock('@/lib/storyblok-utils', () => ({
   }),
 }));
 
-// Mock the Richtext component itself - must use inline factory to avoid hoisting issues
-vi.mock('@/components/atoms/Richtext', () => {
-  return {
-    default: ({ blok }: { blok: RichtextBlok }) => {
-      const content = blok.content;
-      if (!content) return null;
+// Mock injectLazyLoading
+vi.mock('@/lib/utils', () => ({
+  injectLazyLoading: vi.fn((html: string) => html),
+}));
 
-      // Include lazy loading attributes to match pipeline behavior
-      const html = typeof content === 'object'
-        ? '<p>Mock rich text content</p><img src="test.jpg" alt="test" loading="lazy" /><video src="test.mp4" preload="none"></video>'
-        : content as string;
-
-      return (
-        <div
-          data-blok-cuid={blok._uid}
-          data-blok-uid={blok._uid}
-          className="flex flex-col gap-y-4 richtext prose prose-lg max-w-none prose-headings:font-bold prose-h2:text-3xl prose-h3:text-2xl prose-p:text-gray-700 prose-a:text-primary-700 prose-a:no-underline hover:prose-a:underline prose-img:rounded-xl prose-code:bg-gray-200 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm prose-code:before:content-none prose-code:after:content-none"
-          dangerouslySetInnerHTML={{ __html: html }}
-        />
-      );
-    },
-  };
-});
-
-// Import the mocked Richtext for testing
+// Import the real Richtext component
 import Richtext from '@/components/atoms/Richtext';
 
 function createTestRichtextBlok(
@@ -92,6 +51,10 @@ function createTestRichtextBlok(
 }
 
 describe('Richtext Component', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   const mockBlok: RichtextBlok = {
     _uid: 'test-richtext-1',
     component: 'richtext',
@@ -225,7 +188,7 @@ describe('Richtext Component', () => {
 
       const richtextElement = document.querySelector('.richtext');
       expect(richtextElement).toBeInTheDocument();
-      expect(richtextElement?.innerHTML).toContain('Mock rich text content');
+      expect(richtextElement?.innerHTML).toContain('Rendered rich text content');
     });
   });
 
@@ -632,7 +595,7 @@ describe('Richtext Component', () => {
 
         const richtextElement = container.querySelector('.richtext');
         expect(richtextElement).toBeInTheDocument();
-        expect(richtextElement?.innerHTML).toContain('Mock rich text content');
+        expect(richtextElement?.innerHTML).toContain('Rendered rich text content');
       });
     });
   });
