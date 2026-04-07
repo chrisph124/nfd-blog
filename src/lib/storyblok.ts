@@ -13,6 +13,7 @@ import SectionWrapper from "@/components/organisms/SectionWrapper";
 import TabItem from "@/components/molecules/TabItem";
 import Cta from "@/components/atoms/Cta";
 import Richtext from "@/components/atoms/Richtext";
+import Markdown from "@/components/atoms/Markdown";
 import Media from "@/components/atoms/Media";
 import CardItem from "@/components/molecules/CardItem";
 import PostList from "@/components/organisms/PostList";
@@ -38,6 +39,7 @@ const components = {
   section_wrapper: SectionWrapper,
   cta: Cta,
   richtext: Richtext,
+  markdown: Markdown,
   media: Media,
   card_item: CardItem,
   post_list: PostList,
