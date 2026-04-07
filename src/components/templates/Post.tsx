@@ -77,7 +77,7 @@ export default function Post({ blok, tags = [], createdAt }: Readonly<PostProps>
         </div>
       </div>
 
-      <div className="max-w-[1280px] flex flex-col justify-center items-center px-4 md:px-8 lg:px-12 xl:px-5 mx-auto gap-y-6 md:gap-y-12">
+      <div className="w-full max-w-[1280px] flex flex-col justify-center items-center px-4 md:px-8 lg:px-12 xl:px-5 mx-auto gap-y-6 md:gap-y-12">
         {excerpt && (
           <h2 className="h4 italic text-center md:px-2 lg:px-4 xl:px-16">
             {excerpt}

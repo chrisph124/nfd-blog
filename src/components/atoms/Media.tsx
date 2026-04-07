@@ -178,7 +178,7 @@ const ImageFile = ({ filename, altText, caption, aspectRatio, isExternalUrl, lin
 
   const imageContent = (
     <figure {...makeStoryblokEditable(blok)} className="group flex flex-col items-center">
-      <div className={`relative w-full md:w-[85%] rounded-xl overflow-hidden ${getAspectRatioClass(aspectRatio)}`}>
+      <div className={`relative ${getAspectRatioClass(aspectRatio) === 'aspect-square' ? 'w-[85%] md:w-[50%]' : 'w-full md:w-[85%]'} rounded-xl overflow-hidden ${getAspectRatioClass(aspectRatio)}`}>
         <Image
           src={filename}
           alt={altText}
