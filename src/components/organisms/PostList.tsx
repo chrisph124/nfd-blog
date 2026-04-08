@@ -27,7 +27,7 @@ async function fetchPosts(perPage: number) {
     }) as StoriesResponse;
 
     const { data, headers } = response;
-    const total = parseInt(headers.total || '0');
+    const total = Number.parseInt(headers.total || '0');
     const hasMore = data.stories.length < total;
 
     return { stories: data.stories, hasMore };
