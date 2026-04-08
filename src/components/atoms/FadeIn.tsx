@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode } from 'react';
+import { type ReactNode, useState, useEffect } from 'react';
 import { m, useReducedMotion, type HTMLMotionProps } from 'motion/react';
 import { cn } from '@/lib/utils';
 
@@ -22,6 +22,11 @@ export default function FadeIn({
   as: Tag = 'div',
 }: Readonly<FadeInProps>) {
   const shouldReduceMotion = useReducedMotion();
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   const getComponent = (tag: MotionTag) => {
     switch (tag) {
@@ -41,7 +46,7 @@ export default function FadeIn({
 
   return (
     <Component
-      initial={{ opacity: 0, y: 20 }}
+      initial={hasMounted ? { opacity: 0, y: 20 } : false}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration, delay, ease: 'easeOut' }}
