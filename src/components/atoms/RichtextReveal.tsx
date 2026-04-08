@@ -28,7 +28,7 @@ export default function RichtextReveal({ children }: Readonly<RichtextRevealProp
           }
         });
       },
-      { rootMargin: '-50px' }
+      { rootMargin: '0px' }
     );
 
     mediaElements.forEach((el) => observer.observe(el));

@@ -204,16 +204,17 @@ describe('Post', () => {
       expect(tagsContainer).not.toBeInTheDocument();
     });
 
-    it('renders tag links with correct href', () => {
+    it('renders tags as styled spans', () => {
       const blok = createMockBlok();
       const tags = ['AI', 'Tech'];
       render(<Post blok={blok} tags={tags} />);
 
-      const aiLink = screen.getByRole('link', { name: 'AI' });
-      const techLink = screen.getByRole('link', { name: 'Tech' });
+      const aiSpan = screen.getByText('AI');
+      const techSpan = screen.getByText('Tech');
 
-      expect(aiLink).toHaveAttribute('href', '/insight-hub/AI');
-      expect(techLink).toHaveAttribute('href', '/insight-hub/Tech');
+      expect(aiSpan.tagName).toBe('SPAN');
+      expect(techSpan.tagName).toBe('SPAN');
+      expect(aiSpan).toHaveClass('px-3', 'py-1', 'text-sm', 'font-bold', 'text-white', 'uppercase', 'bg-white/20', 'backdrop-blur-sm', 'rounded-full');
     });
 
     it('renders tags above title', () => {
@@ -234,19 +235,19 @@ describe('Post', () => {
       expect(elements.indexOf(tagContainer!)).toBeLessThan(elements.indexOf(titleElement!));
     });
 
-    it('applies correct styling to tag links', () => {
+    it('applies correct styling to tag spans', () => {
       const blok = createMockBlok();
       const tags = ['Styled Tag'];
       render(<Post blok={blok} tags={tags} />);
 
-      const tagLink = screen.getByRole('link', { name: 'Styled Tag' });
+      const tagSpan = screen.getByText('Styled Tag');
       // Check individual classes
-      expect(tagLink).toHaveClass('px-3');
-      expect(tagLink).toHaveClass('py-1');
-      expect(tagLink).toHaveClass('text-sm');
-      expect(tagLink).toHaveClass('rounded-full');
+      expect(tagSpan).toHaveClass('px-3');
+      expect(tagSpan).toHaveClass('py-1');
+      expect(tagSpan).toHaveClass('text-sm');
+      expect(tagSpan).toHaveClass('rounded-full');
       // Check className string contains expected patterns
-      expect(tagLink.className).toMatch(/text-white|backdrop-blur/);
+      expect(tagSpan.className).toMatch(/text-white|backdrop-blur/);
     });
   });
 
@@ -595,16 +596,16 @@ describe('Post', () => {
       expect(screen.getByTestId('blok-block-1')).toBeInTheDocument();
     });
 
-    it('preserves proper link functionality in tags with ReadingProgress', () => {
+    it('renders tags as spans with ReadingProgress', () => {
       const blok = createMockBlok();
       const tags = ['Accessibility', 'Testing'];
       render(<Post blok={blok} tags={tags} />);
 
-      const accessibilityLink = screen.getByRole('link', { name: 'Accessibility' });
-      const testingLink = screen.getByRole('link', { name: 'Testing' });
+      const accessibilitySpan = screen.getByText('Accessibility');
+      const testingSpan = screen.getByText('Testing');
 
-      expect(accessibilityLink).toHaveAttribute('href', '/insight-hub/Accessibility');
-      expect(testingLink).toHaveAttribute('href', '/insight-hub/Testing');
+      expect(accessibilitySpan.tagName).toBe('SPAN');
+      expect(testingSpan.tagName).toBe('SPAN');
       expect(screen.getByTestId('reading-progress')).toBeInTheDocument();
     });
   });

@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import { StoryblokServerComponent } from "@/lib/storyblok-utils";
 import { getStoryReadingTime, formatDate } from "@/lib/utils";
 import ReadingProgressBar from "@/components/atoms/ReadingProgress";
@@ -48,13 +47,12 @@ export default function Post({ blok, tags = [], createdAt }: Readonly<PostProps>
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-2 justify-center">
               {tags.map((tag) => (
-                <Link
+                <span
                   key={tag}
-                  href={`/insight-hub/${tag}`}
-                  className="px-3 py-1 text-sm font-bold text-white uppercase bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors"
+                  className="px-3 py-1 text-sm font-bold text-white uppercase bg-white/20 backdrop-blur-sm rounded-full"
                 >
                   {tag}
-                </Link>
+                </span>
               ))}
             </div>
           )}

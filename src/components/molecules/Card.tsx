@@ -49,14 +49,12 @@ const CardTags = memo(({ tags }: CardTagsProps) => {
   return (
     <div className="flex flex-wrap gap-2">
       {tags.map((tag) => (
-        <Link
+        <span
           key={tag}
-          href={`/insight-hub/${tag}`}
-          className="px-2 py-1 text-xs font-bold uppercase text-neon-cyan-900 bg-gray-200 rounded-md hover:bg-gray-100 transition-colors"
-          onClick={(e) => e.stopPropagation()}
+          className="px-2 py-1 text-xs font-bold uppercase text-neon-cyan-900 bg-gray-200 rounded-md"
         >
           {tag}
-        </Link>
+        </span>
       ))}
     </div>
   );

@@ -90,7 +90,7 @@ export function formatDate(dateString: string, locale: string = 'en-US'): string
 
 /**
  * Normalize Storyblok URLs to ensure absolute paths for Next.js Link components
- * Prevents relative path issues when navigating from nested routes (e.g., /insight-hub/category)
+ * Prevents relative path issues when navigating from nested routes
  *
  * @param url - URL from Storyblok (cached_url or url field)
  * @returns Absolute path starting with '/' or original URL if external/already absolute

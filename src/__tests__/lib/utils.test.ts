@@ -352,7 +352,7 @@ describe('normalizeStoryblokUrl', () => {
     });
 
     it('converts nested relative path to absolute path', () => {
-      expect(normalizeStoryblokUrl('insight-hub/category')).toBe('/insight-hub/category');
+      expect(normalizeStoryblokUrl('category/article')).toBe('/category/article');
     });
 
     it('handles paths with query parameters', () => {
@@ -370,7 +370,7 @@ describe('normalizeStoryblokUrl', () => {
     });
 
     it('handles nested absolute paths', () => {
-      expect(normalizeStoryblokUrl('/insight-hub/category')).toBe('/insight-hub/category');
+      expect(normalizeStoryblokUrl('/category/article')).toBe('/category/article');
     });
 
     it('handles absolute paths with query parameters', () => {
@@ -419,15 +419,15 @@ describe('normalizeStoryblokUrl', () => {
   });
 
   describe('Real-world Storyblok scenarios', () => {
-    it('fixes navigation bug from /insight-hub/category to about page', () => {
+    it('fixes navigation bug from nested path to about page', () => {
       // This is the actual bug scenario reported by user
       expect(normalizeStoryblokUrl('about')).toBe('/about');
     });
 
     it('handles typical navigation items', () => {
       expect(normalizeStoryblokUrl('home')).toBe('/home');
-      expect(normalizeStoryblokUrl('insight-hub')).toBe('/insight-hub');
-      expect(normalizeStoryblokUrl('insight-hub/web-development')).toBe('/insight-hub/web-development');
+      expect(normalizeStoryblokUrl('blog')).toBe('/blog');
+      expect(normalizeStoryblokUrl('blog/web-development')).toBe('/blog/web-development');
     });
 
     it('handles Storyblok external links', () => {
