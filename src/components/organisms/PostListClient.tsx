@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Card from '@/components/molecules/Card';
-import ScrollReveal from '@/components/atoms/ScrollReveal';
+import FadeIn from '@/components/atoms/FadeIn';
 import type { StoryblokStory, PostBlok } from '@/types/storyblok';
 
 interface PostListClientProps {
@@ -63,9 +63,9 @@ export default function PostListClient({
       {/* Posts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
         {posts.map((story, index) => (
-          <ScrollReveal key={story.uuid} delay={(index % perPage) * 0.1}>
+          <FadeIn key={story.uuid} delay={(index % perPage) * 0.08}>
             <Card story={story} />
-          </ScrollReveal>
+          </FadeIn>
         ))}
       </div>
 

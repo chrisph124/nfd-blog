@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import ScrollReveal from '@/components/atoms/ScrollReveal';
+import FadeIn from '@/components/atoms/FadeIn';
 
 // Track reduced motion state for testing
 let mockReducedMotion = false;
@@ -34,23 +34,23 @@ vi.mock('motion/react', () => {
   };
 });
 
-describe('ScrollReveal', () => {
+describe('FadeIn', () => {
   describe('Rendering', () => {
     it('renders without crashing', () => {
       expect(() => {
         render(
-          <ScrollReveal>
+          <FadeIn>
             <div>Test content</div>
-          </ScrollReveal>
+          </FadeIn>
         );
       }).not.toThrow();
     });
 
     it('renders children correctly', () => {
       render(
-        <ScrollReveal>
+        <FadeIn>
           <div>Test content</div>
-        </ScrollReveal>
+        </FadeIn>
       );
 
       expect(screen.getByText('Test content')).toBeInTheDocument();
@@ -58,9 +58,9 @@ describe('ScrollReveal', () => {
 
     it('renders as div by default', () => {
       const { container } = render(
-        <ScrollReveal>
+        <FadeIn>
           <span>Content</span>
-        </ScrollReveal>
+        </FadeIn>
       );
 
       const element = container.querySelector('div');
@@ -69,9 +69,9 @@ describe('ScrollReveal', () => {
 
     it('renders as section when as="section"', () => {
       const { container } = render(
-        <ScrollReveal as="section">
+        <FadeIn as="section">
           <span>Content</span>
-        </ScrollReveal>
+        </FadeIn>
       );
 
       const element = container.querySelector('section');
@@ -80,9 +80,9 @@ describe('ScrollReveal', () => {
 
     it('renders as li when as="li"', () => {
       const { container } = render(
-        <ScrollReveal as="li">
+        <FadeIn as="li">
           <span>Content</span>
-        </ScrollReveal>
+        </FadeIn>
       );
 
       const element = container.querySelector('li');
@@ -91,9 +91,9 @@ describe('ScrollReveal', () => {
 
     it('renders as article when as="article"', () => {
       const { container } = render(
-        <ScrollReveal as="article">
+        <FadeIn as="article">
           <span>Content</span>
-        </ScrollReveal>
+        </FadeIn>
       );
 
       const element = container.querySelector('article');
@@ -102,9 +102,9 @@ describe('ScrollReveal', () => {
 
     it('renders as span when as="span"', () => {
       const { container } = render(
-        <ScrollReveal as="span">
+        <FadeIn as="span">
           <span>Content</span>
-        </ScrollReveal>
+        </FadeIn>
       );
 
       const element = container.querySelector('span');
@@ -115,9 +115,9 @@ describe('ScrollReveal', () => {
   describe('Props Handling', () => {
     it('applies className prop', () => {
       const { container } = render(
-        <ScrollReveal className="custom-class">
+        <FadeIn className="custom-class">
           <div>Content</div>
-        </ScrollReveal>
+        </FadeIn>
       );
 
       const element = container.firstChild as HTMLElement;
@@ -126,9 +126,9 @@ describe('ScrollReveal', () => {
 
     it('applies multiple classes', () => {
       const { container } = render(
-        <ScrollReveal className="class-1 class-2 class-3">
+        <FadeIn className="class-1 class-2 class-3">
           <div>Content</div>
-        </ScrollReveal>
+        </FadeIn>
       );
 
       const element = container.firstChild as HTMLElement;
@@ -138,19 +138,19 @@ describe('ScrollReveal', () => {
     it('uses default delay of 0', () => {
       expect(() => {
         render(
-          <ScrollReveal>
+          <FadeIn>
             <div>Content</div>
-          </ScrollReveal>
+          </FadeIn>
         );
       }).not.toThrow();
     });
 
-    it('uses default duration of 0.5', () => {
+    it('uses default duration of 0.4', () => {
       expect(() => {
         render(
-          <ScrollReveal>
+          <FadeIn>
             <div>Content</div>
-          </ScrollReveal>
+          </FadeIn>
         );
       }).not.toThrow();
     });
@@ -158,9 +158,9 @@ describe('ScrollReveal', () => {
     it('accepts custom delay prop', () => {
       expect(() => {
         render(
-          <ScrollReveal delay={0.2}>
+          <FadeIn delay={0.2}>
             <div>Content</div>
-          </ScrollReveal>
+          </FadeIn>
         );
       }).not.toThrow();
     });
@@ -168,9 +168,9 @@ describe('ScrollReveal', () => {
     it('accepts custom duration prop', () => {
       expect(() => {
         render(
-          <ScrollReveal duration={0.8}>
+          <FadeIn duration={0.8}>
             <div>Content</div>
-          </ScrollReveal>
+          </FadeIn>
         );
       }).not.toThrow();
     });
@@ -179,9 +179,9 @@ describe('ScrollReveal', () => {
   describe('Content', () => {
     it('renders text content', () => {
       render(
-        <ScrollReveal>
+        <FadeIn>
           Test text content
-        </ScrollReveal>
+        </FadeIn>
       );
 
       expect(screen.getByText('Test text content')).toBeInTheDocument();
@@ -191,9 +191,9 @@ describe('ScrollReveal', () => {
       const NestedComponent = () => <p>Nested content</p>;
 
       render(
-        <ScrollReveal>
+        <FadeIn>
           <NestedComponent />
-        </ScrollReveal>
+        </FadeIn>
       );
 
       expect(screen.getByText('Nested content')).toBeInTheDocument();
@@ -201,11 +201,11 @@ describe('ScrollReveal', () => {
 
     it('renders multiple children', () => {
       render(
-        <ScrollReveal>
+        <FadeIn>
           <div>First</div>
           <div>Second</div>
           <div>Third</div>
-        </ScrollReveal>
+        </FadeIn>
       );
 
       expect(screen.getByText('First')).toBeInTheDocument();
@@ -219,9 +219,9 @@ describe('ScrollReveal', () => {
       mockReducedMotion = true;
 
       const { container } = render(
-        <ScrollReveal className="test-class">
+        <FadeIn className="test-class">
           <div>Content</div>
-        </ScrollReveal>
+        </FadeIn>
       );
 
       const element = container.firstChild as HTMLElement;
@@ -234,16 +234,16 @@ describe('ScrollReveal', () => {
 
   describe('Edge Cases', () => {
     it('handles empty children', () => {
-      const { container } = render(<ScrollReveal />);
+      const { container } = render(<FadeIn />);
       expect(container.firstChild).toBeInTheDocument();
     });
 
     it('works with zero delay', () => {
       expect(() => {
         render(
-          <ScrollReveal delay={0}>
+          <FadeIn delay={0}>
             <div>Content</div>
-          </ScrollReveal>
+          </FadeIn>
         );
       }).not.toThrow();
     });
@@ -251,9 +251,9 @@ describe('ScrollReveal', () => {
     it('works with zero duration', () => {
       expect(() => {
         render(
-          <ScrollReveal duration={0}>
+          <FadeIn duration={0}>
             <div>Content</div>
-          </ScrollReveal>
+          </FadeIn>
         );
       }).not.toThrow();
     });
@@ -261,9 +261,9 @@ describe('ScrollReveal', () => {
     it('works with large delay values', () => {
       expect(() => {
         render(
-          <ScrollReveal delay={10}>
+          <FadeIn delay={10}>
             <div>Content</div>
-          </ScrollReveal>
+          </FadeIn>
         );
       }).not.toThrow();
     });

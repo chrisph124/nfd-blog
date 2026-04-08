@@ -158,15 +158,16 @@ describe('Card', () => {
       expect(titleLink).toHaveAttribute('href', '/test-post');
     });
 
-    it('renders tag links with correct href', () => {
+    it('renders tags as styled spans', () => {
       const story = createMockStory();
       render(<Card story={story} />);
 
-      const testTagLink = screen.getByRole('link', { name: 'test' });
-      const exampleTagLink = screen.getByRole('link', { name: 'example' });
+      const testTagSpan = screen.getByText('test');
+      const exampleTagSpan = screen.getByText('example');
 
-      expect(testTagLink).toHaveAttribute('href', '/insight-hub/test');
-      expect(exampleTagLink).toHaveAttribute('href', '/insight-hub/example');
+      expect(testTagSpan.tagName).toBe('SPAN');
+      expect(exampleTagSpan.tagName).toBe('SPAN');
+      expect(testTagSpan).toHaveClass('px-2', 'py-1', 'text-xs', 'font-bold', 'uppercase', 'text-neon-cyan-900', 'bg-gray-200', 'rounded-md');
     });
 
     it('strips posts/ prefix from full_slug for root-level URL', () => {
@@ -257,35 +258,15 @@ describe('Card', () => {
   });
 });
 
-describe('Event Handling', () => {
-  it('handles click events gracefully', () => {
+describe('Tag Rendering', () => {
+  it('renders tags as plain spans without navigation', () => {
     const story = createMockStory();
     render(<Card story={story} />);
 
-    const tagLink = screen.getByRole('link', { name: 'test' });
+    const testTagSpan = screen.getByText('test');
 
-    // Verify link is clickable without errors
-    expect(tagLink).toHaveAttribute('href', '/insight-hub/test');
-    expect(tagLink).toBeInTheDocument();
-  });
-
-  it('prevents event propagation on tag clicks', () => {
-    const story = createMockStory();
-    render(<Card story={story} />);
-
-    const tagLink = screen.getByRole('link', { name: 'test' });
-
-    // Create a mock click event with stopPropagation
-    const mockEvent = {
-      stopPropagation: vi.fn(),
-      preventDefault: vi.fn(),
-    } as unknown as React.MouseEvent;
-
-    // Simulate the onClick handler being called
-    tagLink.onclick = (e) => e.stopPropagation();
-    tagLink.onclick(mockEvent);
-
-    expect(mockEvent.stopPropagation).toHaveBeenCalled();
+    expect(testTagSpan.tagName).toBe('SPAN');
+    expect(testTagSpan).not.toHaveAttribute('href');
   });
 });
 

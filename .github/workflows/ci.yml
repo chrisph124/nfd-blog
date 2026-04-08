@@ -47,7 +47,7 @@ jobs:
           NEXT_PUBLIC_STORYBLOK_CONTENT_API_ACCESS_TOKEN: ${{ secrets.STORYBLOK_TOKEN }}
 
       - name: Upload coverage to SonarCloud
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
