@@ -47,8 +47,7 @@ export default function FadeIn({
   return (
     <Component
       initial={isClient ? { opacity: 0, y: 20 } : false}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration, delay, ease: 'easeOut' }}
       className={cn(className)}
     >
