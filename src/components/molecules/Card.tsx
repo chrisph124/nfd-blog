@@ -8,11 +8,13 @@ import { cn, getStoryReadingTime, formatDate } from '@/lib/utils';
 
 interface CardProps {
   story: StoryblokStory<PostBlok>;
+  priority?: boolean;
 }
 
 interface CardImageProps {
   image: PostBlok['featured_image'];
   title: string;
+  priority?: boolean;
 }
 
 interface CardTagsProps {
@@ -25,7 +27,7 @@ interface CardMetaProps {
   body?: unknown[];
 }
 
-const CardImage = memo(({ image, title }: CardImageProps) => {
+const CardImage = memo(({ image, title, priority = false }: CardImageProps) => {
   if (!image?.filename) return null;
 
   return (
@@ -36,6 +38,7 @@ const CardImage = memo(({ image, title }: CardImageProps) => {
         fill
         className="object-cover transition-transform duration-300 group-hover:scale-105"
         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+        priority={priority}
       />
     </div>
   );
@@ -51,7 +54,7 @@ const CardTags = memo(({ tags }: CardTagsProps) => {
       {tags.map((tag) => (
         <span
           key={tag}
-          className="px-2 py-1 text-xs font-bold uppercase text-neon-cyan-900 bg-gray-200 rounded-md"
+          className="px-2 py-1 text-[10px] font-bold uppercase text-neon-cyan-900 bg-gray-200 rounded-md"
         >
           {tag}
         </span>
@@ -79,7 +82,7 @@ const CardMeta = memo(({ createdAt, body }: CardMetaProps) => {
 
 CardMeta.displayName = 'CardMeta';
 
-const Card = memo(({ story }: CardProps) => {
+const Card = memo(({ story, priority = false }: CardProps) => {
   const { content, full_slug, tag_list, created_at } = story;
   const { featured_image, title = '', excerpt, body } = content;
 
@@ -94,7 +97,7 @@ const Card = memo(({ story }: CardProps) => {
       )}
     >
       <Link href={`/${postSlug}`} className="block">
-        <CardImage image={featured_image} title={title} />
+        <CardImage image={featured_image} title={title} priority={priority} />
       </Link>
 
       <div className="flex flex-col gap-2 p-4 flex-1">

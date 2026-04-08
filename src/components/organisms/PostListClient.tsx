@@ -63,8 +63,8 @@ export default function PostListClient({
       {/* Posts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
         {posts.map((story, index) => (
-          <FadeIn key={story.uuid} delay={(index % perPage) * 0.08}>
-            <Card story={story} />
+          <FadeIn key={story.uuid} delay={(index % perPage) * 0.12} direction="up">
+            <Card story={story} priority={index === 0} />
           </FadeIn>
         ))}
       </div>

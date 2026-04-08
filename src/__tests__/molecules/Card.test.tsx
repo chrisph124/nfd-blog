@@ -167,7 +167,7 @@ describe('Card', () => {
 
       expect(testTagSpan.tagName).toBe('SPAN');
       expect(exampleTagSpan.tagName).toBe('SPAN');
-      expect(testTagSpan).toHaveClass('px-2', 'py-1', 'text-xs', 'font-bold', 'uppercase', 'text-neon-cyan-900', 'bg-gray-200', 'rounded-md');
+      expect(testTagSpan).toHaveClass('px-2', 'py-1', 'text-[10px]', 'font-bold', 'uppercase', 'text-neon-cyan-900', 'bg-gray-200', 'rounded-md');
     });
 
     it('strips posts/ prefix from full_slug for root-level URL', () => {
