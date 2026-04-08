@@ -77,7 +77,7 @@ function rehypeMarkdownDetect() {
     visit(parent, 'element', (node: Element, index) => {
       if (node.tagName !== 'p' || index === undefined) return;
       const textContent = getTextContent(node);
-      const match = textContent.match(/^(#{1,4})\s+(.+)$/);
+      const match = textContent.match(/^(#{1,4})\s+(\S.*)$/);
       if (match) {
         headingNodes.push({ node, index, level: match[1].length, text: match[2] });
       }
