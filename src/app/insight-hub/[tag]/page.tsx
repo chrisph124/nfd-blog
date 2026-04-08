@@ -16,7 +16,7 @@ interface StoriesResponse {
   };
 }
 
-export default async function TagPage({ params }: TagPageProps) {
+export default async function TagPage({ params }: Readonly<TagPageProps>) {
   const { tag } = await params;
 
   // Convert URL slug to readable title (e.g., "ai" -> "AI", "afk-life" -> "AFK Life")
