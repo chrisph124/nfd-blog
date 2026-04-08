@@ -54,7 +54,7 @@ const CardTags = memo(({ tags }: CardTagsProps) => {
       {tags.map((tag) => (
         <span
           key={tag}
-          className="px-2 py-1 text-xs font-bold uppercase text-neon-cyan-900 bg-gray-200 rounded-md"
+          className="px-2 py-1 text-[10px] font-bold uppercase text-neon-cyan-900 bg-gray-200 rounded-md"
         >
           {tag}
         </span>

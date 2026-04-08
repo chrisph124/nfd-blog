@@ -49,7 +49,7 @@ export default function Post({ blok, tags = [], createdAt }: Readonly<PostProps>
               {tags.map((tag) => (
                 <span
                   key={tag}
-                  className="px-3 py-1 text-sm font-bold text-white uppercase bg-white/20 backdrop-blur-sm rounded-full"
+                  className="px-3 py-1 text-xs font-bold text-white uppercase bg-white/20 backdrop-blur-sm rounded-full"
                 >
                   {tag}
                 </span>

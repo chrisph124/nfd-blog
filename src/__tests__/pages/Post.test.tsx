@@ -214,7 +214,7 @@ describe('Post', () => {
 
       expect(aiSpan.tagName).toBe('SPAN');
       expect(techSpan.tagName).toBe('SPAN');
-      expect(aiSpan).toHaveClass('px-3', 'py-1', 'text-sm', 'font-bold', 'text-white', 'uppercase', 'bg-white/20', 'backdrop-blur-sm', 'rounded-full');
+      expect(aiSpan).toHaveClass('px-3', 'py-1', 'text-xs', 'font-bold', 'text-white', 'uppercase', 'bg-white/20', 'backdrop-blur-sm', 'rounded-full');
     });
 
     it('renders tags above title', () => {
@@ -244,7 +244,7 @@ describe('Post', () => {
       // Check individual classes
       expect(tagSpan).toHaveClass('px-3');
       expect(tagSpan).toHaveClass('py-1');
-      expect(tagSpan).toHaveClass('text-sm');
+      expect(tagSpan).toHaveClass('text-xs');
       expect(tagSpan).toHaveClass('rounded-full');
       // Check className string contains expected patterns
       expect(tagSpan.className).toMatch(/text-white|backdrop-blur/);

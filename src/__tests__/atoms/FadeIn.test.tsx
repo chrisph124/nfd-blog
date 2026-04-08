@@ -232,6 +232,67 @@ describe('FadeIn', () => {
     });
   });
 
+  describe('Direction Prop', () => {
+    it('renders with direction="up" without crashing', () => {
+      expect(() => {
+        render(
+          <FadeIn direction="up">
+            <div>Content</div>
+          </FadeIn>
+        );
+      }).not.toThrow();
+    });
+
+    it('renders with direction="down" without crashing', () => {
+      expect(() => {
+        render(
+          <FadeIn direction="down">
+            <div>Content</div>
+          </FadeIn>
+        );
+      }).not.toThrow();
+    });
+
+    it('renders with direction="left" without crashing', () => {
+      expect(() => {
+        render(
+          <FadeIn direction="left">
+            <div>Content</div>
+          </FadeIn>
+        );
+      }).not.toThrow();
+    });
+
+    it('renders with direction="right" without crashing', () => {
+      expect(() => {
+        render(
+          <FadeIn direction="right">
+            <div>Content</div>
+          </FadeIn>
+        );
+      }).not.toThrow();
+    });
+
+    it('uses default direction of "up"', () => {
+      expect(() => {
+        render(
+          <FadeIn>
+            <div>Content</div>
+          </FadeIn>
+        );
+      }).not.toThrow();
+    });
+
+    it('renders children with direction prop', () => {
+      render(
+        <FadeIn direction="left">
+          <div>Direction content</div>
+        </FadeIn>
+      );
+      expect(screen.getByText('Direction content')).toBeInTheDocument();
+    });
+  });
+
   describe('Edge Cases', () => {
     it('handles empty children', () => {
       const { container } = render(<FadeIn />);
