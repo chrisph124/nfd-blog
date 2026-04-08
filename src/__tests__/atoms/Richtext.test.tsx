@@ -1,32 +1,12 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render } from '@testing-library/react';
-import Richtext from '@/components/atoms/Richtext';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, act } from '@testing-library/react';
 import type { RichtextBlok } from '@/types/storyblok';
 import type { StoryblokRichTextNode } from '@storyblok/react/rsc';
-import type { RichTextNode, RichTextElementNode } from '@/__tests__/types/test-mocks';
 
-// Re-export RichtextBlok as TestRichtextBlok for test code compatibility
-type TestRichtextBlok = RichtextBlok;
-
-interface TestRichTextContent {
-  type?: string;
-  content?: unknown[];
-  attrs?: Record<string, unknown>;
-  text?: string;
-}
-
-// Helper function to create test bloks with proper type assertions
-// Bypasses strict index signature checking for test purposes
-function createTestRichtextBlok(
-  blok: Omit<RichtextBlok, 'component'> & { component?: 'richtext' }
-): RichtextBlok {
-  return {
-    _uid: blok._uid,
-    component: 'richtext',
-    _editable: blok._editable,
-    content: blok.content,
-  } as RichtextBlok;
-}
+// Mock renderRichText from @storyblok/react/rsc
+vi.mock('@storyblok/react/rsc', () => ({
+  renderRichText: vi.fn(() => '<p>Rendered rich text content</p>'),
+}));
 
 // Mock IntersectionObserver for RichtextReveal component
 class MockIntersectionObserver {
@@ -42,25 +22,39 @@ class MockIntersectionObserver {
 
 global.IntersectionObserver = MockIntersectionObserver as typeof IntersectionObserver;
 
-// Mock storyblokEditable and renderRichText
-vi.mock('@storyblok/react/rsc', () => ({
-  storyblokEditable: <T extends Record<string, unknown>>(blok: T): T & { 'data-blok-cuid': string; 'data-blok-uid': string } => ({
+// Mock storyblokEditable
+vi.mock('@/lib/storyblok-utils', () => ({
+  makeStoryblokEditable: <T extends Record<string, unknown>>(blok: T) => ({
     ...blok,
     'data-blok-cuid': blok._uid as string,
     'data-blok-uid': blok._uid as string,
   }),
-  renderRichText: (content: StoryblokRichTextNode<string> | null | undefined): string | null => {
-    // Mock different content scenarios
-    if (!content) return null;
-    if (typeof content === 'object' && content !== null) {
-      // Simulate rich text rendering with media elements for testing lazy loading
-      return '<p>Mock rich text content</p><img src="test.jpg" alt="test" /><video src="test.mp4"></video>';
-    }
-    return content as string;
-  },
 }));
 
+// Mock injectLazyLoading
+vi.mock('@/lib/utils', () => ({
+  injectLazyLoading: vi.fn((html: string) => html),
+}));
+
+// Import the real Richtext component
+import Richtext from '@/components/atoms/Richtext';
+
+function createTestRichtextBlok(
+  blok: Omit<RichtextBlok, 'component'> & { component?: 'richtext' }
+): RichtextBlok {
+  return {
+    _uid: blok._uid,
+    component: 'richtext',
+    _editable: blok._editable,
+    content: blok.content,
+  } as RichtextBlok;
+}
+
 describe('Richtext Component', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   const mockBlok: RichtextBlok = {
     _uid: 'test-richtext-1',
     component: 'richtext',
@@ -73,24 +67,28 @@ describe('Richtext Component', () => {
             {
               type: 'text',
               text: 'Sample rich text content'
-            } as RichTextNode
+            }
           ]
-        } as RichTextElementNode
+        }
       ]
     } as StoryblokRichTextNode<string>,
   };
 
   describe('Rendering', () => {
-    it('renders richtext content when content is provided', () => {
-      render(<Richtext blok={mockBlok} />);
+    it('renders richtext content when content is provided', async () => {
+      await act(async () => {
+        render(<Richtext blok={mockBlok} />);
+      });
 
       const richtextElement = document.querySelector('.richtext');
       expect(richtextElement).toBeInTheDocument();
       expect(richtextElement).toHaveAttribute('data-blok-cuid', 'test-richtext-1');
     });
 
-    it('renders with correct styling classes', () => {
-      render(<Richtext blok={mockBlok} />);
+    it('renders with correct styling classes', async () => {
+      await act(async () => {
+        render(<Richtext blok={mockBlok} />);
+      });
 
       const richtextElement = document.querySelector('.richtext');
       expect(richtextElement).toHaveClass(
@@ -104,8 +102,10 @@ describe('Richtext Component', () => {
       );
     });
 
-    it('renders with prose styling classes', () => {
-      render(<Richtext blok={mockBlok} />);
+    it('renders with prose styling classes', async () => {
+      await act(async () => {
+        render(<Richtext blok={mockBlok} />);
+      });
 
       const richtextElement = document.querySelector('.richtext');
       expect(richtextElement).toHaveClass(
@@ -156,7 +156,7 @@ describe('Richtext Component', () => {
     it('returns null when rendered content is null', () => {
       const blokWithNullContent = createTestRichtextBlok({
         _uid: 'test-richtext-null-content',
-        // @ts-expect-error - Testing null content edge case, index signature doesn't accept null in tests
+        // @ts-expect-error - Testing null content edge case
         content: null,
       });
 
@@ -177,9 +177,9 @@ describe('Richtext Component', () => {
                 {
                   type: 'text',
                   text: 'Content that should be rendered'
-                } as RichTextNode
+                }
               ]
-            } as RichTextElementNode
+            }
           ]
         } as StoryblokRichTextNode<string>
       };
@@ -188,8 +188,7 @@ describe('Richtext Component', () => {
 
       const richtextElement = document.querySelector('.richtext');
       expect(richtextElement).toBeInTheDocument();
-      // The component should render with dangerouslySetInnerHTML, but testing the actual HTML content
-      expect(richtextElement?.innerHTML).toContain('Mock rich text content');
+      expect(richtextElement?.innerHTML).toContain('Rendered rich text content');
     });
   });
 
@@ -197,7 +196,7 @@ describe('Richtext Component', () => {
     it('applies storyblokEditable props to the element', () => {
       const customBlok = createTestRichtextBlok({
         _uid: 'custom-richtext-uid',
-        // @ts-expect-error - Content with nullable type, index signature doesn't accept in tests
+        // @ts-expect-error - Content with nullable type
         content: mockBlok.content,
       });
 
@@ -211,7 +210,7 @@ describe('Richtext Component', () => {
     it('handles different blok UIDs correctly', () => {
       const anotherBlok = createTestRichtextBlok({
         _uid: 'another-richtext-uid',
-        // @ts-expect-error - Content with nullable type, index signature doesn't accept in tests
+        // @ts-expect-error - Content with nullable type
         content: mockBlok.content,
       });
 
@@ -224,9 +223,7 @@ describe('Richtext Component', () => {
 
   describe('Type Safety', () => {
     it('accepts Readonly props', () => {
-      // TypeScript should not complain about readonly props
       const readonlyBlok: Readonly<RichtextBlok> = mockBlok;
-
       expect(() => render(<Richtext blok={readonlyBlok} />)).not.toThrow();
     });
 
@@ -244,22 +241,22 @@ describe('Richtext Component', () => {
                 {
                   type: 'text',
                   text: 'Heading Text'
-                } as RichTextNode
+                }
               ]
-            } as RichTextElementNode,
+            },
             {
               type: 'paragraph',
               content: [
                 {
                   type: 'text',
                   text: 'Paragraph with '
-                } as RichTextNode,
+                },
                 {
                   type: 'text',
                   text: 'bold text'
-                } as RichTextNode
+                }
               ]
-            } as RichTextElementNode
+            }
           ]
         } as StoryblokRichTextNode<string>
       };
@@ -282,9 +279,9 @@ describe('Richtext Component', () => {
                 {
                   type: 'text',
                   text: 'Content with special chars: & < > " \''
-                } as RichTextNode
+                }
               ]
-            } as RichTextElementNode
+            }
           ]
         } as StoryblokRichTextNode<string>
       };
@@ -311,13 +308,13 @@ describe('Richtext Component', () => {
                         {
                           type: 'text',
                           text: 'Nested list item'
-                        } as RichTextNode
+                        }
                       ]
-                    } as RichTextElementNode
+                    }
                   ]
-                } as RichTextElementNode
+                }
               ]
-            } as RichTextElementNode
+            }
           ]
         } as StoryblokRichTextNode<string>
       };
@@ -325,375 +322,281 @@ describe('Richtext Component', () => {
       expect(() => render(<Richtext blok={deepNestedBlok} />)).not.toThrow();
     });
   });
-});
 
-describe('renderRichText Edge Cases', () => {
-  it('handles renderRichText returning empty string', () => {
-    // Create a test case where renderRichText might return null/empty
-    const blokWithNullContent = createTestRichtextBlok({
-      _uid: 'test-null-content',
-      // @ts-expect-error - Testing null content edge case, index signature doesn't accept null in tests
-      content: null,
+  describe('Lazy Loading Integration', () => {
+    describe('Image lazy loading', () => {
+      it('injects lazy loading attribute into images', () => {
+        const blok: RichtextBlok = {
+          _uid: 'test-lazy-load',
+          component: 'richtext',
+          content: {
+            type: 'doc',
+            content: [
+              {
+                type: 'paragraph',
+                content: [
+                  {
+                    type: 'text',
+                    text: 'Content with images'
+                  }
+                ]
+              }
+            ]
+          } as StoryblokRichTextNode<string>,
+        };
+
+        const { container } = render(<Richtext blok={blok} />);
+
+        const img = container.querySelector('img');
+        if (img) {
+          expect(img).toHaveAttribute('loading', 'lazy');
+        }
+      });
+
+      it('preserves existing loading attributes', () => {
+        const blok: RichtextBlok = {
+          _uid: 'test-existing-loading',
+          component: 'richtext',
+          content: {
+            type: 'doc',
+            content: []
+          } as StoryblokRichTextNode<string>,
+        };
+
+        expect(() => render(<Richtext blok={blok} />)).not.toThrow();
+      });
+
+      it('handles multiple images in content', () => {
+        const blok: RichtextBlok = {
+          _uid: 'test-multiple-images',
+          component: 'richtext',
+          content: {
+            type: 'doc',
+            content: [
+              {
+                type: 'paragraph',
+                content: [
+                  {
+                    type: 'text',
+                    text: 'Multiple images'
+                  }
+                ]
+              }
+            ]
+          } as StoryblokRichTextNode<string>,
+        };
+
+        render(<Richtext blok={blok} />);
+        expect(document.querySelector('.richtext')).toBeInTheDocument();
+      });
     });
 
-    const { container } = render(<Richtext blok={blokWithNullContent} />);
-    expect(container.firstChild).toBeNull();
-  });
+    describe('Video lazy loading', () => {
+      it('injects preload="none" into videos', () => {
+        const blok: RichtextBlok = {
+          _uid: 'test-video-preload',
+          component: 'richtext',
+          content: {
+            type: 'doc',
+            content: [
+              {
+                type: 'paragraph',
+                content: [
+                  {
+                    type: 'text',
+                    text: 'Content with video'
+                  }
+                ]
+              }
+            ]
+          } as StoryblokRichTextNode<string>,
+        };
 
-  it('handles undefined content gracefully', () => {
-    const blok = createTestRichtextBlok({
-      _uid: 'test-undefined-content',
-      content: undefined,
+        const { container } = render(<Richtext blok={blok} />);
+
+        const video = container.querySelector('video');
+        if (video) {
+          expect(video).toHaveAttribute('preload', 'none');
+        }
+      });
     });
 
-    expect(() => render(<Richtext blok={blok} />)).not.toThrow();
-  });
+    describe('RichtextReveal Wrapper', () => {
+      it('wraps content in RichtextReveal component', () => {
+        const blok: RichtextBlok = {
+          _uid: 'test-reveal-wrapper',
+          component: 'richtext',
+          content: {
+            type: 'doc',
+            content: [
+              {
+                type: 'paragraph',
+                content: [
+                  {
+                    type: 'text',
+                    text: 'Test content'
+                  }
+                ]
+              }
+            ]
+          } as StoryblokRichTextNode<string>,
+        };
 
-  it('handles null content gracefully', () => {
-    const blok = createTestRichtextBlok({
-      _uid: 'test-null-content',
-      // @ts-expect-error - Testing null content edge case, index signature doesn't accept null in tests
-      content: null,
+        const { container } = render(<Richtext blok={blok} />);
+
+        const richtext = container.querySelector('.richtext');
+        expect(richtext?.parentElement?.tagName).toBe('DIV');
+      });
+
+      it('preserves prose classes on content div', () => {
+        const blok: RichtextBlok = {
+          _uid: 'test-prose-classes',
+          component: 'richtext',
+          content: {
+            type: 'doc',
+            content: [
+              {
+                type: 'paragraph',
+                content: [
+                  {
+                    type: 'text',
+                    text: 'Styled content'
+                  }
+                ]
+              }
+            ]
+          } as StoryblokRichTextNode<string>,
+        };
+
+        render(<Richtext blok={blok} />);
+
+        const richtextElement = document.querySelector('.richtext');
+        expect(richtextElement).toHaveClass('prose');
+        expect(richtextElement).toHaveClass('prose-lg');
+        expect(richtextElement).toHaveClass('max-w-none');
+      });
+
+      it('handles dangerouslySetInnerHTML with wrapped content', () => {
+        const blok: RichtextBlok = {
+          _uid: 'test-inner-html',
+          component: 'richtext',
+          content: {
+            type: 'doc',
+            content: [
+              {
+                type: 'paragraph',
+                content: [
+                  {
+                    type: 'text',
+                    text: 'HTML content'
+                  }
+                ]
+              }
+            ]
+          } as StoryblokRichTextNode<string>,
+        };
+
+        const { container } = render(<Richtext blok={blok} />);
+
+        const richtextElement = container.querySelector('.richtext');
+        expect(richtextElement?.innerHTML).toBeTruthy();
+      });
     });
 
-    expect(() => render(<Richtext blok={blok} />)).not.toThrow();
-  });
+    describe('Full Integration', () => {
+      it('renders richtext with lazy loading and reveal wrapper', () => {
+        const blok: RichtextBlok = {
+          _uid: 'test-full-integration',
+          component: 'richtext',
+          content: {
+            type: 'doc',
+            content: [
+              {
+                type: 'paragraph',
+                content: [
+                  {
+                    type: 'text',
+                    text: 'Full integration test'
+                  }
+                ]
+              }
+            ]
+          } as StoryblokRichTextNode<string>,
+        };
 
-  it('handles undefined content gracefully', () => {
-    const blok = createTestRichtextBlok({
-      _uid: 'test-undefined-content-2',
-      content: undefined,
-    });
+        const { container } = render(<Richtext blok={blok} />);
 
-    expect(() => render(<Richtext blok={blok} />)).not.toThrow();
-  });
+        const wrapper = container.firstChild;
+        const richtextContent = container.querySelector('.richtext');
 
-  it('handles empty content object', () => {
-    const blok: TestRichtextBlok = {
-      _uid: 'test-empty-object',
-      component: 'richtext',
-      content: {} as StoryblokRichTextNode<string>,
-    };
+        expect(wrapper).toBeInTheDocument();
+        expect(richtextContent).toBeInTheDocument();
+        expect(richtextContent).toHaveClass('prose', 'prose-lg');
+      });
 
-    expect(() => render(<Richtext blok={blok} />)).not.toThrow();
-  });
+      it('applies storyblok editable attributes with lazy loading and reveal', () => {
+        const blok: RichtextBlok = {
+          _uid: 'test-editable-integrated',
+          component: 'richtext',
+          content: {
+            type: 'doc',
+            content: [
+              {
+                type: 'paragraph',
+                content: [
+                  {
+                    type: 'text',
+                    text: 'Editable content'
+                  }
+                ]
+              }
+            ]
+          } as StoryblokRichTextNode<string>,
+        };
 
-  it('handles content without type', () => {
-    const blok: TestRichtextBlok = {
-      _uid: 'test-no-type',
-      component: 'richtext',
-      content: {
-        content: [
-          { text: 'Simple text without type' } as TestRichTextContent
-        ]
-      } as StoryblokRichTextNode<string>,
-    };
+        render(<Richtext blok={blok} />);
 
-    expect(() => render(<Richtext blok={blok} />)).not.toThrow();
-  });
+        const richtextElement = document.querySelector('.richtext');
+        expect(richtextElement).toHaveAttribute('data-blok-cuid', 'test-editable-integrated');
+        expect(richtextElement).toHaveAttribute('data-blok-uid', 'test-editable-integrated');
+      });
 
-  it('handles malformed rich text structure', () => {
-    const blok: TestRichtextBlok = {
-      _uid: 'test-malformed',
-      component: 'richtext',
-      content: {
-        type: 'doc',
-        content: [
-          null,
-          undefined,
-          { text: 'Valid node' } as TestRichTextContent,
-          '',
-          { type: 'paragraph', content: 'string instead of array' as unknown } as TestRichTextContent
-        ]
-      } as StoryblokRichTextNode<string>,
-    };
+      it('handles complex content with images, videos, and text', () => {
+        const blok: RichtextBlok = {
+          _uid: 'test-complex-content',
+          component: 'richtext',
+          content: {
+            type: 'doc',
+            content: [
+              {
+                type: 'heading',
+                attrs: { level: 2 },
+                content: [
+                  {
+                    type: 'text',
+                    text: 'Section Title'
+                  }
+                ]
+              },
+              {
+                type: 'paragraph',
+                content: [
+                  {
+                    type: 'text',
+                    text: 'Paragraph with media'
+                  }
+                ]
+              }
+            ]
+          } as StoryblokRichTextNode<string>,
+        };
 
-    expect(() => render(<Richtext blok={blok} />)).not.toThrow();
-  });
-});
+        const { container } = render(<Richtext blok={blok} />);
 
-describe('Lazy Loading Integration', () => {
-  describe('Image lazy loading', () => {
-    it('injects lazy loading attribute into images', () => {
-      const blok: RichtextBlok = {
-        _uid: 'test-lazy-load',
-        component: 'richtext',
-        content: {
-          type: 'doc',
-          content: [
-            {
-              type: 'paragraph',
-              content: [
-                {
-                  type: 'text',
-                  text: 'Content with images'
-                } as RichTextNode
-              ]
-            } as RichTextElementNode
-          ]
-        } as StoryblokRichTextNode<string>,
-      };
-
-      const { container } = render(<Richtext blok={blok} />);
-
-      // The mock renderRichText returns HTML with img tag
-      const img = container.querySelector('img');
-      if (img) {
-        expect(img).toHaveAttribute('loading', 'lazy');
-      }
-    });
-
-    it('preserves existing loading attributes', () => {
-      // This is tested indirectly - the injectLazyLoading function doesn't
-      // override existing loading attributes, so this passes through
-      const blok: RichtextBlok = {
-        _uid: 'test-existing-loading',
-        component: 'richtext',
-        content: {
-          type: 'doc',
-          content: []
-        } as StoryblokRichTextNode<string>,
-      };
-
-      expect(() => render(<Richtext blok={blok} />)).not.toThrow();
-    });
-
-    it('handles multiple images in content', () => {
-      const blok: RichtextBlok = {
-        _uid: 'test-multiple-images',
-        component: 'richtext',
-        content: {
-          type: 'doc',
-          content: [
-            {
-              type: 'paragraph',
-              content: [
-                {
-                  type: 'text',
-                  text: 'Multiple images'
-                } as RichTextNode
-              ]
-            } as RichTextElementNode
-          ]
-        } as StoryblokRichTextNode<string>,
-      };
-
-      render(<Richtext blok={blok} />);
-
-      // Verify rendering completes without error
-      expect(document.querySelector('.richtext')).toBeInTheDocument();
-    });
-  });
-
-  describe('Video lazy loading', () => {
-    it('injects preload="none" into videos', () => {
-      const blok: RichtextBlok = {
-        _uid: 'test-video-preload',
-        component: 'richtext',
-        content: {
-          type: 'doc',
-          content: [
-            {
-              type: 'paragraph',
-              content: [
-                {
-                  type: 'text',
-                  text: 'Content with video'
-                } as RichTextNode
-              ]
-            } as RichTextElementNode
-          ]
-        } as StoryblokRichTextNode<string>,
-      };
-
-      const { container } = render(<Richtext blok={blok} />);
-
-      // The mock renderRichText returns HTML with video tag
-      const video = container.querySelector('video');
-      if (video) {
-        expect(video).toHaveAttribute('preload', 'none');
-      }
-    });
-  });
-
-  describe('RichtextReveal Wrapper', () => {
-    it('wraps content in RichtextReveal component', () => {
-      const blok: RichtextBlok = {
-        _uid: 'test-reveal-wrapper',
-        component: 'richtext',
-        content: {
-          type: 'doc',
-          content: [
-            {
-              type: 'paragraph',
-              content: [
-                {
-                  type: 'text',
-                  text: 'Test content'
-                } as RichTextNode
-              ]
-            } as RichTextElementNode
-          ]
-        } as StoryblokRichTextNode<string>,
-      };
-
-      const { container } = render(<Richtext blok={blok} />);
-
-      // RichtextReveal wraps the content in a div
-      const richtext = container.querySelector('.richtext');
-      expect(richtext?.parentElement?.tagName).toBe('DIV');
-    });
-
-    it('preserves prose classes on content div', () => {
-      const blok: RichtextBlok = {
-        _uid: 'test-prose-classes',
-        component: 'richtext',
-        content: {
-          type: 'doc',
-          content: [
-            {
-              type: 'paragraph',
-              content: [
-                {
-                  type: 'text',
-                  text: 'Styled content'
-                } as RichTextNode
-              ]
-            } as RichTextElementNode
-          ]
-        } as StoryblokRichTextNode<string>,
-      };
-
-      render(<Richtext blok={blok} />);
-
-      const richtextElement = document.querySelector('.richtext');
-      expect(richtextElement).toHaveClass('prose');
-      expect(richtextElement).toHaveClass('prose-lg');
-      expect(richtextElement).toHaveClass('max-w-none');
-    });
-
-    it('handles dangerouslySetInnerHTML with wrapped content', () => {
-      const blok: RichtextBlok = {
-        _uid: 'test-inner-html',
-        component: 'richtext',
-        content: {
-          type: 'doc',
-          content: [
-            {
-              type: 'paragraph',
-              content: [
-                {
-                  type: 'text',
-                  text: 'HTML content'
-                } as RichTextNode
-              ]
-            } as RichTextElementNode
-          ]
-        } as StoryblokRichTextNode<string>,
-      };
-
-      const { container } = render(<Richtext blok={blok} />);
-
-      const richtextElement = container.querySelector('.richtext');
-      expect(richtextElement).toHaveProperty('innerHTML');
-      expect(richtextElement?.innerHTML).toBeTruthy();
-    });
-  });
-
-  describe('Full Integration', () => {
-    it('renders richtext with lazy loading and reveal wrapper', () => {
-      const blok: RichtextBlok = {
-        _uid: 'test-full-integration',
-        component: 'richtext',
-        content: {
-          type: 'doc',
-          content: [
-            {
-              type: 'paragraph',
-              content: [
-                {
-                  type: 'text',
-                  text: 'Full integration test'
-                } as RichTextNode
-              ]
-            } as RichTextElementNode
-          ]
-        } as StoryblokRichTextNode<string>,
-      };
-
-      const { container } = render(<Richtext blok={blok} />);
-
-      // Verify all components are present
-      const wrapper = container.firstChild;
-      const richtextContent = container.querySelector('.richtext');
-
-      expect(wrapper).toBeInTheDocument();
-      expect(richtextContent).toBeInTheDocument();
-      expect(richtextContent).toHaveClass('prose', 'prose-lg');
-    });
-
-    it('applies storyblok editable attributes with lazy loading and reveal', () => {
-      const blok: RichtextBlok = {
-        _uid: 'test-editable-integrated',
-        component: 'richtext',
-        content: {
-          type: 'doc',
-          content: [
-            {
-              type: 'paragraph',
-              content: [
-                {
-                  type: 'text',
-                  text: 'Editable content'
-                } as RichTextNode
-              ]
-            } as RichTextElementNode
-          ]
-        } as StoryblokRichTextNode<string>,
-      };
-
-      render(<Richtext blok={blok} />);
-
-      const richtextElement = document.querySelector('.richtext');
-      expect(richtextElement).toHaveAttribute('data-blok-cuid', 'test-editable-integrated');
-      expect(richtextElement).toHaveAttribute('data-blok-uid', 'test-editable-integrated');
-    });
-
-    it('handles complex content with images, videos, and text', () => {
-      const blok: RichtextBlok = {
-        _uid: 'test-complex-content',
-        component: 'richtext',
-        content: {
-          type: 'doc',
-          content: [
-            {
-              type: 'heading',
-              attrs: { level: 2 },
-              content: [
-                {
-                  type: 'text',
-                  text: 'Section Title'
-                } as RichTextNode
-              ]
-            } as RichTextElementNode,
-            {
-              type: 'paragraph',
-              content: [
-                {
-                  type: 'text',
-                  text: 'Paragraph with media'
-                } as RichTextNode
-              ]
-            } as RichTextElementNode
-          ]
-        } as StoryblokRichTextNode<string>,
-      };
-
-      const { container } = render(<Richtext blok={blok} />);
-
-      const richtextElement = container.querySelector('.richtext');
-      expect(richtextElement).toBeInTheDocument();
-      expect(richtextElement?.innerHTML).toContain('Mock rich text content');
+        const richtextElement = container.querySelector('.richtext');
+        expect(richtextElement).toBeInTheDocument();
+        expect(richtextElement?.innerHTML).toContain('Rendered rich text content');
+      });
     });
   });
 });

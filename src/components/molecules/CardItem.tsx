@@ -14,14 +14,13 @@ interface CardItemProps {
 export default function CardItem({ blok }: Readonly<CardItemProps>) {
   const { post_reference } = blok;
   const [story, setStory] = useState<StoryblokStory<PostBlok> | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!!post_reference);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    if (!post_reference) {
-      setLoading(false);
-      return;
-    }
+    if (!post_reference) return;
+
+    let cancelled = false;
 
     const fetchPost = async () => {
       try {
@@ -41,16 +40,21 @@ export default function CardItem({ blok }: Readonly<CardItemProps>) {
         const response = await storyblokApi.get(`cdn/stories/${storyIdentifier}` as const, apiParams);
         const fetchedStory = (response.data as { story: StoryblokStory<PostBlok> }).story;
 
-        setStory(fetchedStory);
-        setLoading(false);
+        if (!cancelled) {
+          setStory(fetchedStory);
+          setLoading(false);
+        }
       } catch (err) {
         console.error(`CardItem: Failed to fetch post ${post_reference}:`, err);
-        setError(true);
-        setLoading(false);
+        if (!cancelled) {
+          setError(true);
+          setLoading(false);
+        }
       }
     };
 
     fetchPost();
+    return () => { cancelled = true; };
   }, [post_reference]);
 
   if (!post_reference) {

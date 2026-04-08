@@ -15,11 +15,9 @@ interface StoriesResponse {
   };
 }
 
-export default async function PostList({ blok }: Readonly<PostListProps>) {
-  const perPage = blok.posts_per_page || 12;
-  const storyblokApi = getStoryblokApi();
-
+async function fetchPosts(perPage: number) {
   try {
+    const storyblokApi = getStoryblokApi();
     const response = await storyblokApi.get('cdn/stories', {
       version: 'draft',
       content_type: 'post',
@@ -29,23 +27,33 @@ export default async function PostList({ blok }: Readonly<PostListProps>) {
     }) as StoriesResponse;
 
     const { data, headers } = response;
-    const total = parseInt(headers.total || '0');
+    const total = Number.parseInt(headers.total || '0');
     const hasMore = data.stories.length < total;
 
-    return (
-      <PostListClient
-        initialPosts={data.stories}
-        perPage={perPage}
-        hasMore={hasMore}
-      />
-    );
+    return { stories: data.stories, hasMore };
   } catch (error) {
     console.error('Error fetching posts:', error);
+    return null;
+  }
+}
 
+export default async function PostList({ blok }: Readonly<PostListProps>) {
+  const perPage = blok.posts_per_page || 12;
+  const result = await fetchPosts(perPage);
+
+  if (!result) {
     return (
       <div className="text-center py-12">
         <p className="text-gray-500">Unable to load posts. Please try again later.</p>
       </div>
     );
   }
+
+  return (
+    <PostListClient
+      initialPosts={result.stories}
+      perPage={perPage}
+      hasMore={result.hasMore}
+    />
+  );
 }

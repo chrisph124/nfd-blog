@@ -59,7 +59,7 @@ export function getStoryReadingTime(body: unknown[] | undefined, wordsPerMinute:
           .join(' ');
       }
       // Handle other content types
-      return acc + JSON.stringify(block).replace(/[^a-zA-Z\s]/g, ' ');
+      return acc + JSON.stringify(block).replaceAll(/[^a-zA-Z\s]/g, ' ');
     }
     return acc;
   }, '');
@@ -130,7 +130,7 @@ export function normalizeStoryblokUrl(url: string | undefined | null): string {
  */
 export function injectLazyLoading(html: string): string {
   return html
-    .replace(/<img(?!\s[^>]*loading=)/gi, '<img loading="lazy"')
-    .replace(/<iframe(?!\s[^>]*loading=)/gi, '<iframe loading="lazy"')
-    .replace(/<video(?!\s[^>]*preload=)/gi, '<video preload="none"');
+    .replaceAll(/<img(?!\s[^>]*loading=)/gi, '<img loading="lazy"')
+    .replaceAll(/<iframe(?!\s[^>]*loading=)/gi, '<iframe loading="lazy"')
+    .replaceAll(/<video(?!\s[^>]*preload=)/gi, '<video preload="none"');
 }

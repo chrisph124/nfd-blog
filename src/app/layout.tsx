@@ -11,7 +11,7 @@ import Footer from "@/components/organisms/Footer";
 const nunito = Nunito({
   variable: "--font-nunito",
   subsets: ["latin"],
-  weight: ["400", "600", "700", "800"],
+  weight: ["300", "400", "600", "700", "800"],
   display: "swap",
 });
 
@@ -20,6 +20,7 @@ const bitcountPropSingle = Bitcount_Prop_Single({
   weight: ["400", "500", "600", "700", "800"],
   subsets: ["latin"],
   display: "swap",
+  fallback: ["system-ui", "Arial", "sans-serif"],
 });
 
 const lora = Lora({

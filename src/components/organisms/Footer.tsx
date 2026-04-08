@@ -3,10 +3,6 @@ import { makeStoryblokEditable } from "@/lib/storyblok-utils";
 import type { StoryblokComponentProps, FooterBlok } from "@/types/storyblok";
 import { FaGithub, FaLinkedin, FaEnvelope } from 'react-icons/fa';
 
-/**
- * Social media links configuration
- * TODO: Update placeholder URLs with actual social media accounts
- */
 const SOCIAL_LINKS = [
   { name: 'GitHub', url: 'https://github.com/chrisph124', icon: FaGithub },
   { name: 'LinkedIn', url: 'https://www.linkedin.com/in/chrispham124/', icon: FaLinkedin },

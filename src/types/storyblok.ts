@@ -219,11 +219,19 @@ export interface PostListBlok extends StoryblokBlok {
 }
 
 /**
- * richtext component
+ * richtext component — Rich Text JSON content
  */
 export type RichtextBlok = Omit<StoryblokBlok, 'component' | 'content'> & {
   component: 'richtext';
   content?: StoryblokRichTextNode<string> | null;
+};
+
+/**
+ * markdown component — Markdown HTML content
+ */
+export type MarkdownBlok = Omit<StoryblokBlok, 'component' | 'content'> & {
+  component: 'markdown';
+  content?: string;
 };
 
 /**
@@ -300,6 +308,7 @@ export type AnyBlok =
   | GridBlok
   | HeaderBlok
   | HeroBlockBlok
+  | MarkdownBlok
   | MediaBlok
   | NavItemBlok
   | PageBlok

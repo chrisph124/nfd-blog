@@ -91,7 +91,7 @@ describe('Revalidate API Route', () => {
 
       await POST(request);
 
-      expect(revalidateTag).toHaveBeenCalledWith('posts');
+      expect(revalidateTag).toHaveBeenCalledWith('posts', 'page');
     });
 
     it('returns revalidation info', async () => {

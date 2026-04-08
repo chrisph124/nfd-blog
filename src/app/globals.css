@@ -561,3 +561,85 @@ h6, .h6 {
     transition: none;
   }
 }
+
+/* Shiki code block base styles */
+.richtext pre {
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  overflow-x: auto;
+  max-width: 100%;
+  font-size: 0.875rem;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.richtext code {
+  background-color: var(--gray-200);
+  padding: 0.125rem;
+  border-radius: 0.2rem;
+}
+
+pre.shiki {
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+[data-theme="dark"] pre.shiki {
+  box-shadow: 0 5px 15px 0 rgb(255 255 255 / 0.2), 0 2px 4px -2px rgb(255 255 255 / 0.2);
+}
+
+pre.shiki code {
+  background-color: transparent;
+}
+
+/* Light mode: use Shiki light theme colors (default) */
+.shiki,
+.shiki span {
+  color: var(--shiki-light);
+  background-color: var(--shiki-light-bg);
+  font-style: var(--shiki-light-font-style);
+  font-weight: var(--shiki-light-font-weight);
+  text-decoration: var(--shiki-light-text-decoration);
+}
+
+
+/* List styling */
+.richtext ul,
+.richtext ol {
+  padding-left: 1.5rem;
+}
+
+.richtext li {
+  margin-bottom: 0.5rem;
+}
+
+.richtext li > ul,
+.richtext li > ol {
+  margin-top: 0.5rem;
+}
+
+/* Blockquote (markdown >) */
+.richtext blockquote {
+  border-left: 4px solid var(--primary-500);
+  padding-left: 1.25rem;
+  margin-left: 0;
+  font-style: italic;
+  color: var(--gray-600);
+}
+
+.richtext blockquote p {
+  color: var(--gray-600);
+  margin-bottom: 0.5rem;
+}
+
+.richtext blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+[data-theme="dark"] .richtext blockquote {
+  border-left-color: var(--primary-400);
+  color: var(--gray-400);
+}
+
+[data-theme="dark"] .richtext blockquote p {
+  color: var(--gray-400);
+}

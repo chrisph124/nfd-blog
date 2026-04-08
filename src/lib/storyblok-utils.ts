@@ -35,8 +35,8 @@ export function getDimensionsFromStoryblokUrl(url: string): {
   }
 
   const [widthStr, heightStr] = dimensionsPart.split('x');
-  const width = parseInt(widthStr, 10);
-  const height = parseInt(heightStr, 10);
+  const width = Number.parseInt(widthStr, 10);
+  const height = Number.parseInt(heightStr, 10);
 
   if (Number.isNaN(width) || Number.isNaN(height) || width <= 0 || height <= 0) {
     console.warn(`Invalid dimensions extracted from URL: ${url}`);
