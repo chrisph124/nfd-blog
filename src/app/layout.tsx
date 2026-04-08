@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Nunito, Lora, Bitcount_Prop_Single } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import StoryblokProvider from "@/components/providers/StoryblokProvider";
 import ThemeProvider from "@/components/providers/ThemeProvider";
@@ -70,6 +71,7 @@ export default async function RootLayout({
               </MotionProvider>
             </StoryblokProvider>
           </ThemeProvider>
+          <Analytics />
         </body>
       </html>
   );
