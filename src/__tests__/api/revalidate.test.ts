@@ -149,6 +149,7 @@ describe('Revalidate API Route', () => {
 
   describe('Error handling', () => {
     it('handles malformed JSON body', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const url = new URL('http://localhost:3000/api/revalidate');
       url.searchParams.set('secret', 'test-secret');
       const request = new NextRequest(url, {
@@ -159,6 +160,8 @@ describe('Revalidate API Route', () => {
       const response = await POST(request);
 
       expect(response.status).toBe(500);
+      expect(consoleSpy).toHaveBeenCalledWith('Revalidation error:', expect.any(SyntaxError));
+      consoleSpy.mockRestore();
     });
   });
 });
