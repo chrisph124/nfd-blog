@@ -24,6 +24,10 @@ import { apiPlugin, storyblokInit } from '@storyblok/react/rsc';
 import type { PostBlok, PageBlok, StoryblokStory } from '@/types/storyblok';
 import { cache } from 'react';
 
+// Use 'draft' in development for preview, 'published' in production
+export const storyblokVersion: 'draft' | 'published' =
+  process.env.NODE_ENV === 'development' ? 'draft' : 'published';
+
 // Component mapping type
 const components = {
   page: Page,
@@ -80,7 +84,7 @@ export function getSiteUrl(): string {
 export const fetchHomeStory = cache(async () => {
   try {
     const storyblokApi = getStoryblokApi();
-    const { data } = await storyblokApi.get('cdn/stories/home', { version: 'draft' });
+    const { data } = await storyblokApi.get('cdn/stories/home', { version: storyblokVersion });
     return data.story as StoryblokStory<PageBlok>;
   } catch (error) {
     console.error('Error fetching home story:', error);
@@ -93,14 +97,14 @@ export const fetchStoryBySlug = cache(async (slug: string) => {
 
   // Try fetching as a post first (from posts/ folder)
   try {
-    const { data } = await storyblokApi.get(`cdn/stories/posts/${slug}`, { version: 'draft' });
+    const { data } = await storyblokApi.get(`cdn/stories/posts/${slug}`, { version: storyblokVersion });
     return { story: data.story as StoryblokStory<PostBlok>, source: 'posts' as const };
   } catch {
     // If not found in posts/, try fetching as a regular page
   }
 
   try {
-    const { data } = await storyblokApi.get(`cdn/stories/${slug}`, { version: 'draft' });
+    const { data } = await storyblokApi.get(`cdn/stories/${slug}`, { version: storyblokVersion });
     return { story: data.story as StoryblokStory<PostBlok>, source: 'pages' as const };
   } catch {
     return null;
@@ -110,7 +114,7 @@ export const fetchStoryBySlug = cache(async (slug: string) => {
 export const fetchStory = cache(async (fullSlug: string) => {
   try {
     const storyblokApi = getStoryblokApi();
-    const { data } = await storyblokApi.get(`cdn/stories/${fullSlug}`, { version: 'draft' });
+    const { data } = await storyblokApi.get(`cdn/stories/${fullSlug}`, { version: storyblokVersion });
     return data.story as StoryblokStory<PageBlok>;
   } catch (error) {
     console.error(`Error fetching story for slug: ${fullSlug}`, error);
