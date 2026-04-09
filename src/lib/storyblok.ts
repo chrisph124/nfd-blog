@@ -23,10 +23,10 @@ import ContentCardBlock from "@/components/molecules/ContentCardBlock";
 import { apiPlugin, storyblokInit } from '@storyblok/react/rsc';
 import type { PostBlok, PageBlok, StoryblokStory } from '@/types/storyblok';
 import { cache } from 'react';
+import { storyblokVersion } from './storyblok-version';
 
-// Use 'draft' in development for preview, 'published' in production
-export const storyblokVersion: 'draft' | 'published' =
-  process.env.NODE_ENV === 'development' ? 'draft' : 'published';
+// Re-export so existing imports from '@/lib/storyblok' keep working.
+export { storyblokVersion };
 
 // Component mapping type
 const components = {

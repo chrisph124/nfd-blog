@@ -1,6 +1,6 @@
 import { apiPlugin, storyblokInit } from '@storyblok/react/rsc';
 import type { PostBlok, PageBlok, StoryblokStory } from '@/types/storyblok';
-import { storyblokVersion } from '@/lib/storyblok';
+import { storyblokVersion } from '@/lib/storyblok-version';
 
 // Lightweight API-only init — no component imports.
 // Use this in API routes (e.g., OG image) to avoid bundling all React components.
