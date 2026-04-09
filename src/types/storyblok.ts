@@ -1,4 +1,4 @@
-import { SbBlokData, StoryblokRichTextNode } from "@storyblok/react/rsc";
+import { SbBlokData } from "@storyblok/react/rsc";
 
 // ============================================================================
 // Base Storyblok Types
@@ -60,44 +60,27 @@ export interface CardItemBlok extends StoryblokBlok {
 }
 
 /**
- * content_block component
+ * content_card_block component
  */
-export interface ContentBlockBlok extends StoryblokBlok {
-  component: 'content_block';
-  eyebrow?: string;
-  title?: string;
-  sub_title?: string;
-  description?: string;
-  first_cta?: StoryblokLink;
-  second_cta?: StoryblokLink;
-  media?: StoryblokAsset;
-  background_image?: StoryblokAsset;
-  content_alignment?: 'left' | 'center' | 'right';
-  position?: 'vertical' | 'vertical-reverse' | 'horizontal' | 'horizontal-reverse';
-}
-
-/**
- * content_cards component — two-block layout with configurable ratios
- */
-export interface ContentCardsBlok extends StoryblokBlok {
-  component: 'content_cards';
-  blocks?: ContentCardBlockBlok[];
-  layout?: '5/5' | '6/4' | '4/6';
-}
-
-/**
- * content_card_block component — nestable block within content_cards
- */
-export type ContentCardBlockBlok = Omit<StoryblokBlok, 'component'> & {
+export interface ContentCardBlockBlok extends StoryblokBlok {
   component: 'content_card_block';
   variant?: 'primary' | 'secondary';
   title?: string;
   subtitle?: string;
-  description?: StoryblokRichTextNode<string> | null;
-  cta_group?: CtaBlok[];
+  description?: string;
+  cta_group?: (CtaBlok)[];
   images?: StoryblokAsset[];
   hide_image_mobile?: boolean;
-};
+}
+
+/**
+ * content_cards component
+ */
+export interface ContentCardsBlok extends StoryblokBlok {
+  component: 'content_cards';
+  blocks?: (ContentCardBlockBlok)[];
+  layout?: '5/5' | '6/4' | '4/6';
+}
 
 /**
  * cta component
@@ -166,6 +149,14 @@ export interface HeroBlockBlok extends StoryblokBlok {
 }
 
 /**
+ * markdown component
+ */
+export interface MarkdownBlok extends StoryblokBlok {
+  component: 'markdown';
+  content?: string;
+}
+
+/**
  * media component
  */
 export interface MediaBlok extends StoryblokBlok {
@@ -196,7 +187,11 @@ export interface NavItemBlok extends StoryblokBlok {
  */
 export interface PageBlok extends StoryblokBlok {
   component: 'page';
-  body?: StoryblokBlok[];
+  body?: (ContentCardsBlok | GridBlok | HeroBlockBlok | TabsBlok)[];
+  og_title?: string;
+  og_description?: string;
+  og_image?: StoryblokAsset;
+  SEO?: Record<string, unknown>;
 }
 
 /**
@@ -207,7 +202,11 @@ export interface PostBlok extends StoryblokBlok {
   title?: string;
   featured_image?: StoryblokAsset;
   excerpt?: string;
-  body?: StoryblokBlok[];
+  body?: (RichtextBlok | MarkdownBlok | MediaBlok)[];
+  SEO?: Record<string, unknown>;
+  og_title?: string;
+  og_description?: string;
+  og_image?: StoryblokAsset;
 }
 
 /**
@@ -219,20 +218,12 @@ export interface PostListBlok extends StoryblokBlok {
 }
 
 /**
- * richtext component — Rich Text JSON content
+ * richtext component
  */
-export type RichtextBlok = Omit<StoryblokBlok, 'component' | 'content'> & {
+export interface RichtextBlok extends StoryblokBlok {
   component: 'richtext';
-  content?: StoryblokRichTextNode<string> | null;
-};
-
-/**
- * markdown component — Markdown HTML content
- */
-export type MarkdownBlok = Omit<StoryblokBlok, 'component' | 'content'> & {
-  component: 'markdown';
   content?: string;
-};
+}
 
 /**
  * section_wrapper component
@@ -299,9 +290,8 @@ export interface StoryblokComponentProps<T extends StoryblokBlok = StoryblokBlok
  */
 export type AnyBlok =
   | CardItemBlok
-  | ContentBlockBlok
-  | ContentCardsBlok
   | ContentCardBlockBlok
+  | ContentCardsBlok
   | CtaBlok
   | FeatureBlok
   | FooterBlok

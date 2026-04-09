@@ -295,7 +295,7 @@ describe('FadeIn', () => {
 
   describe('Edge Cases', () => {
     it('handles empty children', () => {
-      const { container } = render(<FadeIn />);
+      const { container } = render(<FadeIn>{null}</FadeIn>);
       expect(container.firstChild).toBeInTheDocument();
     });
 

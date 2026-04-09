@@ -54,7 +54,7 @@ describe('Page', () => {
           createMockNestedBlok('body-1', 'header'),
           createMockNestedBlok('body-2', 'hero_block'),
           createMockNestedBlok('body-3', 'footer'),
-        ],
+        ] as PageBlok['body'],
       });
       const { getByTestId } = render(<Page blok={blok} />);
 
@@ -68,7 +68,7 @@ describe('Page', () => {
         body: [
           createMockNestedBlok('body-1', 'header'),
           createMockNestedBlok('body-2', 'hero_block'),
-        ],
+        ] as PageBlok['body'],
       });
       const { container } = render(<Page blok={blok} />);
 
@@ -95,7 +95,7 @@ describe('Page', () => {
   describe('Component Keys', () => {
     it('uses _uid as key for body components', () => {
       const blok = createMockBlok({
-        body: [createMockNestedBlok('unique-uid-123', 'feature')],
+        body: [createMockNestedBlok('unique-uid-123', 'feature')] as PageBlok['body'],
       });
       const { getByTestId } = render(<Page blok={blok} />);
 

@@ -219,7 +219,8 @@ export default function Media({ blok }: Readonly<MediaProps>) {
   // Guard clause for missing media file
   if (!media_file?.filename) return null;
 
-  const { filename, alt, title, is_external_url } = media_file;
+  const { filename, alt, title } = media_file;
+  const is_external_url = (media_file as { is_external_url?: boolean }).is_external_url;
   const altText = alt || title || 'Media';
   const caption = title || undefined;
 

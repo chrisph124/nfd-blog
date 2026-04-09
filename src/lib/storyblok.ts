@@ -21,6 +21,8 @@ import ContentCards from "@/components/organisms/ContentCards";
 import ContentCardBlock from "@/components/molecules/ContentCardBlock";
 
 import { apiPlugin, storyblokInit } from '@storyblok/react/rsc';
+import type { PostBlok, PageBlok, StoryblokStory } from '@/types/storyblok';
+import { cache } from 'react';
 
 // Component mapping type
 const components = {
@@ -55,4 +57,63 @@ export const getStoryblokApi = storyblokInit({
   apiOptions: {
     region: 'eu'
   },
+});
+
+// ============================================================================
+// Site URL Helper
+// ============================================================================
+
+export function getSiteUrl(): string {
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    let url = process.env.NEXT_PUBLIC_SITE_URL;
+    while (url.endsWith('/')) url = url.slice(0, -1);
+    return url;
+  }
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return 'http://localhost:3000';
+}
+
+// ============================================================================
+// Shared Fetch Helpers
+// ============================================================================
+
+export const fetchHomeStory = cache(async () => {
+  try {
+    const storyblokApi = getStoryblokApi();
+    const { data } = await storyblokApi.get('cdn/stories/home', { version: 'draft' });
+    return data.story as StoryblokStory<PageBlok>;
+  } catch (error) {
+    console.error('Error fetching home story:', error);
+    return null;
+  }
+});
+
+export const fetchStoryBySlug = cache(async (slug: string) => {
+  const storyblokApi = getStoryblokApi();
+
+  // Try fetching as a post first (from posts/ folder)
+  try {
+    const { data } = await storyblokApi.get(`cdn/stories/posts/${slug}`, { version: 'draft' });
+    return { story: data.story as StoryblokStory<PostBlok>, source: 'posts' as const };
+  } catch {
+    // If not found in posts/, try fetching as a regular page
+  }
+
+  try {
+    const { data } = await storyblokApi.get(`cdn/stories/${slug}`, { version: 'draft' });
+    return { story: data.story as StoryblokStory<PostBlok>, source: 'pages' as const };
+  } catch {
+    return null;
+  }
+});
+
+export const fetchStory = cache(async (fullSlug: string) => {
+  try {
+    const storyblokApi = getStoryblokApi();
+    const { data } = await storyblokApi.get(`cdn/stories/${fullSlug}`, { version: 'draft' });
+    return data.story as StoryblokStory<PageBlok>;
+  } catch (error) {
+    console.error(`Error fetching story for slug: ${fullSlug}`, error);
+    return null;
+  }
 });

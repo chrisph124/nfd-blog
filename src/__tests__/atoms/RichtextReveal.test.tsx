@@ -90,7 +90,7 @@ describe('RichtextReveal Component', () => {
     });
 
     it('handles empty children', () => {
-      const { container } = render(<RichtextReveal />);
+      const { container } = render(<RichtextReveal>{null}</RichtextReveal>);
       expect(container.firstChild).toBeInTheDocument();
     });
 
@@ -234,7 +234,7 @@ describe('RichtextReveal Component', () => {
               intersectionRatio: 0.5,
               rootBounds: new DOMRect(),
               time: Date.now(),
-            } as IntersectionObserverEntry,
+            } as unknown as IntersectionObserverEntry,
           ],
           {} as IntersectionObserver
         );
@@ -263,7 +263,7 @@ describe('RichtextReveal Component', () => {
               intersectionRatio: 0,
               rootBounds: new DOMRect(),
               time: Date.now(),
-            } as IntersectionObserverEntry,
+            } as unknown as IntersectionObserverEntry,
           ],
           {} as IntersectionObserver
         );
@@ -293,7 +293,7 @@ describe('RichtextReveal Component', () => {
               intersectionRatio: 0.5,
               rootBounds: new DOMRect(),
               time: Date.now(),
-            } as IntersectionObserverEntry,
+            } as unknown as IntersectionObserverEntry,
           ],
           {} as IntersectionObserver
         );
@@ -326,7 +326,7 @@ describe('RichtextReveal Component', () => {
               intersectionRatio: 0.5,
               rootBounds: new DOMRect(),
               time: Date.now(),
-            } as IntersectionObserverEntry,
+            } as unknown as IntersectionObserverEntry,
           ],
           {} as IntersectionObserver
         );
@@ -346,7 +346,7 @@ describe('RichtextReveal Component', () => {
               intersectionRatio: 0.5,
               rootBounds: new DOMRect(),
               time: Date.now(),
-            } as IntersectionObserverEntry,
+            } as unknown as IntersectionObserverEntry,
           ],
           {} as IntersectionObserver
         );
@@ -416,7 +416,7 @@ describe('RichtextReveal Component', () => {
     });
 
     it('handles unmount without container ref', () => {
-      const { unmount } = render(<RichtextReveal />);
+      const { unmount } = render(<RichtextReveal>{null}</RichtextReveal>);
 
       expect(() => unmount()).not.toThrow();
     });
@@ -541,8 +541,9 @@ describe('RichtextReveal Component', () => {
 
       if (mockObserverCallback) {
         // Call with empty entries array
+        const callback = mockObserverCallback;
         expect(() => {
-          mockObserverCallback([], {} as IntersectionObserver);
+          callback([], {} as IntersectionObserver);
         }).not.toThrow();
       }
     });
@@ -573,7 +574,7 @@ describe('RichtextReveal Component', () => {
               intersectionRatio: 0.5,
               rootBounds: new DOMRect(),
               time: Date.now(),
-            } as IntersectionObserverEntry,
+            } as unknown as IntersectionObserverEntry,
             {
               target: img2,
               isIntersecting: true,
@@ -581,7 +582,7 @@ describe('RichtextReveal Component', () => {
               intersectionRatio: 0.3,
               rootBounds: new DOMRect(),
               time: Date.now(),
-            } as IntersectionObserverEntry,
+            } as unknown as IntersectionObserverEntry,
             {
               target: img3,
               isIntersecting: false,
@@ -589,7 +590,7 @@ describe('RichtextReveal Component', () => {
               intersectionRatio: 0,
               rootBounds: new DOMRect(),
               time: Date.now(),
-            } as IntersectionObserverEntry,
+            } as unknown as IntersectionObserverEntry,
           ],
           {} as IntersectionObserver
         );

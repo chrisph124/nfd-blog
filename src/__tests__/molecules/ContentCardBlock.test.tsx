@@ -56,7 +56,7 @@ vi.mock('react-icons/hi2', () => ({
 
 // Mock @/lib/storyblok-utils
 vi.mock('@/lib/storyblok-utils', async (importOriginal) => {
-  const actual = await importOriginal();
+  const actual = await importOriginal() as Record<string, unknown>;
   return {
     ...actual,
     renderRichText: vi.fn(() => '<p>Rendered rich text content</p>'),
@@ -178,7 +178,7 @@ describe('ContentCardBlock', () => {
     });
 
     it('does not render description div when description is null', () => {
-      const blok = createMockBlok({ description: null });
+      const blok = createMockBlok({ description: undefined });
       const { container } = render(<ContentCardBlock blok={blok} />);
 
       expect(container.querySelector('.prose')).not.toBeInTheDocument();

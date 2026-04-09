@@ -277,7 +277,7 @@ describe('Edge Cases', () => {
         _uid: 'content-uid',
         component: 'post',
         title: 'Test Post',
-        excerpt: null,
+        excerpt: undefined,
         body: [],
       },
     });
@@ -299,7 +299,7 @@ describe('Edge Cases', () => {
         _uid: 'content-uid',
         component: 'post',
         title: 'Test Post Title',
-        featured_image: null,
+        featured_image: undefined,
         body: [],
       },
     });

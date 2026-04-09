@@ -520,6 +520,11 @@ h6, .h6 {
   transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out, background 0.3s ease-in-out;
 }
 
+a:not(.cta-primary-gradient-border, .cta-primary-outlined-border) {
+  color: var(--color-primary-800);
+  text-decoration: underline;
+}
+
 /* Rotate gradient on hover */
 .group:hover .cta-primary-outlined-border::before {
   background: linear-gradient(315deg, var(--primary-700), var(--secondary-900));
@@ -575,7 +580,7 @@ h6, .h6 {
 
 .richtext code {
   background-color: var(--gray-200);
-  padding: 0.125rem;
+  padding: 0.1rem;
   border-radius: 0.2rem;
 }
 
@@ -591,12 +596,19 @@ pre.shiki code {
   background-color: transparent;
 }
 
+code {
+  font-family: var(--font-nunito), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-size: var(--font-size-body-1);
+}
+
 /* Light mode: use Shiki light theme colors (default) */
 .shiki,
 .shiki span {
   color: var(--shiki-light);
   background-color: var(--shiki-light-bg);
+  font-family: var(--font-nunito), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   font-style: var(--shiki-light-font-style);
+  font-size: var(--font-size-body-1);
   font-weight: var(--shiki-light-font-weight);
   text-decoration: var(--shiki-light-text-decoration);
 }

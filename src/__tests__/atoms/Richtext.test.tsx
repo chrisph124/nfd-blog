@@ -71,7 +71,7 @@ describe('Richtext Component', () => {
           ]
         }
       ]
-    } as StoryblokRichTextNode<string>,
+    } as any as string,
   };
 
   describe('Rendering', () => {
@@ -144,7 +144,7 @@ describe('Richtext Component', () => {
       const blokWithEmptyContent: RichtextBlok = {
         _uid: 'test-richtext-empty-content',
         component: 'richtext',
-        content: {} as StoryblokRichTextNode<string>,
+        content: {} as any as string,
       };
 
       const { container } = render(<Richtext blok={blokWithEmptyContent} />);
@@ -181,7 +181,7 @@ describe('Richtext Component', () => {
               ]
             }
           ]
-        } as StoryblokRichTextNode<string>
+        } as any as string
       };
 
       render(<Richtext blok={blokWithRenderableContent} />);
@@ -196,8 +196,7 @@ describe('Richtext Component', () => {
     it('applies storyblokEditable props to the element', () => {
       const customBlok = createTestRichtextBlok({
         _uid: 'custom-richtext-uid',
-        // @ts-expect-error - Content with nullable type
-        content: mockBlok.content,
+        content: mockBlok.content as any as string,
       });
 
       render(<Richtext blok={customBlok} />);
@@ -210,8 +209,7 @@ describe('Richtext Component', () => {
     it('handles different blok UIDs correctly', () => {
       const anotherBlok = createTestRichtextBlok({
         _uid: 'another-richtext-uid',
-        // @ts-expect-error - Content with nullable type
-        content: mockBlok.content,
+        content: mockBlok.content as any as string,
       });
 
       render(<Richtext blok={anotherBlok} />);
@@ -258,7 +256,7 @@ describe('Richtext Component', () => {
               ]
             }
           ]
-        } as StoryblokRichTextNode<string>
+        } as any as string
       };
 
       expect(() => render(<Richtext blok={complexContentBlok} />)).not.toThrow();
@@ -283,7 +281,7 @@ describe('Richtext Component', () => {
               ]
             }
           ]
-        } as StoryblokRichTextNode<string>
+        } as any as string
       };
 
       expect(() => render(<Richtext blok={blokWithSpecialChars} />)).not.toThrow();
@@ -316,7 +314,7 @@ describe('Richtext Component', () => {
               ]
             }
           ]
-        } as StoryblokRichTextNode<string>
+        } as any as string
       };
 
       expect(() => render(<Richtext blok={deepNestedBlok} />)).not.toThrow();
@@ -342,7 +340,7 @@ describe('Richtext Component', () => {
                 ]
               }
             ]
-          } as StoryblokRichTextNode<string>,
+          } as any as string,
         };
 
         const { container } = render(<Richtext blok={blok} />);
@@ -360,7 +358,7 @@ describe('Richtext Component', () => {
           content: {
             type: 'doc',
             content: []
-          } as StoryblokRichTextNode<string>,
+          } as any as string,
         };
 
         expect(() => render(<Richtext blok={blok} />)).not.toThrow();
@@ -383,7 +381,7 @@ describe('Richtext Component', () => {
                 ]
               }
             ]
-          } as StoryblokRichTextNode<string>,
+          } as any as string,
         };
 
         render(<Richtext blok={blok} />);
@@ -409,7 +407,7 @@ describe('Richtext Component', () => {
                 ]
               }
             ]
-          } as StoryblokRichTextNode<string>,
+          } as any as string,
         };
 
         const { container } = render(<Richtext blok={blok} />);
@@ -439,7 +437,7 @@ describe('Richtext Component', () => {
                 ]
               }
             ]
-          } as StoryblokRichTextNode<string>,
+          } as any as string,
         };
 
         const { container } = render(<Richtext blok={blok} />);
@@ -465,7 +463,7 @@ describe('Richtext Component', () => {
                 ]
               }
             ]
-          } as StoryblokRichTextNode<string>,
+          } as any as string,
         };
 
         render(<Richtext blok={blok} />);
@@ -493,7 +491,7 @@ describe('Richtext Component', () => {
                 ]
               }
             ]
-          } as StoryblokRichTextNode<string>,
+          } as any as string,
         };
 
         const { container } = render(<Richtext blok={blok} />);
@@ -521,7 +519,7 @@ describe('Richtext Component', () => {
                 ]
               }
             ]
-          } as StoryblokRichTextNode<string>,
+          } as any as string,
         };
 
         const { container } = render(<Richtext blok={blok} />);
@@ -551,7 +549,7 @@ describe('Richtext Component', () => {
                 ]
               }
             ]
-          } as StoryblokRichTextNode<string>,
+          } as any as string,
         };
 
         render(<Richtext blok={blok} />);
@@ -588,7 +586,7 @@ describe('Richtext Component', () => {
                 ]
               }
             ]
-          } as StoryblokRichTextNode<string>,
+          } as any as string,
         };
 
         const { container } = render(<Richtext blok={blok} />);

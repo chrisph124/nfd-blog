@@ -1,7 +1,8 @@
-import { getStoryblokApi } from '@/lib/storyblok';
+import { getStoryblokApi, fetchStoryBySlug, getSiteUrl } from '@/lib/storyblok';
 import { StoryblokStory } from '@storyblok/react/rsc';
 import { notFound } from 'next/navigation';
-import type { StoryblokLinksResponse, StoryblokStoryLink, PostBlok, StoryblokStory as StoryType } from '@/types/storyblok';
+import type { Metadata } from 'next';
+import type { StoryblokLinksResponse, StoryblokStoryLink } from '@/types/storyblok';
 import Post from '@/components/templates/Post';
 
 interface PageProps {
@@ -10,27 +11,27 @@ interface PageProps {
   }>;
 }
 
-async function fetchStoryBySlug(slug: string) {
-  const storyblokApi = getStoryblokApi();
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const result = await fetchStoryBySlug(slug);
+  if (!result) return {};
 
-  // Try fetching as a post first (from posts/ folder)
-  try {
-    const { data } = await storyblokApi.get(`cdn/stories/posts/${slug}`, {
-      version: 'draft',
-    });
-    return { story: data.story as StoryType<PostBlok>, source: 'posts' as const };
-  } catch {
-    // If not found in posts/, try fetching as a regular page
-  }
+  const { story } = result;
+  const content = story.content;
+  const siteUrl = getSiteUrl();
 
-  try {
-    const { data } = await storyblokApi.get(`cdn/stories/${slug}`, {
-      version: 'draft',
-    });
-    return { story: data.story as StoryType<PostBlok>, source: 'pages' as const };
-  } catch {
-    return null;
-  }
+  const title = content.og_title || content.title || story.name;
+  const description = content.og_description || content.excerpt || '';
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [{ url: `${siteUrl}/api/og?slug=${encodeURIComponent(slug)}`, width: 1200, height: 630 }],
+    },
+  };
 }
 
 export default async function DynamicPage({ params }: PageProps) {

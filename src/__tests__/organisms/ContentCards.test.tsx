@@ -5,7 +5,7 @@ import type { ContentCardsBlok, ContentCardBlockBlok } from '@/types/storyblok';
 
 // Mock @/lib/storyblok-utils
 vi.mock('@/lib/storyblok-utils', async (importOriginal) => {
-  const actual = await importOriginal();
+  const actual = await importOriginal() as Record<string, unknown>;
   return {
     ...actual,
     StoryblokServerComponent: ({ blok }: { blok: { _uid: string; component: string } }) => (
