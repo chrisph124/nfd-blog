@@ -103,7 +103,7 @@ const Card = memo(({ story, priority = false }: CardProps) => {
       <div className="flex flex-col gap-2 p-4 flex-1">
         {tag_list && tag_list.length > 0 && <CardTags tags={tag_list} />}
 
-        <Link href={`/${postSlug}`}>
+        <Link href={`/${postSlug}`} className='no-underline!'>
           <h3 className="body-1 font-semibold line-clamp-3 group-hover:text-primary-700 transition-colors">
             {title}
           </h3>

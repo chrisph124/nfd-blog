@@ -40,7 +40,7 @@ export default function Post({ blok, tags = [], createdAt }: Readonly<PostProps>
         )}
 
         {/* Dark Overlay - covers whole image */}
-        <div className="absolute inset-0 bg-black/70 -z-10" />
+        <div className="absolute inset-0 bg-black/80 -z-10" />
 
         <div className="flex flex-col items-center gap-4 max-w-[1280px] px-4 md:px-8 lg:px-12 xl:px-5">
           {/* Tags */}
