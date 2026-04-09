@@ -149,7 +149,7 @@ describe('fetchHomeStory', () => {
     const result = await fetchHomeStory();
 
     expect(result).toEqual(mockStory);
-    expect(mockGet).toHaveBeenCalledWith('cdn/stories/home', { version: 'draft' });
+    expect(mockGet).toHaveBeenCalledWith('cdn/stories/home', { version: 'published' });
   });
 
   it('returns null on error', async () => {
@@ -179,7 +179,7 @@ describe('fetchStoryBySlug', () => {
     const result = await fetchStoryBySlug('my-post');
 
     expect(result).toEqual({ story: mockPost, source: 'posts' });
-    expect(mockGet).toHaveBeenCalledWith('cdn/stories/posts/my-post', { version: 'draft' });
+    expect(mockGet).toHaveBeenCalledWith('cdn/stories/posts/my-post', { version: 'published' });
   });
 
   it('falls back to page with source="pages" when post not found', async () => {
@@ -221,7 +221,7 @@ describe('fetchStory', () => {
     const result = await fetchStory('about/team');
 
     expect(result).toEqual(mockStory);
-    expect(mockGet).toHaveBeenCalledWith('cdn/stories/about/team', { version: 'draft' });
+    expect(mockGet).toHaveBeenCalledWith('cdn/stories/about/team', { version: 'published' });
   });
 
   it('returns null on error', async () => {

@@ -21,6 +21,7 @@ vi.mock('@/lib/storyblok', () => ({
   getStoryblokApi: () => ({
     get: mockGet,
   }),
+  storyblokVersion: 'published',
 }));
 
 const createMockStory = (title = 'Test Post'): { data: { story: StoryblokStory<PostBlok> } } => ({
@@ -116,7 +117,7 @@ describe('CardItem', () => {
       await waitFor(() => {
         expect(mockGet).toHaveBeenCalledWith(
           'cdn/stories/0ae4a708-0226-42f0-99d5-93ec86ba89e5',
-          { version: 'draft', find_by: 'uuid' }
+          { version: 'published', find_by: 'uuid' }
         );
       });
 
@@ -263,7 +264,7 @@ describe('CardItem', () => {
         await waitFor(() => {
           expect(mockGet).toHaveBeenCalledWith(
             `cdn/stories/${uuid}`,
-            { version: 'draft', find_by: 'uuid' }
+            { version: 'published', find_by: 'uuid' }
           );
         });
       }
@@ -278,7 +279,7 @@ describe('CardItem', () => {
       await waitFor(() => {
         expect(mockGet).toHaveBeenCalledWith(
           'cdn/stories/simple-slug',
-          { version: 'draft' }
+          { version: 'published' }
         );
       });
     });

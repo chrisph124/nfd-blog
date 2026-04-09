@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { makeStoryblokEditable } from '@/lib/storyblok-utils';
-import { getStoryblokApi } from '@/lib/storyblok';
+import { getStoryblokApi, storyblokVersion } from '@/lib/storyblok';
 import type { CardItemBlok, StoryblokStory, PostBlok } from '@/types/storyblok';
 import Card from './Card';
 import { CardSkeleton } from '@/components/atoms/Skeleton';
@@ -28,7 +28,7 @@ export default function CardItem({ blok }: Readonly<CardItemProps>) {
 
         // Determine the correct identifier and API parameters
         let storyIdentifier: string;
-        const apiParams: Record<string, string> = { version: 'draft' };
+        const apiParams: Record<string, string> = { version: storyblokVersion };
 
         if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(post_reference)) {
           storyIdentifier = post_reference;

@@ -1,4 +1,4 @@
-import { getStoryblokApi } from '@/lib/storyblok';
+import { getStoryblokApi, storyblokVersion } from '@/lib/storyblok';
 import type { StoryblokStory, PostBlok } from '@/types/storyblok';
 import Card from '@/components/molecules/Card';
 
@@ -21,7 +21,7 @@ export default async function CardList({
 
   const params: Record<string, string> = {
     starts_with: startsWithPath,
-    version: 'draft',
+    version: storyblokVersion,
     content_type: 'post',
   };
 

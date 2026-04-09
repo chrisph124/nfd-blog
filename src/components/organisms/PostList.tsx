@@ -1,4 +1,4 @@
-import { getStoryblokApi } from '@/lib/storyblok';
+import { getStoryblokApi, storyblokVersion } from '@/lib/storyblok';
 import PostListClient from './PostListClient';
 import type { PostListBlok, StoryblokStory, PostBlok } from '@/types/storyblok';
 
@@ -19,7 +19,7 @@ async function fetchPosts(perPage: number) {
   try {
     const storyblokApi = getStoryblokApi();
     const response = await storyblokApi.get('cdn/stories', {
-      version: 'draft',
+      version: storyblokVersion,
       content_type: 'post',
       sort_by: 'first_published_at:desc',
       per_page: perPage,

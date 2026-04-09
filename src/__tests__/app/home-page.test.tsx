@@ -10,6 +10,7 @@ vi.mock('@/lib/storyblok', () => ({
   fetchHomeStory: () => mockFetchHomeStory(),
   getSiteUrl: () => mockGetSiteUrl(),
   getStoryblokApi: vi.fn(),
+  storyblokVersion: 'published',
 }));
 
 vi.mock('@storyblok/react/rsc', () => ({

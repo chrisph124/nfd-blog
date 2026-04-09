@@ -649,9 +649,9 @@ code {
 
 [data-theme="dark"] .richtext blockquote {
   border-left-color: var(--primary-400);
-  color: var(--gray-400);
+  color: var(--gray-600);
 }
 
 [data-theme="dark"] .richtext blockquote p {
-  color: var(--gray-400);
+  color: var(--gray-600);
 }

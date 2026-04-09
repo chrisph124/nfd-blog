@@ -23,6 +23,10 @@ import ContentCardBlock from "@/components/molecules/ContentCardBlock";
 import { apiPlugin, storyblokInit } from '@storyblok/react/rsc';
 import type { PostBlok, PageBlok, StoryblokStory } from '@/types/storyblok';
 import { cache } from 'react';
+import { storyblokVersion } from './storyblok-version';
+
+// Re-export so existing imports from '@/lib/storyblok' keep working.
+export { storyblokVersion };
 
 // Component mapping type
 const components = {
@@ -80,7 +84,7 @@ export function getSiteUrl(): string {
 export const fetchHomeStory = cache(async () => {
   try {
     const storyblokApi = getStoryblokApi();
-    const { data } = await storyblokApi.get('cdn/stories/home', { version: 'draft' });
+    const { data } = await storyblokApi.get('cdn/stories/home', { version: storyblokVersion });
     return data.story as StoryblokStory<PageBlok>;
   } catch (error) {
     console.error('Error fetching home story:', error);
@@ -91,26 +95,26 @@ export const fetchHomeStory = cache(async () => {
 export const fetchStoryBySlug = cache(async (slug: string) => {
   const storyblokApi = getStoryblokApi();
 
-  // Try fetching as a post first (from posts/ folder)
-  try {
-    const { data } = await storyblokApi.get(`cdn/stories/posts/${slug}`, { version: 'draft' });
-    return { story: data.story as StoryblokStory<PostBlok>, source: 'posts' as const };
-  } catch {
-    // If not found in posts/, try fetching as a regular page
-  }
+  // Fetch both paths in parallel to avoid sequential waterfall
+  const [postsResult, pagesResult] = await Promise.allSettled([
+    storyblokApi.get(`cdn/stories/posts/${slug}`, { version: storyblokVersion }),
+    storyblokApi.get(`cdn/stories/${slug}`, { version: storyblokVersion }),
+  ]);
 
-  try {
-    const { data } = await storyblokApi.get(`cdn/stories/${slug}`, { version: 'draft' });
-    return { story: data.story as StoryblokStory<PostBlok>, source: 'pages' as const };
-  } catch {
-    return null;
+  // Prefer post match over page match
+  if (postsResult.status === 'fulfilled') {
+    return { story: postsResult.value.data.story as StoryblokStory<PostBlok>, source: 'posts' as const };
   }
+  if (pagesResult.status === 'fulfilled') {
+    return { story: pagesResult.value.data.story as StoryblokStory<PostBlok>, source: 'pages' as const };
+  }
+  return null;
 });
 
 export const fetchStory = cache(async (fullSlug: string) => {
   try {
     const storyblokApi = getStoryblokApi();
-    const { data } = await storyblokApi.get(`cdn/stories/${fullSlug}`, { version: 'draft' });
+    const { data } = await storyblokApi.get(`cdn/stories/${fullSlug}`, { version: storyblokVersion });
     return data.story as StoryblokStory<PageBlok>;
   } catch (error) {
     console.error(`Error fetching story for slug: ${fullSlug}`, error);

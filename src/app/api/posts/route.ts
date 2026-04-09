@@ -1,4 +1,4 @@
-import { getStoryblokApi } from '@/lib/storyblok';
+import { getStoryblokApi, storyblokVersion } from '@/lib/storyblok';
 import { NextRequest, NextResponse } from 'next/server';
 import type { StoryblokStory, PostBlok } from '@/types/storyblok';
 
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const response = await storyblokApi.get('cdn/stories', {
-      version: 'draft',
+      version: storyblokVersion,
       content_type: 'post',
       sort_by: 'first_published_at:desc',
       per_page: perPage,

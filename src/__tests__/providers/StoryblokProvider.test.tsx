@@ -6,6 +6,7 @@ import type { GetStoryblokApiOptions, StoryblokApiInstance } from '@/__tests__/t
 // Mock the storyblok API function
 vi.mock('@/lib/storyblok', () => ({
   getStoryblokApi: vi.fn(),
+  storyblokVersion: 'published',
 }));
 
 describe('StoryblokProvider Component', () => {

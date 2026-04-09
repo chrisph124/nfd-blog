@@ -11,6 +11,7 @@ vi.mock('@/lib/storyblok', () => ({
   fetchStoryBySlug: (...args: unknown[]) => mockFetchStoryBySlug(...args),
   getSiteUrl: () => mockGetSiteUrl(),
   getStoryblokApi: () => mockGetStoryblokApi(),
+  storyblokVersion: 'published',
 }));
 
 vi.mock('@storyblok/react/rsc', () => ({
