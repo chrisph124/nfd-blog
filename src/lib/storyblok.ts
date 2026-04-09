@@ -95,20 +95,20 @@ export const fetchHomeStory = cache(async () => {
 export const fetchStoryBySlug = cache(async (slug: string) => {
   const storyblokApi = getStoryblokApi();
 
-  // Try fetching as a post first (from posts/ folder)
-  try {
-    const { data } = await storyblokApi.get(`cdn/stories/posts/${slug}`, { version: storyblokVersion });
-    return { story: data.story as StoryblokStory<PostBlok>, source: 'posts' as const };
-  } catch {
-    // If not found in posts/, try fetching as a regular page
-  }
+  // Fetch both paths in parallel to avoid sequential waterfall
+  const [postsResult, pagesResult] = await Promise.allSettled([
+    storyblokApi.get(`cdn/stories/posts/${slug}`, { version: storyblokVersion }),
+    storyblokApi.get(`cdn/stories/${slug}`, { version: storyblokVersion }),
+  ]);
 
-  try {
-    const { data } = await storyblokApi.get(`cdn/stories/${slug}`, { version: storyblokVersion });
-    return { story: data.story as StoryblokStory<PostBlok>, source: 'pages' as const };
-  } catch {
-    return null;
+  // Prefer post match over page match
+  if (postsResult.status === 'fulfilled') {
+    return { story: postsResult.value.data.story as StoryblokStory<PostBlok>, source: 'posts' as const };
   }
+  if (pagesResult.status === 'fulfilled') {
+    return { story: pagesResult.value.data.story as StoryblokStory<PostBlok>, source: 'pages' as const };
+  }
+  return null;
 });
 
 export const fetchStory = cache(async (fullSlug: string) => {
