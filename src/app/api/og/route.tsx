@@ -1,10 +1,15 @@
 import { ImageResponse } from 'next/og';
 import { fetchStoryApi, fetchStoryBySlugApi } from '@/lib/storyblok-api';
 import type { NextRequest } from 'next/server';
+import type { StoryblokAsset, PostBlok } from '@/types/storyblok';
 
 export const runtime = 'edge';
 
 const SITE_NAME = 'Notes of Dev';
+
+function getImage(asset: StoryblokAsset | undefined): string | undefined {
+  return asset?.filename;
+}
 
 async function resolveStory(slug: string) {
   if (slug === 'home') {
@@ -12,17 +17,17 @@ async function resolveStory(slug: string) {
     if (!story) return null;
     return {
       title: story.content.og_title || story.name,
-      image: story.content.og_image?.filename || undefined,
+      image: getImage(story.content.og_image as StoryblokAsset | undefined),
     };
   }
 
   // Try [slug] route (posts + pages)
   const story = await fetchStoryBySlugApi(slug);
   if (story) {
-    const content = story.content;
+    const content = story.content as PostBlok;
     return {
       title: content.og_title || content.title || story.name,
-      image: content.og_image?.filename || content.featured_image?.filename || undefined,
+      image: getImage((content.og_image as StoryblokAsset | undefined) || (content.featured_image as StoryblokAsset | undefined)),
     };
   }
 
@@ -31,7 +36,7 @@ async function resolveStory(slug: string) {
   if (nestedStory) {
     return {
       title: nestedStory.content.og_title || nestedStory.name,
-      image: nestedStory.content.og_image?.filename || undefined,
+      image: getImage(nestedStory.content.og_image as StoryblokAsset | undefined),
     };
   }
 

@@ -1,4 +1,4 @@
-import { renderRichText } from '@storyblok/react/rsc';
+import { renderRichText, type StoryblokRichTextNode } from '@storyblok/react/rsc';
 import type { RichtextBlok } from '@/types/storyblok';
 import { makeStoryblokEditable } from '@/lib/storyblok-utils';
 import { injectLazyLoading } from '@/lib/utils';
@@ -13,7 +13,7 @@ const PROSE_CLASSES = "w-full flex flex-col gap-y-4 richtext prose prose-lg max-
 export default function Richtext({ blok }: Readonly<RichtextProps>) {
   if (!blok.content) return null;
 
-  const renderedContent = renderRichText(blok.content);
+  const renderedContent = renderRichText(blok.content as unknown as StoryblokRichTextNode<string>);
 
   if (!renderedContent) return null;
 

@@ -31,7 +31,7 @@ export async function fetchStoryBySlugApi(slug: string) {
 
   try {
     const { data } = await api.get(`cdn/stories/${slug}`, { version: 'draft' });
-    return data.story as StoryblokStory<PostBlok>;
+    return data.story as StoryblokStory<PageBlok>;
   } catch {
     return null;
   }
