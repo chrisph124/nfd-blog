@@ -64,7 +64,11 @@ export const getStoryblokApi = storyblokInit({
 // ============================================================================
 
 export function getSiteUrl(): string {
-  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/+$/, '');
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    let url = process.env.NEXT_PUBLIC_SITE_URL;
+    while (url.endsWith('/')) url = url.slice(0, -1);
+    return url;
+  }
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
   return 'http://localhost:3000';
 }
