@@ -20,9 +20,6 @@ export default defineConfig({
         '**/*.d.ts',
         '**/index.ts',
         '**/index.js',
-        'src/app/**', // Next.js app routes - tested via E2E
-        'src/components/providers/**', // Provider wrappers
-        'src/lib/storyblok.ts', // SDK initialization
       ],
       thresholds: {
         statements: 80,
