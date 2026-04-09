@@ -6,7 +6,7 @@ import "./globals.css";
 import StoryblokProvider from "@/components/providers/StoryblokProvider";
 import ThemeProvider from "@/components/providers/ThemeProvider";
 import MotionProvider from "@/components/providers/MotionProvider";
-import { getStoryblokApi } from "@/lib/storyblok";
+import { getStoryblokApi, storyblokVersion } from "@/lib/storyblok";
 import Header from "@/components/organisms/Header";
 import Footer from "@/components/organisms/Footer";
 
@@ -56,8 +56,8 @@ export default async function RootLayout({
     try {
       const storyblokApi = getStoryblokApi();
       const [headerData, footerData] = await Promise.all([
-        storyblokApi.get('cdn/stories/global/header', { version: 'draft' }),
-        storyblokApi.get('cdn/stories/global/footer', { version: 'draft' }),
+        storyblokApi.get('cdn/stories/global/header', { version: storyblokVersion }),
+        storyblokApi.get('cdn/stories/global/footer', { version: storyblokVersion }),
       ]);
       headerStory = headerData.data.story;
       footerStory = footerData.data.story;

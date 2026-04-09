@@ -1,4 +1,4 @@
-import { getStoryblokApi, fetchStoryBySlug, getSiteUrl } from '@/lib/storyblok';
+import { getStoryblokApi, fetchStoryBySlug, getSiteUrl, storyblokVersion } from '@/lib/storyblok';
 import { StoryblokStory } from '@storyblok/react/rsc';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
@@ -70,7 +70,7 @@ export async function generateStaticParams() {
 
   try {
     const { data } = await storyblokApi.get('cdn/links', {
-      version: 'draft',
+      version: storyblokVersion,
     }) as { data: StoryblokLinksResponse };
 
     const links = Object.values(data.links) as StoryblokStoryLink[];
