@@ -85,8 +85,12 @@ function mapFieldToTypeScript(fieldName: string, field: StoryblokField): string 
         ).join(' | ');
       }
       return 'StoryblokBlok';
+    case 'unknown':
     default:
-      // For unknown field types, use unknown instead of any
+      // For unknown field types, use Record<string, unknown> to avoid index signature conflict
+      if (fieldName.toLowerCase() === 'seo') {
+        return 'Record<string, unknown>';
+      }
       console.warn(`⚠️  Unknown field type "${field.type}" for field "${fieldName}", using "unknown"`);
       return 'unknown';
   }
@@ -180,6 +184,7 @@ export interface StoryblokAsset {
   focus?: string;
   name?: string;
   copyright?: string;
+  is_external_url?: boolean;
 }
 
 /**
