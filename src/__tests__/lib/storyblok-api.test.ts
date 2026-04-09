@@ -98,7 +98,7 @@ describe('fetchStoryApi', () => {
     const result = await fetchStoryApi('home');
 
     expect(result).toEqual(mockPageStory);
-    expect(mockGet).toHaveBeenCalledWith('cdn/stories/home', { version: 'draft' });
+    expect(mockGet).toHaveBeenCalledWith('cdn/stories/home', { version: 'published' });
   });
 
   it('returns null when story not found (404)', async () => {
@@ -130,7 +130,7 @@ describe('fetchStoryBySlugApi', () => {
     const result = await fetchStoryBySlugApi('my-post');
 
     expect(result).toEqual(mockPostStory);
-    expect(mockGet).toHaveBeenCalledWith('cdn/stories/posts/my-post', { version: 'draft' });
+    expect(mockGet).toHaveBeenCalledWith('cdn/stories/posts/my-post', { version: 'published' });
     expect(mockGet).toHaveBeenCalledTimes(1);
   });
 
@@ -144,8 +144,8 @@ describe('fetchStoryBySlugApi', () => {
 
     expect(result).toEqual(mockPageStory);
     expect(mockGet).toHaveBeenCalledTimes(2);
-    expect(mockGet).toHaveBeenNthCalledWith(1, 'cdn/stories/posts/about', { version: 'draft' });
-    expect(mockGet).toHaveBeenNthCalledWith(2, 'cdn/stories/about', { version: 'draft' });
+    expect(mockGet).toHaveBeenNthCalledWith(1, 'cdn/stories/posts/about', { version: 'published' });
+    expect(mockGet).toHaveBeenNthCalledWith(2, 'cdn/stories/about', { version: 'published' });
   });
 
   it('returns null when both post and page 404', async () => {
@@ -194,7 +194,7 @@ describe('fetchStoryBySlugApi edge cases', () => {
 
     const result = await fetchStoryBySlugApi('');
 
-    expect(mockGet).toHaveBeenCalledWith('cdn/stories/posts/', { version: 'draft' });
+    expect(mockGet).toHaveBeenCalledWith('cdn/stories/posts/', { version: 'published' });
     expect(result).toEqual(mockPageStory);
   });
 
@@ -204,7 +204,7 @@ describe('fetchStoryBySlugApi edge cases', () => {
 
     const result = await fetchStoryBySlugApi('hello-world-2024');
 
-    expect(mockGet).toHaveBeenCalledWith('cdn/stories/posts/hello-world-2024', { version: 'draft' });
+    expect(mockGet).toHaveBeenCalledWith('cdn/stories/posts/hello-world-2024', { version: 'published' });
     expect(result).toEqual(mockPostStory);
   });
 

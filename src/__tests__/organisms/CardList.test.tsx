@@ -18,6 +18,7 @@ vi.mock('@/lib/storyblok', () => ({
   getStoryblokApi: () => ({
     get: mockGet,
   }),
+  storyblokVersion: 'published',
 }));
 
 const createMockStory = (
@@ -121,7 +122,7 @@ describe('CardList', () => {
 
       expect(mockGet).toHaveBeenCalledWith('cdn/stories', {
         starts_with: 'posts/',
-        version: 'draft',
+        version: 'published',
         content_type: 'post',
       });
     });
@@ -137,7 +138,7 @@ describe('CardList', () => {
 
       expect(mockGet).toHaveBeenCalledWith('cdn/stories', {
         starts_with: 'blog/',
-        version: 'draft',
+        version: 'published',
         content_type: 'post',
       });
     });
@@ -153,7 +154,7 @@ describe('CardList', () => {
 
       expect(mockGet).toHaveBeenCalledWith('cdn/stories', {
         starts_with: 'posts/',
-        version: 'draft',
+        version: 'published',
         content_type: 'post',
         with_tag: 'pixel-playground',
       });
@@ -173,7 +174,7 @@ describe('CardList', () => {
 
       expect(mockGet).toHaveBeenCalledWith('cdn/stories', {
         starts_with: 'articles/',
-        version: 'draft',
+        version: 'published',
         content_type: 'post',
         with_tag: 'featured',
       });
@@ -213,7 +214,7 @@ describe('CardList', () => {
 
       expect(mockGet).toHaveBeenCalledWith('cdn/stories', {
         starts_with: 'posts/',
-        version: 'draft',
+        version: 'published',
         content_type: 'post',
       });
     });

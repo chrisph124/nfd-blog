@@ -22,6 +22,7 @@ vi.mock('@/components/organisms/PostListClient', () => ({
 const mockGet = vi.fn();
 vi.mock('@/lib/storyblok', () => ({
   getStoryblokApi: () => ({ get: mockGet }),
+  storyblokVersion: 'published',
 }));
 
 // Mock post data
@@ -99,7 +100,7 @@ describe('PostList Server Component', () => {
       await PostList({ blok });
 
       expect(mockGet).toHaveBeenCalledWith('cdn/stories', {
-        version: 'draft',
+        version: 'published',
         content_type: 'post',
         sort_by: 'first_published_at:desc',
         per_page: 12,

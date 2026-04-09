@@ -6,6 +6,7 @@ import { NextRequest } from 'next/server';
 const mockGet = vi.fn();
 vi.mock('@/lib/storyblok', () => ({
   getStoryblokApi: () => ({ get: mockGet }),
+  storyblokVersion: 'published',
 }));
 
 const createMockRequest = (page?: string, perPage?: string) => {
@@ -54,7 +55,7 @@ describe('POST API Route', () => {
       await GET(request);
 
       expect(mockGet).toHaveBeenCalledWith('cdn/stories', {
-        version: 'draft',
+        version: 'published',
         content_type: 'post',
         sort_by: 'first_published_at:desc',
         per_page: 12,
