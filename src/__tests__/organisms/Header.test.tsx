@@ -21,7 +21,7 @@ vi.mock('next/image', () => ({
       alt={alt}
       role="img"
       aria-label={alt}
-      {...props}
+      {...props as any}
     />
   ),
 }));

@@ -25,7 +25,7 @@ vi.mock('next/image', () => ({
       alt={alt}
       role="img"
       aria-label={alt}
-      {...props}
+      {...props as any}
     />
   ),
 }));
@@ -257,7 +257,7 @@ describe('Post', () => {
         body: [
           { _uid: 'block-1', component: 'paragraph' },
           { _uid: 'block-2', component: 'paragraph' },
-        ],
+        ] as any,
       });
       render(<Post blok={blok} />);
 
@@ -336,7 +336,7 @@ describe('Post', () => {
 
     it('applies prose styling to body content', () => {
       const blok = createMockBlok({
-        body: [{ _uid: 'block-1', component: 'paragraph' }],
+        body: [{ _uid: 'block-1', component: 'paragraph' }] as any,
       });
       const { container } = render(<Post blok={blok} />);
 
@@ -364,7 +364,7 @@ describe('Post', () => {
 
     it('has correct content max-width', () => {
       const blok = createMockBlok({
-        body: [{ _uid: 'block-1', component: 'paragraph' }],
+        body: [{ _uid: 'block-1', component: 'paragraph' }] as any,
       });
       const { container } = render(<Post blok={blok} />);
 
@@ -428,7 +428,7 @@ describe('Post', () => {
 
     it('renders ReadingProgress between hero section and article content', () => {
       const blok = createMockBlok({
-        body: [{ _uid: 'block-1', component: 'paragraph' }],
+        body: [{ _uid: 'block-1', component: 'paragraph' }] as any,
       });
       render(<Post blok={blok} />);
 
@@ -447,7 +447,7 @@ describe('Post', () => {
 
     it('renders article content section with correct ID for progress tracking', () => {
       const blok = createMockBlok({
-        body: [{ _uid: 'block-1', component: 'paragraph' }],
+        body: [{ _uid: 'block-1', component: 'paragraph' }] as any,
       });
       render(<Post blok={blok} />);
 
@@ -467,7 +467,7 @@ describe('Post', () => {
 
     it('renders ReadingProgress with all Post features (tags, date, reading time)', () => {
       const blok = createMockBlok({
-        body: [{ _uid: 'block-1', component: 'paragraph' }],
+        body: [{ _uid: 'block-1', component: 'paragraph' }] as any,
       });
       const tags = ['Technology', 'AI'];
       const createdAt = '2025-01-15T10:00:00.000Z';
@@ -488,7 +488,7 @@ describe('Post', () => {
         body: [
           { _uid: 'block-1', component: 'paragraph' },
           { _uid: 'block-2', component: 'heading' },
-        ],
+        ] as any,
       });
       render(<Post blok={blok} />);
 
@@ -505,7 +505,7 @@ describe('Post', () => {
         body: [
           { _uid: 'storyblok-1', component: 'rich_text' },
           { _uid: 'storyblok-2', component: 'image' },
-        ],
+        ] as any,
       });
       render(<Post blok={blok} />);
 
@@ -524,7 +524,7 @@ describe('Post', () => {
           filename: 'https://a.storyblok.com/f/test.jpg',
           alt: 'Test featured image',
         },
-        body: [{ _uid: 'block-1', component: 'paragraph' }],
+        body: [{ _uid: 'block-1', component: 'paragraph' }] as any,
       });
       render(<Post blok={blok} />);
 
@@ -581,7 +581,7 @@ describe('Post', () => {
 
     it('maintains semantic structure with ReadingProgress integration', () => {
       const blok = createMockBlok({
-        body: [{ _uid: 'block-1', component: 'paragraph' }],
+        body: [{ _uid: 'block-1', component: 'paragraph' }] as any,
       });
       render(<Post blok={blok} />);
 
@@ -617,7 +617,7 @@ describe('Post', () => {
   describe('Performance and Integration', () => {
     it('does not cause layout shift with ReadingProgress', () => {
       const blok = createMockBlok({
-        body: [{ _uid: 'block-1', component: 'paragraph' }],
+        body: [{ _uid: 'block-1', component: 'paragraph' }] as any,
       });
       render(<Post blok={blok} />);
 
@@ -634,7 +634,7 @@ describe('Post', () => {
 
     it('handles window resize events gracefully with ReadingProgress', () => {
       const blok = createMockBlok({
-        body: [{ _uid: 'block-1', component: 'paragraph' }],
+        body: [{ _uid: 'block-1', component: 'paragraph' }] as any,
       });
       render(<Post blok={blok} />);
 
@@ -648,7 +648,7 @@ describe('Post', () => {
 
     it('maintains responsive design with ReadingProgress', () => {
       const blok = createMockBlok({
-        body: [{ _uid: 'block-1', component: 'paragraph' }],
+        body: [{ _uid: 'block-1', component: 'paragraph' }] as any,
       });
       const { container } = render(<Post blok={blok} />);
 
@@ -664,7 +664,7 @@ describe('Post', () => {
 
     it('preserves correct content max-width with ReadingProgress', () => {
       const blok = createMockBlok({
-        body: [{ _uid: 'block-1', component: 'paragraph' }],
+        body: [{ _uid: 'block-1', component: 'paragraph' }] as any,
       });
       render(<Post blok={blok} />);
 

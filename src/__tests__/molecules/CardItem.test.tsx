@@ -65,7 +65,7 @@ const createMockStory = (title = 'Test Post'): { data: { story: StoryblokStory<P
 const createMockBlok = (post_reference?: string | number): CardItemBlok => ({
   _uid: 'test-uid',
   component: 'card_item',
-  post_reference,
+  post_reference: post_reference as string | undefined,
 });
 
 // Test mock function type support and IntelliSense

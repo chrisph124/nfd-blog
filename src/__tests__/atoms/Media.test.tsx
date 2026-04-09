@@ -349,7 +349,6 @@ describe('Media Component', () => {
           id: 1,
           filename: 'https://external-site.com/image.jpg',
           alt: 'External image',
-          is_external_url: true,
         },
       };
 
@@ -452,7 +451,6 @@ describe('Media Component', () => {
           focus: '50%50%',
           copyright: '© 2025',
           name: 'Test image name',
-          is_external_url: false,
         },
         aspect_ratio: 'video', // IDE suggests: 'video' | 'square' | 'portrait' | 'wide' | 'auto'
         autoplay: true,
@@ -484,7 +482,6 @@ describe('Media Component', () => {
           id: 1,
           filename: 'test.jpg',
         },
-        // @ts-expect-error - Testing TypeScript error for invalid enum
         aspect_ratio: 'invalid-ratio' as MediaBlok['aspect_ratio'],
       };
 
