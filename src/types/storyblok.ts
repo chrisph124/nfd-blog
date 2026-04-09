@@ -197,6 +197,9 @@ export interface NavItemBlok extends StoryblokBlok {
 export interface PageBlok extends StoryblokBlok {
   component: 'page';
   body?: StoryblokBlok[];
+  og_title?: string;
+  og_description?: string;
+  og_image?: StoryblokAsset;
 }
 
 /**
@@ -208,6 +211,9 @@ export interface PostBlok extends StoryblokBlok {
   featured_image?: StoryblokAsset;
   excerpt?: string;
   body?: StoryblokBlok[];
+  og_title?: string;
+  og_description?: string;
+  og_image?: StoryblokAsset;
 }
 
 /**

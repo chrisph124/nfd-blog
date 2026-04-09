@@ -1,6 +1,7 @@
-import { getStoryblokApi } from '@/lib/storyblok';
+import { getStoryblokApi, fetchStory, getSiteUrl } from '@/lib/storyblok';
 import { StoryblokStory } from '@storyblok/react/rsc';
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 import type { StoryblokLinksResponse, StoryblokStoryLink } from '@/types/storyblok';
 
 export const revalidate = 3600; // Revalidate every 1 hour
@@ -11,17 +12,27 @@ interface PageProps {
   }>;
 }
 
-async function fetchStory(fullSlug: string) {
-  try {
-    const storyblokApi = getStoryblokApi();
-    const { data } = await storyblokApi.get(`cdn/stories/${fullSlug}`, {
-      version: 'draft',
-    });
-    return data.story;
-  } catch (error) {
-    console.error(`Error fetching story for slug: ${fullSlug}`, error);
-    return null;
-  }
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const fullSlug = slug.join('/');
+  const story = await fetchStory(fullSlug);
+  if (!story) return {};
+
+  const content = story.content;
+  const siteUrl = getSiteUrl();
+
+  const title = content.og_title || story.name;
+  const description = content.og_description || '';
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [{ url: `${siteUrl}/api/og?slug=${encodeURIComponent(fullSlug)}`, width: 1200, height: 630 }],
+    },
+  };
 }
 
 export default async function CatchAllPage({ params }: PageProps) {
