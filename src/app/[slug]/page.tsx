@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import type { StoryblokLinksResponse, StoryblokStoryLink } from '@/types/storyblok';
 import Post from '@/components/templates/Post';
+import { buildBlogPostingJsonLd } from '@/lib/seo-structured-data';
 
 interface PageProps {
   params: Promise<{
@@ -20,12 +21,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const content = story.content;
   const siteUrl = getSiteUrl();
 
-  const title = content.og_title || content.title || story.name;
-  const description = content.og_description || content.excerpt || '';
+  const title = content.og_title?.trim() || content.title?.trim() || story.name;
+  const description = content.og_description?.trim() || content.excerpt?.trim() || '';
 
   return {
     title,
     description,
+    alternates: {
+      canonical: `/${slug}`,
+    },
     openGraph: {
       title,
       description,
@@ -46,8 +50,23 @@ export default async function DynamicPage({ params }: PageProps) {
   const { story, source } = result;
 
   if (source === 'posts' && story.content.component === 'post') {
+    const siteUrl = getSiteUrl();
+    const jsonLd = buildBlogPostingJsonLd({
+      siteUrl,
+      slug,
+      title: story.content.title?.trim() || story.name,
+      description: story.content.excerpt?.trim() || '',
+      datePublished: story.first_published_at || story.created_at,
+      imageUrl: story.content.featured_image?.filename,
+      authorName: 'Hieu (Chris) Pham',
+    });
+
     return (
       <div className="page">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <Post
           blok={story.content}
           tags={story.tag_list}

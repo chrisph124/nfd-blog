@@ -21,12 +21,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const content = story.content;
   const siteUrl = getSiteUrl();
 
-  const title = content.og_title || story.name;
-  const description = content.og_description || '';
+  const title = content.og_title?.trim() || story.name;
+  const description = content.og_description?.trim() || '';
 
   return {
     title,
     description,
+    alternates: {
+      canonical: `/${fullSlug}`,
+    },
     openGraph: {
       title,
       description,
