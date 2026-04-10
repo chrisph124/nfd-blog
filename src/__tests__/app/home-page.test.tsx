@@ -109,6 +109,6 @@ describe('Home generateMetadata', () => {
     const metadata = await generateMetadata();
 
     expect(metadata.title).toBe('Notes of Dev');
-    expect(metadata.description).toBe('Blog of a developer');
+    expect(metadata.description).toBe('Thoughts on frontend engineering, AI, and building interfaces — by Hieu (Chris) Pham.');
   });
 });
