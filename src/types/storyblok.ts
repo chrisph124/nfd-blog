@@ -321,6 +321,7 @@ export interface StoryblokStoryLink {
   is_folder: boolean;
   parent_id: number | null;
   published: boolean;
+  published_at: string | null;
   position: number;
   uuid: string;
   is_startpage: boolean;
