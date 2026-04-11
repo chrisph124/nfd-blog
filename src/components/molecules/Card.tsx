@@ -72,7 +72,7 @@ const CardMeta = memo(({ createdAt, body }: CardMetaProps) => {
   if (!formattedDate && !readingTime) return null;
 
   return (
-    <div className="flex items-center gap-2 text-xs italic text-gray-500">
+    <div className="flex items-center gap-2 text-xs italic text-gray-600">
       {formattedDate && <span>{formattedDate}</span>}
       {formattedDate && readingTime && <span>•</span>}
       {readingTime && <span>{readingTime}</span>}
