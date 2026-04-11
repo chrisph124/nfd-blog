@@ -5,161 +5,59 @@ import type { StoryblokAsset, PostBlok } from '@/types/storyblok';
 
 export const runtime = 'edge';
 
-const SITE_NAME = 'Notes of Dev';
-
+// Storyblok returns `{id: null, filename: '', ...}` (truthy) for empty asset fields,
+// so we must check `.filename` directly — an object-truthy check would short-circuit
+// an `||` fallback chain on empty assets.
 function getImage(asset: StoryblokAsset | undefined): string | undefined {
-  return asset?.filename;
+  return asset?.filename || undefined;
 }
 
-async function resolveStory(slug: string) {
+async function resolveImage(slug: string): Promise<string | undefined> {
   if (slug === 'home') {
     const story = await fetchStoryApi('home');
-    if (!story) return null;
-    return {
-      title: story.content.og_title || story.name,
-      image: getImage(story.content.og_image as StoryblokAsset | undefined),
-    };
+    return getImage(story?.content.og_image as StoryblokAsset | undefined);
   }
 
-  // Try [slug] route (posts + pages)
   const story = await fetchStoryBySlugApi(slug);
   if (story) {
     const content = story.content as PostBlok;
-    return {
-      title: content.og_title || content.title || story.name,
-      image: getImage((content.og_image as StoryblokAsset | undefined) || (content.featured_image as StoryblokAsset | undefined)),
-    };
+    return (
+      getImage(content.og_image as StoryblokAsset | undefined) ||
+      getImage(content.featured_image as StoryblokAsset | undefined)
+    );
   }
 
-  // Fall back to catch-all (nested slugs)
-  const nestedStory = await fetchStoryApi(slug);
-  if (nestedStory) {
-    return {
-      title: nestedStory.content.og_title || nestedStory.name,
-      image: getImage(nestedStory.content.og_image as StoryblokAsset | undefined),
-    };
-  }
-
-  return null;
+  const nested = await fetchStoryApi(slug);
+  return getImage(nested?.content.og_image as StoryblokAsset | undefined);
 }
 
 export async function GET(request: NextRequest) {
   const slug = request.nextUrl.searchParams.get('slug') || 'home';
+  const resolvedImage = await resolveImage(slug);
 
-  const storyData = await resolveStory(slug);
-  const title = storyData?.title || SITE_NAME;
-  const imageUrl = storyData?.image;
+  const defaultImage = new URL('/og-default.jpg', request.url).toString();
+  const finalImage = resolvedImage ?? defaultImage;
+  const isDefault = finalImage === defaultImage;
 
-  const responseOptions = {
-    width: 1200,
-    height: 630,
-    headers: { 'Cache-Control': 'public, max-age=3600, s-maxage=86400' },
-  };
-
-  // If we have an image, render it as background with overlay
-  if (imageUrl) {
-    return new ImageResponse(
-      (
-        <div
+  return new ImageResponse(
+    (
+      <div style={{ width: '100%', height: '100%', display: 'flex', background: '#0f172a' }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={finalImage}
+          alt=""
           style={{
             width: '100%',
             height: '100%',
-            display: 'flex',
-            position: 'relative',
+            objectFit: isDefault ? 'contain' : 'cover',
           }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={imageUrl}
-            alt=""
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-            }}
-          />
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'flex-end',
-              padding: '48px',
-              background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%)',
-              height: '50%',
-            }}
-          >
-            <div
-              style={{
-                fontSize: 48,
-                fontWeight: 700,
-                color: '#ffffff',
-                lineHeight: 1.2,
-                textShadow: '0 2px 4px rgba(0,0,0,0.5)',
-              }}
-            >
-              {title}
-            </div>
-            <div
-              style={{
-                fontSize: 24,
-                color: '#d1d5db',
-                marginTop: 12,
-              }}
-            >
-              {SITE_NAME}
-            </div>
-          </div>
-        </div>
-      ),
-      responseOptions,
-    );
-  }
-
-  // Branded text card fallback
-  return new ImageResponse(
-    (
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
-          padding: '60px',
-        }}
-      >
-        <div
-          style={{
-            fontSize: 56,
-            fontWeight: 700,
-            color: '#f8fafc',
-            textAlign: 'center',
-            lineHeight: 1.3,
-            maxWidth: '900px',
-          }}
-        >
-          {title}
-        </div>
-        <div
-          style={{
-            fontSize: 28,
-            color: '#94a3b8',
-            marginTop: 24,
-          }}
-        >
-          {SITE_NAME}
-        </div>
+        />
       </div>
     ),
-    responseOptions,
+    {
+      width: 1200,
+      height: 630,
+      headers: { 'Cache-Control': 'public, max-age=3600, s-maxage=86400' },
+    },
   );
 }

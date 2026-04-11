@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { StoryblokStory, PageBlok, PostBlok } from '@/types/storyblok';
+import type { StoryblokStory, PageBlok, PostBlok, StoryblokAsset } from '@/types/storyblok';
 
 const mockFetchStoryApi = vi.fn<[string], Promise<StoryblokStory<PageBlok> | null>>();
 const mockFetchStoryBySlugApi = vi.fn<[string], Promise<StoryblokStory<PostBlok> | null>>();
@@ -24,10 +24,30 @@ vi.mock('next/og', () => ({
 import { GET } from '@/app/api/og/route';
 import type { NextRequest } from 'next/server';
 
+const DEFAULT_ORIGIN = 'https://notesof.dev';
+
 function createRequest(slug?: string): NextRequest {
-  const url = new URL('http://localhost/api/og');
+  const url = new URL(`${DEFAULT_ORIGIN}/api/og`);
   if (slug) url.searchParams.set('slug', slug);
-  return { nextUrl: url } as NextRequest;
+  return { nextUrl: url, url: url.toString() } as NextRequest;
+}
+
+// Extracts the <img src> from the captured JSX tree.
+// Root element shape: { type: 'div', props: { children: { type: 'img', props: { src, style } } } }
+function getImageSrc(element: unknown): string | undefined {
+  const root = element as { props?: { children?: unknown } } | undefined;
+  const child = root?.props?.children as
+    | { type?: string; props?: { src?: string } }
+    | undefined;
+  return child?.type === 'img' ? child.props?.src : undefined;
+}
+
+function getImageObjectFit(element: unknown): string | undefined {
+  const root = element as { props?: { children?: unknown } } | undefined;
+  const child = root?.props?.children as
+    | { type?: string; props?: { style?: { objectFit?: string } } }
+    | undefined;
+  return child?.props?.style?.objectFit;
 }
 
 const createMockPageStory = (overrides?: Partial<PageBlok>): StoryblokStory<PageBlok> => ({
@@ -130,16 +150,17 @@ describe('OG Image Route - GET', () => {
     expect(mockFetchStoryApi).toHaveBeenCalledWith('about/team');
   });
 
-  it('returns default title when no story found', async () => {
+  it('falls back to default image when no story found', async () => {
     mockFetchStoryBySlugApi.mockResolvedValue(null);
     mockFetchStoryApi.mockResolvedValue(null);
 
     await GET(createRequest('non-existent'));
 
-    expect(capturedElement).toBeDefined();
+    expect(getImageSrc(capturedElement)).toBe(`${DEFAULT_ORIGIN}/og-default.jpg`);
+    expect(getImageObjectFit(capturedElement)).toBe('contain');
   });
 
-  it('renders image background when story has og_image', async () => {
+  it('uses og_image when set on page', async () => {
     const story = createMockPageStory({
       og_title: 'With Image',
       og_image: { id: 1, filename: 'https://example.com/og.jpg', alt: 'OG' },
@@ -148,16 +169,8 @@ describe('OG Image Route - GET', () => {
 
     await GET(createRequest('home'));
 
-    expect(capturedElement).toBeDefined();
-  });
-
-  it('renders text fallback when no image', async () => {
-    const story = createMockPageStory({ og_title: 'No Image' });
-    mockFetchStoryApi.mockResolvedValue(story);
-
-    await GET(createRequest('home'));
-
-    expect(capturedElement).toBeDefined();
+    expect(getImageSrc(capturedElement)).toBe('https://example.com/og.jpg');
+    expect(getImageObjectFit(capturedElement)).toBe('cover');
   });
 
   it('defaults to home slug when no slug param', async () => {
@@ -167,5 +180,81 @@ describe('OG Image Route - GET', () => {
     await GET(createRequest());
 
     expect(mockFetchStoryApi).toHaveBeenCalledWith('home');
+  });
+
+  // Regression: Storyblok returns `{id: null, filename: '', ...}` (truthy) for empty asset
+  // fields. A naive `||` on the asset object would short-circuit to the empty og_image and
+  // never check featured_image. Must fall through based on `.filename`.
+  it('falls through empty og_image object to featured_image (Storyblok bug)', async () => {
+    const story = createMockPostStory({
+      og_image: {
+        id: null,
+        filename: '',
+        alt: '',
+        name: '',
+        focus: '',
+        title: '',
+      } as unknown as StoryblokAsset,
+      featured_image: { id: 2, filename: 'https://a.storyblok.com/featured.jpg', alt: 'feat' },
+    });
+    mockFetchStoryBySlugApi.mockResolvedValue(story);
+
+    await GET(createRequest('my-post'));
+
+    expect(getImageSrc(capturedElement)).toBe('https://a.storyblok.com/featured.jpg');
+    expect(getImageObjectFit(capturedElement)).toBe('cover');
+  });
+
+  it('uses featured_image when og_image not set on post', async () => {
+    const story = createMockPostStory({
+      featured_image: { id: 2, filename: 'https://a.storyblok.com/post.jpg', alt: 'p' },
+    });
+    mockFetchStoryBySlugApi.mockResolvedValue(story);
+
+    await GET(createRequest('my-post'));
+
+    expect(getImageSrc(capturedElement)).toBe('https://a.storyblok.com/post.jpg');
+  });
+
+  it('prefers og_image over featured_image when both set', async () => {
+    const story = createMockPostStory({
+      og_image: { id: 1, filename: 'https://a.storyblok.com/og.jpg', alt: 'og' },
+      featured_image: { id: 2, filename: 'https://a.storyblok.com/feat.jpg', alt: 'f' },
+    });
+    mockFetchStoryBySlugApi.mockResolvedValue(story);
+
+    await GET(createRequest('my-post'));
+
+    expect(getImageSrc(capturedElement)).toBe('https://a.storyblok.com/og.jpg');
+  });
+
+  it('post with no images falls back to default image', async () => {
+    const story = createMockPostStory();
+    mockFetchStoryBySlugApi.mockResolvedValue(story);
+
+    await GET(createRequest('my-post'));
+
+    expect(getImageSrc(capturedElement)).toBe(`${DEFAULT_ORIGIN}/og-default.jpg`);
+  });
+
+  it('nested slug with og_image uses that image', async () => {
+    const story = createMockPageStory({
+      og_image: { id: 3, filename: 'https://a.storyblok.com/nested.jpg', alt: 'n' },
+    });
+    mockFetchStoryBySlugApi.mockResolvedValue(null);
+    mockFetchStoryApi.mockResolvedValue(story);
+
+    await GET(createRequest('about/team'));
+
+    expect(getImageSrc(capturedElement)).toBe('https://a.storyblok.com/nested.jpg');
+  });
+
+  it('default image URL resolves against request origin', async () => {
+    mockFetchStoryBySlugApi.mockResolvedValue(null);
+    mockFetchStoryApi.mockResolvedValue(null);
+
+    await GET(createRequest('missing'));
+
+    expect(getImageSrc(capturedElement)).toBe(`${DEFAULT_ORIGIN}/og-default.jpg`);
   });
 });
