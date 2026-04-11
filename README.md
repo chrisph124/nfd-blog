@@ -1,171 +1,96 @@
-# NFD Blog
+# Notes of Dev Blog
 
-A modern blog application built with Next.js 15 and Storyblok CMS for seamless content management.
+A personal blog by Hieu (Chris) Pham - notes on software engineering. Built with Next.js 16 and Storyblok CMS for seamless content management.
 
 ## Tech Stack
 
-- **Next.js 15.3.0** - React framework with App Router and Server Components
+- **Next.js 16.2.3.0** - React framework with App Router and Server Components
 - **Storyblok** - Headless CMS for content management
 - **Tailwind CSS v4** - Utility-first CSS with new `@tailwindcss/postcss` plugin
 - **TypeScript** - Type-safe development with strict mode
 - **Turbopack** - Next-generation bundler for fast development
-
-## Features
-
-- 🚀 Server-side rendering with React Server Components
-- 📝 Content management via Storyblok CMS
-- 🎨 Component-based architecture with Storyblok integration
-- 🔄 Auto-generated TypeScript types from Storyblok schemas
-- 🎯 Type-safe with strict TypeScript configuration
-- ⚡ Fast development with Turbopack
+- **Vercel** - hosting + analytics
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+
-- npm or yarn
+- Node.js 20+
+- pnpm package manager
 - Storyblok account with a space created
 
 ### Installation
 
-1. Clone the repository:
-   ```bash
-   git clone <your-repo-url>
-   cd nfd-blog
-   ```
-
+1. Clone the repo
 2. Install dependencies:
    ```bash
-   npm install
+   pnpm install
    ```
-
 3. Set up environment variables:
-
-   Create a `.env.local` file in the root directory:
    ```bash
-   # Required for content fetching
-   NEXT_PUBLIC_STORYBLOK_CONTENT_API_ACCESS_TOKEN=your_content_api_token
-
-   # Required for type generation (optional)
-   STORYBLOK_MANAGEMENT_TOKEN=your_management_token
-   STORYBLOK_SPACE_ID=your_space_id
+   # .env.local
+   NEXT_PUBLIC_STORYBLOK_CONTENT_API_ACCESS_TOKEN=your_token
    ```
-
-   Get your tokens from Storyblok:
-   - Content API Token: Settings → Access Tokens → Content Delivery
-   - Management Token: Settings → Access Tokens → Personal Access Tokens
-   - Space ID: Settings → General
 
 ### Development
 
-Start the development server:
-
-```bash
-npm run dev
-```
+4. Start dev server:
+   ```bash
+   pnpm dev
+   ```
 
 Open [http://localhost:3000](http://localhost:3000) to view the application.
 
 ### Building for Production
 
 ```bash
-npm run build
-npm start
+pnpm build
+pnpm start
 ```
 
 ## Project Structure
 
 ```
-nfd-blog/
-├── src/
-│   ├── app/              # Next.js App Router pages
-│   │   ├── [...slug]/    # Dynamic catch-all route for Storyblok pages
-│   │   ├── layout.tsx    # Root layout with StoryblokProvider
-│   │   └── page.tsx      # Homepage
-│   ├── components/       # Storyblok components (JSX)
-│   │   ├── Page.jsx      # Page container component
-│   │   ├── Feature.jsx   # Feature block component
-│   │   ├── Grid.jsx      # Grid layout component
-│   │   └── Teaser.jsx    # Teaser card component
-│   ├── lib/              # Utilities and SDK setup
-│   │   └── storyblok.js  # Storyblok SDK initialization
-│   └── types/            # TypeScript type definitions
-│       └── storyblok.ts  # Auto-generated Storyblok types
-├── scripts/              # Utility scripts
-│   └── generate-types.ts # Type generation from Storyblok schemas
-├── CLAUDE.md             # AI assistant instructions
-└── STORYBLOK_SETUP_GUIDE.md  # Storyblok setup documentation
+src/
+├── app/              # Next.js App Router pages
+├── components/       # UI components (atoms, molecules, organisms, templates)
+├── lib/              # SDK setup, utilities, API helpers
+├── types/            # TypeScript types
+└── __tests__/        # Vitest tests
+scripts/
+└── generate-types.ts  # Storyblok type generation
 ```
 
 ## Type Generation
 
-This project includes automatic TypeScript type generation from Storyblok component schemas:
+Sync TypeScript types with your Storyblok components:
 
 ```bash
-npm run generate-types
+pnpm generate-types
 ```
-
-This fetches all component definitions from Storyblok and generates type-safe interfaces in `src/types/storyblok.ts`.
 
 See [scripts/README.md](scripts/README.md) for details.
 
-## Adding New Components
+## Scripts
 
-1. Create component in Storyblok (via the CMS interface)
-2. Create corresponding React component in `src/components/`
-3. Register component in `src/lib/storyblok.js`
-4. Run `npm run generate-types` to update TypeScript types
-5. Use the component in your pages
-
-Example:
-```jsx
-// src/components/MyComponent.jsx
-export default function MyComponent({ blok }) {
-  return (
-    <div>
-      <h2>{blok.title}</h2>
-      <p>{blok.description}</p>
-    </div>
-  );
-}
-```
-
-## Code Style
-
-- Never use `any` type in TypeScript - use `unknown` or `never` instead
-- Components use JSX (`.jsx`) while pages use TSX (`.tsx`)
-- Follow the component patterns in `CLAUDE.md`
-
-## Documentation
-
-- [scripts/README.md](scripts/README.md) - Type generation script documentation
-- [docs/](docs/) - Comprehensive project documentation
-  - [api-documentation.md](docs/api-documentation.md) - API routes and endpoints documentation
-  - [system-architecture.md](docs/system-architecture.md) - System architecture overview
-  - [code-standards.md](docs/code-standards.md) - Code standards and best practices
-  - [project-overview-pdr.md](docs/project-overview-pdr.md) - Project requirements and specifications
-- [SECURITY.md](SECURITY.md) - Security policy and vulnerability information
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Start dev server |
+| `pnpm build` | Production build |
+| `pnpm start` | Start production server |
+| `pnpm lint` | Lint code |
+| `pnpm test` | Run tests |
+| `pnpm generate-types` | Sync Storyblok types |
 
 ## Security
 
-This project takes security seriously. Key security features include:
-
-- **Regular Security Updates**: Dependencies are regularly updated and audited
+Key security practices:
+- **Regular Security Updates**: Dependencies are regularly updated and audited (`pnpm audit`)
+- **Type-safe TypeScript**: strict mode, no `any`
 - **CVE Patches**: All critical React CVEs are patched (see [SECURITY.md](SECURITY.md))
 - **XSS Prevention**: Input sanitization and content security policies
 - **Type Safety**: Strict TypeScript configuration prevents runtime errors
 - **Environment Security**: Secure handling of API keys and secrets
-
-### Recent Security Updates
-
-As of December 15, 2025, the following React CVEs have been patched:
-- CVE-2025-55184: React Server Components vulnerability
-- CVE-2025-67779: React DOM XSS vulnerability
-- CVE-2025-55183: React Server Actions request forgery
-
-For detailed security practices and guidelines, see [docs/security-considerations-best-practices.md](docs/security-considerations-best-practices.md).
-
 ## Learn More
 
 - [Next.js Documentation](https://nextjs.org/docs)
