@@ -6,6 +6,8 @@ import type { StoryblokLinksResponse, StoryblokStoryLink } from '@/types/storybl
 import Post from '@/components/templates/Post';
 import { buildBlogPostingJsonLd } from '@/lib/seo-structured-data';
 
+export const revalidate = 86400; // Revalidate every 24 hours (webhook handles real-time updates)
+
 interface PageProps {
   params: Promise<{
     slug: string;

@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import type { StoryblokLinksResponse, StoryblokStoryLink } from '@/types/storyblok';
 
-export const revalidate = 3600; // Revalidate every 1 hour
+export const revalidate = 86400; // Revalidate every 24 hours (webhook handles real-time updates)
 
 interface PageProps {
   params: Promise<{
