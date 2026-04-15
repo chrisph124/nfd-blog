@@ -17,10 +17,6 @@ interface CardImageProps {
   priority?: boolean;
 }
 
-interface CardTagsProps {
-  tags: string[];
-}
-
 interface CardMetaProps {
   createdAt?: string;
   excerpt?: string;
@@ -46,25 +42,6 @@ const CardImage = memo(({ image, title, priority = false }: CardImageProps) => {
 
 CardImage.displayName = 'CardImage';
 
-const CardTags = memo(({ tags }: CardTagsProps) => {
-  if (!tags || tags.length === 0) return null;
-
-  return (
-    <div className="flex flex-wrap gap-2">
-      {tags.map((tag) => (
-        <span
-          key={tag}
-          className="px-2 py-1 text-[10px] font-bold uppercase text-neon-cyan-900 bg-gray-200 rounded-md"
-        >
-          {tag}
-        </span>
-      ))}
-    </div>
-  );
-});
-
-CardTags.displayName = 'CardTags';
-
 const CardMeta = memo(({ createdAt, body }: CardMetaProps) => {
   const formattedDate = createdAt ? formatDate(createdAt) : '';
   const readingTime = getStoryReadingTime(body);
@@ -83,7 +60,7 @@ const CardMeta = memo(({ createdAt, body }: CardMetaProps) => {
 CardMeta.displayName = 'CardMeta';
 
 const Card = memo(({ story, priority = false }: CardProps) => {
-  const { content, full_slug, tag_list, created_at } = story;
+  const { content, full_slug, created_at } = story;
   const { featured_image, title = '', excerpt, body } = content;
 
   // Strip "posts/" prefix to get root-level URL (e.g., "posts/my-post" -> "my-post")
@@ -101,7 +78,6 @@ const Card = memo(({ story, priority = false }: CardProps) => {
       </Link>
 
       <div className="flex flex-col gap-2 p-4 flex-1">
-        {tag_list && tag_list.length > 0 && <CardTags tags={tag_list} />}
 
         <Link href={`/${postSlug}`} className='no-underline!'>
           <h3 className="body-1 font-semibold line-clamp-3 group-hover:text-primary-700 transition-colors">
@@ -112,7 +88,7 @@ const Card = memo(({ story, priority = false }: CardProps) => {
         <CardMeta createdAt={created_at} body={body} />
 
         {excerpt && (
-          <p className="subtitle-2 line-clamp-6 mt-auto">
+          <p className="subtitle-2 line-clamp-4 mt-auto">
             {excerpt}
           </p>
         )}

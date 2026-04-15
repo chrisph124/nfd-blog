@@ -95,24 +95,6 @@ describe('Card', () => {
     });
   });
 
-  describe('Tags', () => {
-    it('renders tags when provided', () => {
-      const story = createMockStory();
-      render(<Card story={story} />);
-
-      expect(screen.getByText('test')).toBeInTheDocument();
-      expect(screen.getByText('example')).toBeInTheDocument();
-    });
-
-    it('does not render tags section when tag_list is empty', () => {
-      const story = createMockStory({ tag_list: [] });
-      const { container } = render(<Card story={story} />);
-
-      const tagsContainer = container.querySelector('.flex.flex-wrap.gap-2');
-      expect(tagsContainer).not.toBeInTheDocument();
-    });
-  });
-
   describe('Metadata', () => {
     it('renders formatted creation date', () => {
       const story = createMockStory({
@@ -146,7 +128,6 @@ describe('Card', () => {
       render(<Card story={story} />);
 
       const links = screen.getAllByRole('link');
-      // Should have at least: image link, title link, and tag links
       expect(links.length).toBeGreaterThan(1);
     });
 
@@ -156,18 +137,6 @@ describe('Card', () => {
 
       const titleLink = screen.getByRole('link', { name: /Test Post Title/i });
       expect(titleLink).toHaveAttribute('href', '/test-post');
-    });
-
-    it('renders tags as styled spans', () => {
-      const story = createMockStory();
-      render(<Card story={story} />);
-
-      const testTagSpan = screen.getByText('test');
-      const exampleTagSpan = screen.getByText('example');
-
-      expect(testTagSpan.tagName).toBe('SPAN');
-      expect(exampleTagSpan.tagName).toBe('SPAN');
-      expect(testTagSpan).toHaveClass('px-2', 'py-1', 'text-[10px]', 'font-bold', 'uppercase', 'text-neon-cyan-900', 'bg-gray-200', 'rounded-md');
     });
 
     it('strips posts/ prefix from full_slug for root-level URL', () => {
@@ -258,18 +227,6 @@ describe('Card', () => {
   });
 });
 
-describe('Tag Rendering', () => {
-  it('renders tags as plain spans without navigation', () => {
-    const story = createMockStory();
-    render(<Card story={story} />);
-
-    const testTagSpan = screen.getByText('test');
-
-    expect(testTagSpan.tagName).toBe('SPAN');
-    expect(testTagSpan).not.toHaveAttribute('href');
-  });
-});
-
 describe('Edge Cases', () => {
   it('handles malformed excerpt gracefully', () => {
     const story = createMockStory({
@@ -306,24 +263,6 @@ describe('Edge Cases', () => {
 
     expect(() => render(<Card story={story} />)).not.toThrow();
     expect(screen.queryByRole('img')).not.toBeInTheDocument();
-  });
-
-  it('handles empty tags array', () => {
-    const story = createMockStory({
-      tag_list: [],
-    });
-
-    render(<Card story={story} />);
-    expect(screen.queryByRole('link', { name: 'test' })).not.toBeInTheDocument();
-  });
-
-  it('handles undefined tags', () => {
-    const story = createMockStory({
-      tag_list: undefined,
-    });
-
-    render(<Card story={story} />);
-    expect(screen.queryByRole('link', { name: 'test' })).not.toBeInTheDocument();
   });
 
   it('handles empty or null title', () => {
