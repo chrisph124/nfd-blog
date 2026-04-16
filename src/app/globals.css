@@ -567,6 +567,12 @@ a:not(.cta-primary-gradient-border, .cta-primary-outlined-border) {
   }
 }
 
+/* Richtext container overflow safety */
+.richtext {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
 /* Shiki code block base styles */
 .richtext pre {
   border-radius: 0.75rem;
@@ -585,11 +591,13 @@ a:not(.cta-primary-gradient-border, .cta-primary-outlined-border) {
 }
 
 pre.shiki {
+  border-radius: 0.75rem;
   box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
 [data-theme="dark"] pre.shiki {
-  box-shadow: 0 5px 15px 0 rgb(255 255 255 / 0.2), 0 2px 4px -2px rgb(255 255 255 / 0.2);
+  border-radius: 0.75rem;
+  box-shadow: -1px 4px 6px 0 rgb(255 255 255 / 0.2), 0 2px 4px -4px rgb(255 255 255 / 0.2);
 }
 
 pre.shiki code {
@@ -614,10 +622,25 @@ code {
 }
 
 
+/* Table responsive wrapper */
+.richtext table {
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
 /* List styling */
 .richtext ul,
 .richtext ol {
   padding-left: 1.5rem;
+}
+
+.richtext ul {
+  list-style-type: disc;
+}
+
+.richtext ol {
+  list-style-type: decimal;
 }
 
 .richtext li {
