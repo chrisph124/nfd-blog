@@ -75,7 +75,7 @@ export default async function RootLayout({
             <StoryblokProvider>
               <MotionProvider>
                 {headerStory && <Header blok={headerStory.content.body[0]} />}
-                <main className="grow py-10">
+                <main className="grow py-10 overflow-x-hidden">
                   {children}
                 </main>
                 {footerStory && <Footer blok={footerStory.content.body[0]} />}

@@ -83,7 +83,7 @@ export default function Post({ blok, tags = [], createdAt }: Readonly<PostProps>
         )}
 
         {body && body.length > 0 && (
-          <section className="prose prose-lg max-w-5xl flex flex-col gap-y-6">
+          <section className="prose prose-lg max-w-5xl w-full overflow-hidden flex flex-col gap-y-6">
             {body.map((nestedBlok) => (
               <StoryblokServerComponent
                 blok={nestedBlok}
