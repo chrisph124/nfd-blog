@@ -248,6 +248,22 @@ describe('Header', () => {
       const logoLink = screen.getByRole('link');
       expect(logoLink).toHaveAttribute('href', '/');
     });
+
+    it('clicking logo closes mobile menu', () => {
+      const blok = createMockBlok();
+      const { getByTestId } = render(<Header blok={blok} />);
+
+      // Open mobile menu
+      const menuToggle = getByTestId('menu-toggle');
+      fireEvent.click(menuToggle);
+      expect(menuToggle).toHaveTextContent('Close');
+
+      // Click logo
+      const logoLink = screen.getByRole('link');
+      fireEvent.click(logoLink);
+
+      expect(menuToggle).toHaveTextContent('Menu');
+    });
   });
 
   describe('Styles', () => {
