@@ -15,9 +15,6 @@ export default function Post({ blok, tags = [], createdAt }: Readonly<PostProps>
   const readingTime = getStoryReadingTime(body);
   const formattedDate = createdAt ? formatDate(createdAt) : '';
 
-  // Post hero heading classes (89 chars)
-  const POST_HERO_HEADING_CLASSES = "display-1 text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-lg text-center";
-
   return (
     <>
       <ReadingProgressBar
@@ -25,31 +22,14 @@ export default function Post({ blok, tags = [], createdAt }: Readonly<PostProps>
         position="fixed"
         zIndex={40}
       />
-      <article className="flex flex-col justify-center items-center gap-y-6 md:gap-y-12 -mt-10">
-      <div className="relative flex items-center justify-center w-full min-h-[300px] xl:min-h-[500px] overflow-hidden">
-        {/* Background Image */}
-        {featured_image?.filename && (
-          <Image
-            src={featured_image.filename}
-            alt={featured_image.alt || title}
-            fill
-            className="object-cover -z-10"
-            sizes="(max-width: 1024px) 100vw, 896px"
-            priority
-          />
-        )}
-
-        {/* Dark Overlay - covers whole image */}
-        <div className="absolute inset-0 bg-black/80 -z-10" />
-
-        <div className="flex flex-col items-center gap-4 max-w-[1280px] px-4 md:px-8 lg:px-12 xl:px-5">
-          {/* Tags */}
+      <article className="flex flex-col items-center gap-y-6 md:gap-y-12 pt-4">
+        <header className="w-full max-w-[1280px] mx-auto px-4 md:px-8 lg:px-12 xl:px-5 flex flex-col items-center gap-4 text-center">
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-2 justify-center">
               {tags.map((tag) => (
                 <span
                   key={tag}
-                  className="px-3 py-1 text-xs font-bold text-white uppercase bg-white/20 backdrop-blur-sm rounded-full"
+                  className="px-3 py-1 text-xs font-bold text-white uppercase bg-viva-magenta-500 rounded-full"
                 >
                   {tag}
                 </span>
@@ -57,43 +37,55 @@ export default function Post({ blok, tags = [], createdAt }: Readonly<PostProps>
             </div>
           )}
 
-          {/* Title */}
           {title && (
-            <h1 className={POST_HERO_HEADING_CLASSES}>
+            <h1 className="display-1 text-4xl md:text-5xl lg:text-6xl font-bold text-foreground text-center">
               {title}
             </h1>
           )}
 
-          {/* Date and Reading Time */}
           {(formattedDate || readingTime) && (
-            <div className="flex items-center gap-2 text-sm font-medium text-white/80">
+            <div className="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-600">
               {formattedDate && <span>{formattedDate}</span>}
               {formattedDate && readingTime && <span>•</span>}
               {readingTime && <span>{readingTime}</span>}
             </div>
           )}
-        </div>
-      </div>
+        </header>
 
-      <div className="w-full max-w-[1280px] flex flex-col justify-center items-center px-4 md:px-8 lg:px-12 xl:px-5 mx-auto gap-y-6 md:gap-y-12">
-        {excerpt && (
-          <h2 className="h4 italic text-center md:px-2 lg:px-4 xl:px-16">
-            {excerpt}
-          </h2>
-        )}
-
-        {body && body.length > 0 && (
-          <section className="prose prose-lg max-w-5xl w-full overflow-hidden flex flex-col gap-y-6">
-            {body.map((nestedBlok) => (
-              <StoryblokServerComponent
-                blok={nestedBlok}
-                key={nestedBlok._uid}
+        {featured_image?.filename && (
+          <figure className="w-full max-w-[1280px] mx-auto px-4 md:px-8 lg:px-12 xl:px-5">
+            <div className="relative aspect-video w-full overflow-hidden rounded-xl">
+              <Image
+                src={featured_image.filename}
+                alt={featured_image.alt || title}
+                fill
+                className="object-cover"
+                sizes="(max-width: 1280px) 100vw, 1280px"
+                priority
               />
-            ))}
-          </section>
+            </div>
+          </figure>
         )}
-      </div>
-    </article>
+
+        <div className="w-full max-w-[1280px] flex flex-col items-center px-4 md:px-8 lg:px-12 xl:px-5 mx-auto gap-y-6 md:gap-y-12">
+          {excerpt && (
+            <h2 className="h4 italic text-center md:px-2 lg:px-4 xl:px-16">
+              {excerpt}
+            </h2>
+          )}
+
+          {body && body.length > 0 && (
+            <section className="prose prose-lg max-w-5xl w-full overflow-hidden flex flex-col gap-y-6">
+              {body.map((nestedBlok) => (
+                <StoryblokServerComponent
+                  blok={nestedBlok}
+                  key={nestedBlok._uid}
+                />
+              ))}
+            </section>
+          )}
+        </div>
+      </article>
     </>
   );
 }
