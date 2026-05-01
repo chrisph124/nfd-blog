@@ -164,6 +164,22 @@ describe('Richtext Component', () => {
       expect(container.firstChild).toBeNull();
     });
 
+    it('returns null when renderRichText yields a falsy value (empty doc)', async () => {
+      // blok.content is truthy, but renderRichText returns empty string —
+      // exercises the !renderedContent guard distinct from the !blok.content guard.
+      const { renderRichText } = await import('@storyblok/react/rsc');
+      (renderRichText as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce('');
+
+      const blokWithDocContent: RichtextBlok = {
+        _uid: 'test-richtext-empty-render',
+        component: 'richtext',
+        content: { type: 'doc', content: [] } as unknown as string,
+      };
+
+      const { container } = render(<Richtext blok={blokWithDocContent} />);
+      expect(container.firstChild).toBeNull();
+    });
+
     it('renders content when renderRichText returns HTML', () => {
       const blokWithRenderableContent: RichtextBlok = {
         _uid: 'test-richtext-renderable',

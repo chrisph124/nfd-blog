@@ -214,7 +214,7 @@ describe('Post', () => {
 
       expect(aiSpan.tagName).toBe('SPAN');
       expect(techSpan.tagName).toBe('SPAN');
-      expect(aiSpan).toHaveClass('px-3', 'py-1', 'text-xs', 'font-bold', 'text-white', 'uppercase', 'bg-white/20', 'backdrop-blur-sm', 'rounded-full');
+      expect(aiSpan).toHaveClass('px-3', 'py-1', 'text-xs', 'font-bold', 'text-white', 'uppercase', 'bg-viva-magenta-500', 'rounded-full');
     });
 
     it('renders tags above title', () => {
@@ -246,8 +246,7 @@ describe('Post', () => {
       expect(tagSpan).toHaveClass('py-1');
       expect(tagSpan).toHaveClass('text-xs');
       expect(tagSpan).toHaveClass('rounded-full');
-      // Check className string contains expected patterns
-      expect(tagSpan.className).toMatch(/text-white|backdrop-blur/);
+      expect(tagSpan.className).toMatch(/text-white|bg-viva-magenta-500/);
     });
   });
 
@@ -331,7 +330,7 @@ describe('Post', () => {
       const { container } = render(<Post blok={blok} />);
 
       const article = container.querySelector('article');
-      expect(article).toHaveClass('flex', 'flex-col', 'justify-center', 'items-center');
+      expect(article).toHaveClass('flex', 'flex-col', 'items-center', 'gap-y-6', 'md:gap-y-12', 'pt-4');
     });
 
     it('applies prose styling to body content', () => {
@@ -344,22 +343,76 @@ describe('Post', () => {
       expect(proseDiv).toHaveClass('prose', 'prose-lg', 'max-w-5xl', 'w-full', 'overflow-hidden', 'flex', 'flex-col', 'gap-y-6');
     });
 
-    it('has hero section with correct minimum height', () => {
+    it('renders header with constrained max-width and centered layout', () => {
       const blok = createMockBlok();
       const { container } = render(<Post blok={blok} />);
 
-      const heroSection = container.querySelector('.relative.flex.items-center.justify-center');
-      expect(heroSection).toBeInTheDocument();
-      expect(heroSection).toHaveClass('min-h-[300px]', 'xl:min-h-[500px]');
+      const header = container.querySelector('header');
+      expect(header).toBeInTheDocument();
+      expect(header).toHaveClass('w-full', 'max-w-[1280px]', 'flex', 'flex-col', 'items-center', 'text-center');
     });
 
-    it('has dark overlay on hero image', () => {
+    it('renders featured image inside aspect-video figure with rounded corners', () => {
       const blok = createMockBlok();
       const { container } = render(<Post blok={blok} />);
 
-      const overlay = container.querySelector(String.raw`.bg-black\/80`);
-      expect(overlay).toBeInTheDocument();
-      expect(overlay).toHaveClass('absolute', 'inset-0', '-z-10');
+      const figure = container.querySelector('figure');
+      expect(figure).toBeInTheDocument();
+      expect(figure).toHaveClass('w-full', 'max-w-[1280px]');
+
+      const imageWrapper = figure?.querySelector('div');
+      expect(imageWrapper).toHaveClass('relative', 'aspect-video', 'overflow-hidden', 'rounded-xl');
+    });
+
+    it('does not render dark overlay or background-positioned hero', () => {
+      const blok = createMockBlok();
+      const { container } = render(<Post blok={blok} />);
+
+      expect(container.querySelector(String.raw`.bg-black\/80`)).not.toBeInTheDocument();
+      expect(container.querySelector(String.raw`.min-h-\[300px\]`)).not.toBeInTheDocument();
+      expect(container.querySelector(String.raw`.-z-10`)).not.toBeInTheDocument();
+    });
+
+    it('renders banner sections in order: tags → title → meta → figure', () => {
+      const blok = createMockBlok();
+      const tags = ['First'];
+      const createdAt = '2025-01-15T10:00:00.000Z';
+      render(<Post blok={blok} tags={tags} createdAt={createdAt} />);
+
+      const tag = screen.getByText('First');
+      const h1 = screen.getByRole('heading', { level: 1 });
+      const meta = screen.getByText('January 15, 2025');
+      const figure = document.querySelector('figure');
+
+      expect(tag.compareDocumentPosition(h1) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      expect(h1.compareDocumentPosition(meta) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      expect(meta.compareDocumentPosition(figure!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
+    it('applies viva-magenta background to tag pills', () => {
+      const blok = createMockBlok();
+      render(<Post blok={blok} tags={['Sample']} />);
+
+      const tag = screen.getByText('Sample');
+      expect(tag).toHaveClass('bg-viva-magenta-500');
+    });
+
+    it('applies foreground color to title (no white-on-image text)', () => {
+      const blok = createMockBlok({ title: 'Foreground Title' });
+      render(<Post blok={blok} />);
+
+      const heading = screen.getByRole('heading', { level: 1 });
+      expect(heading).toHaveClass('text-foreground');
+      expect(heading).not.toHaveClass('text-white', 'drop-shadow-lg');
+    });
+
+    it('applies muted gray to meta line', () => {
+      const blok = createMockBlok();
+      const createdAt = '2025-01-15T10:00:00.000Z';
+      const { container } = render(<Post blok={blok} createdAt={createdAt} />);
+
+      const meta = container.querySelector('header > div.flex.items-center');
+      expect(meta).toHaveClass('text-gray-500');
     });
 
     it('has correct content max-width', () => {
@@ -654,10 +707,10 @@ describe('Post', () => {
 
       // Check responsive classes are maintained
       const article = container.querySelector('article');
-      expect(article).toHaveClass('gap-y-6', 'md:gap-y-12');
+      expect(article).toHaveClass('gap-y-6', 'md:gap-y-12', 'pt-4');
 
-      const heroSection = container.querySelector('.relative.flex.items-center.justify-center');
-      expect(heroSection).toHaveClass('min-h-[300px]', 'xl:min-h-[500px]');
+      const figure = container.querySelector('figure');
+      expect(figure).toHaveClass('max-w-[1280px]');
 
       expect(screen.getByTestId('reading-progress')).toBeInTheDocument();
     });
