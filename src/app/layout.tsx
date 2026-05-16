@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Nunito, Lora, Bitcount_Prop_Single } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -39,12 +39,28 @@ export const metadata: Metadata = {
   description: 'Thoughts on software engineering, AI, and building interfaces — by Hieu (Chris) Pham.',
   openGraph: {
     type: 'website',
-    siteName: 'Notes of Dev Blog',
+    siteName: 'Notes of Dev',
     locale: 'en_US',
+    url: getSiteUrl(),
   },
   twitter: {
     card: 'summary_large_image',
+    site: '@chrisphamdev',
+    creator: '@chrisphamdev',
   },
+  alternates: {
+    canonical: '/',
+    types: {
+      'application/rss+xml': [{ url: '/rss.xml', title: 'Notes of Dev' }],
+    },
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
+  ],
 };
 
 export default async function RootLayout({
