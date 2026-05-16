@@ -327,7 +327,17 @@ describe('formatDate', () => {
     const today = new Date();
     const dateString = today.toISOString();
     expect(formatDate(dateString)).toContain(today.getFullYear().toString());
-    expect(formatDate(dateString)).toContain(today.toLocaleDateString('en-US', { month: 'long' }));
+    expect(formatDate(dateString)).toContain(
+      today.toLocaleDateString('en-US', { month: 'long', timeZone: 'UTC' })
+    );
+  });
+
+  it('renders in UTC regardless of runtime timezone (hydration safety)', () => {
+    // 23:30 UTC on May 15 = May 16 in any timezone east of UTC (e.g. Asia/Saigon UTC+7).
+    // Without timeZone: 'UTC', server (UTC) and client (local) produce different strings,
+    // triggering React hydration error #418. Pin to UTC so both render identically.
+    expect(formatDate('2026-05-15T23:30:00.000Z')).toBe('May 15, 2026');
+    expect(formatDate('2026-05-16T00:30:00.000Z')).toBe('May 16, 2026');
   });
 });
 
