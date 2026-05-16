@@ -77,6 +77,30 @@ describe('Home Page', () => {
     expect(screen.getByTestId('storyblok-story')).toHaveTextContent('Home');
   });
 
+  it('emits a single JSON-LD script with @graph containing WebSite + Organization', async () => {
+    const story = createMockStory();
+    mockFetchHomeStory.mockResolvedValue(story);
+
+    const Component = await Home();
+    const { container } = render(Component);
+
+    const scripts = container.querySelectorAll('script[type="application/ld+json"]');
+    expect(scripts).toHaveLength(1);
+
+    const json = JSON.parse(scripts[0].textContent ?? '{}');
+    expect(json['@context']).toBe('https://schema.org');
+    expect(Array.isArray(json['@graph'])).toBe(true);
+    const types = json['@graph'].map((node: { '@type': string }) => node['@type']);
+    expect(types).toEqual(expect.arrayContaining(['WebSite', 'Organization']));
+
+    const organization = json['@graph'].find(
+      (node: { '@type': string }) => node['@type'] === 'Organization'
+    );
+    expect(organization.sameAs).toEqual(
+      expect.arrayContaining([expect.stringContaining('github.com/chrisph124')])
+    );
+  });
+
   it('calls notFound when story is null', async () => {
     mockFetchHomeStory.mockResolvedValue(null);
 

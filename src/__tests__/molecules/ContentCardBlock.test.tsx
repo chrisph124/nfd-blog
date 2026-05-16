@@ -153,27 +153,35 @@ describe('ContentCardBlock', () => {
   });
 
   describe('Subtitle Rendering', () => {
-    it('renders subtitle as h5 when provided', () => {
+    it('renders subtitle as a paragraph when provided', () => {
       const blok = createMockBlok({ subtitle: 'Test Subtitle' });
       render(<ContentCardBlock blok={blok} />);
 
-      const h5 = screen.getByRole('heading', { level: 5 });
-      expect(h5).toHaveTextContent('Test Subtitle');
+      expect(screen.getByText('Test Subtitle').tagName).toBe('P');
     });
 
-    it('does not render h5 when subtitle is undefined', () => {
+    it('does not render subtitle paragraph when subtitle is undefined', () => {
       const blok = createMockBlok({ subtitle: undefined });
-      const { container } = render(<ContentCardBlock blok={blok} />);
+      render(<ContentCardBlock blok={blok} />);
 
-      expect(container.querySelector('h5')).not.toBeInTheDocument();
+      expect(screen.queryByText(/test subtitle/i)).not.toBeInTheDocument();
     });
 
     it('applies correct font weight to subtitle', () => {
       const blok = createMockBlok({ subtitle: 'Test Subtitle' });
+      render(<ContentCardBlock blok={blok} />);
+
+      const subtitle = screen.getByText('Test Subtitle');
+      expect(subtitle).toHaveClass('font-normal');
+      expect(subtitle).toHaveClass('text-gray-700');
+    });
+
+    it('does not introduce a heading-level skip after the h3 title', () => {
+      const blok = createMockBlok({ title: 'Title', subtitle: 'Sub' });
       const { container } = render(<ContentCardBlock blok={blok} />);
 
-      const h5 = container.querySelector('h5');
-      expect(h5).toHaveClass('font-normal');
+      expect(container.querySelector('h5')).not.toBeInTheDocument();
+      expect(container.querySelector('h4')).not.toBeInTheDocument();
     });
   });
 
