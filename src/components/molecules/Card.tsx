@@ -80,9 +80,9 @@ const Card = memo(({ story, priority = false }: CardProps) => {
       <div className="flex flex-col gap-2 p-4 flex-1">
 
         <Link href={`/${postSlug}`} className='no-underline!'>
-          <h3 className="body-1 font-semibold line-clamp-3 group-hover:text-primary-700 transition-colors">
+          <h2 className="h3 body-1 font-semibold line-clamp-3 group-hover:text-primary-700 transition-colors">
             {title}
-          </h3>
+          </h2>
         </Link>
 
         <CardMeta createdAt={created_at} body={body} />

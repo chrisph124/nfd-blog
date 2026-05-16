@@ -11,7 +11,7 @@ const SOCIAL_LINKS = [
 
 const Footer = memo(({ blok }: StoryblokComponentProps<FooterBlok>) => {
   return (
-    <footer {...makeStoryblokEditable(blok)} className="bg-surface-inverted text-on-surface-inverted w-full shadow-sm dark:shadow-white/20">
+    <footer {...makeStoryblokEditable(blok)} className="bg-[#111827] text-[#F9FAFB] w-full shadow-sm dark:shadow-white/20">
       <div className="py-6 max-w-[1280px] px-4 md:px-8 lg:px-12 xl:px-5 mx-auto">
         {/* Mobile/Tablet: Stacked column layout */}
         {/* Desktop: 3-column layout (domain, copyright, social) */}
@@ -30,8 +30,8 @@ const Footer = memo(({ blok }: StoryblokComponentProps<FooterBlok>) => {
                 href={link.url}
                 target={link.url.startsWith('http') ? '_blank' : undefined}
                 rel={link.url.startsWith('http') ? 'noopener noreferrer' : undefined}
-                className="text-on-surface-inverted hover:text-primary-400 transition-colors"
-                aria-label={`${link.name} ${link.url}`}
+                className="!text-[#F9FAFB] hover:text-primary-400 transition-colors"
+                aria-label={link.name}
               >
                 <link.icon className="w-6 h-6" />
               </a>
