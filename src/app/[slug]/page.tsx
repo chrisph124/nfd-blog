@@ -9,24 +9,16 @@ import {
   buildPersonJsonLd,
   estimateWordCount,
 } from '@/lib/seo-structured-data';
+import { escapeJsonLd } from '@/lib/seo/json-ld-escape';
+import { AUTHOR_NAME, AUTHOR_SAME_AS } from '@/lib/seo/author';
 import { stripEntities } from '@/lib/seo/strip-entities';
 
 export const revalidate = 86400; // Revalidate every 24 hours (webhook handles real-time updates)
-
-const AUTHOR_NAME = 'Hieu (Chris) Pham';
-const AUTHOR_SAME_AS = [
-  'https://github.com/chrisph124',
-  'https://www.linkedin.com/in/chrispham124/',
-];
 
 interface PageProps {
   params: Promise<{
     slug: string;
   }>;
-}
-
-function escapeJsonLd(json: object): string {
-  return JSON.stringify(json).replace(/</g, '\\u003c');
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
