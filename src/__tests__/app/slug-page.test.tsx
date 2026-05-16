@@ -153,8 +153,16 @@ describe('generateMetadata ([slug])', () => {
     expect(metadata.title).toBe('Post OG');
     expect(metadata.description).toBe('Post desc');
     expect(metadata.openGraph?.images).toEqual([
-      { url: 'https://example.com/api/og?slug=my-post', width: 1200, height: 630 },
+      { url: 'https://example.com/api/og?slug=my-post', width: 1200, height: 630, alt: 'Post OG' },
     ]);
+    expect(metadata.openGraph?.type).toBe('article');
+    expect(metadata.openGraph?.url).toBe('https://example.com/my-post');
+    expect(metadata.other).toMatchObject({
+      'article:published_time': '2024-01-01T00:00:00.000Z',
+      'article:modified_time': '2024-01-01T00:00:00.000Z',
+      'article:author': 'Hieu (Chris) Pham',
+      'article:tag': ['tech'],
+    });
   });
 
   it('returns empty object when not found', async () => {

@@ -24,7 +24,7 @@ vi.mock('react', async (importOriginal) => {
   };
 });
 
-import { getSiteUrl, fetchHomeStory, fetchStoryBySlug, fetchStory } from '@/lib/storyblok';
+import { getSiteUrl, fetchHomeStory, fetchStoryBySlug, fetchStory, fetchAllPosts } from '@/lib/storyblok';
 
 const createMockPageStory = (slug = 'home'): StoryblokStory<PageBlok> => ({
   id: 1,
@@ -131,6 +131,26 @@ describe('getSiteUrl', () => {
   it('falls back to localhost when no env vars set', () => {
     expect(getSiteUrl()).toBe('http://localhost:3000');
   });
+
+  it('normalizes apex notesof.dev to www.notesof.dev', () => {
+    process.env.NEXT_PUBLIC_SITE_URL = 'https://notesof.dev';
+    expect(getSiteUrl()).toBe('https://www.notesof.dev');
+  });
+
+  it('normalizes apex notesof.dev with trailing slash to www.notesof.dev', () => {
+    process.env.NEXT_PUBLIC_SITE_URL = 'https://notesof.dev/';
+    expect(getSiteUrl()).toBe('https://www.notesof.dev');
+  });
+
+  it('leaves www.notesof.dev unchanged', () => {
+    process.env.NEXT_PUBLIC_SITE_URL = 'https://www.notesof.dev';
+    expect(getSiteUrl()).toBe('https://www.notesof.dev');
+  });
+
+  it('does not match notesof.dev as a substring of another host', () => {
+    process.env.NEXT_PUBLIC_SITE_URL = 'https://notesof.dev.example.com';
+    expect(getSiteUrl()).toBe('https://notesof.dev.example.com');
+  });
 });
 
 // ============================================================================
@@ -231,6 +251,58 @@ describe('fetchStory', () => {
     const result = await fetchStory('bad-slug');
 
     expect(result).toBeNull();
+    consoleSpy.mockRestore();
+  });
+});
+
+// ============================================================================
+// fetchAllPosts
+// ============================================================================
+
+describe('fetchAllPosts', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('returns all posts when total fits in one page', async () => {
+    const stories = [createMockPostStory('a'), createMockPostStory('b')];
+    mockGet.mockResolvedValue({
+      data: { stories },
+      headers: { total: '2' },
+    } as unknown as { data: { story: StoryblokStory } });
+
+    const result = await fetchAllPosts();
+
+    expect(result).toEqual(stories);
+    expect(mockGet).toHaveBeenCalledTimes(1);
+  });
+
+  it('paginates when total exceeds per_page', async () => {
+    const page1 = Array.from({ length: 100 }, (_, i) => createMockPostStory(`p1-${i}`));
+    const page2 = [createMockPostStory('p2-0')];
+    mockGet
+      .mockResolvedValueOnce({
+        data: { stories: page1 },
+        headers: { total: '101' },
+      } as unknown as { data: { story: StoryblokStory } })
+      .mockResolvedValueOnce({
+        data: { stories: page2 },
+        headers: { total: '101' },
+      } as unknown as { data: { story: StoryblokStory } });
+
+    const result = await fetchAllPosts();
+
+    expect(result).toHaveLength(101);
+    expect(mockGet).toHaveBeenCalledTimes(2);
+  });
+
+  it('returns empty array on error', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    mockGet.mockRejectedValue(new Error('boom'));
+
+    const result = await fetchAllPosts();
+
+    expect(result).toEqual([]);
     consoleSpy.mockRestore();
   });
 });

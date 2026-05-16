@@ -99,8 +99,10 @@ describe('Home generateMetadata', () => {
     expect(metadata.title).toBe('Home OG Title');
     expect(metadata.description).toBe('Home OG Desc');
     expect(metadata.openGraph?.images).toEqual([
-      { url: 'https://example.com/api/og?slug=home', width: 1200, height: 630 },
+      { url: 'https://example.com/api/og?slug=home', width: 1200, height: 630, alt: 'Home OG Title' },
     ]);
+    expect(metadata.openGraph?.type).toBe('website');
+    expect(metadata.openGraph?.url).toBe('https://example.com');
   });
 
   it('returns fallback when no story', async () => {

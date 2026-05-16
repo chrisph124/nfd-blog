@@ -178,7 +178,7 @@ describe('Card', () => {
       });
       const { container } = render(<Card story={story} />);
 
-      const heading = container.querySelector('h3');
+      const heading = container.querySelector('h2');
       expect(heading).toBeInTheDocument();
       expect(heading).toHaveTextContent('');
     });
