@@ -78,4 +78,68 @@ describe('GET /rss.xml', () => {
     expect(body).toContain('<channel>');
     expect(body).not.toContain('<item>');
   });
+
+  it('falls back to story.name when content.title is absent', async () => {
+    mockFetchAllPosts.mockResolvedValue([
+      createPost({
+        name: 'Fallback Name',
+        content: {
+          _uid: 'post-uid',
+          component: 'post',
+          title: undefined as unknown as string,
+          og_description: 'OG desc',
+          excerpt: 'excerpt',
+          body: [],
+        },
+      }),
+    ]);
+
+    const body = await (await GET()).text();
+    expect(body).toContain('<title>Fallback Name</title>');
+  });
+
+  it('falls back to og_description when excerpt is absent', async () => {
+    mockFetchAllPosts.mockResolvedValue([
+      createPost({
+        content: {
+          _uid: 'post-uid',
+          component: 'post',
+          title: 'My Post Title',
+          og_description: 'OG fallback desc',
+          excerpt: undefined as unknown as string,
+          body: [],
+        },
+      }),
+    ]);
+
+    const body = await (await GET()).text();
+    expect(body).toContain('OG fallback desc');
+  });
+
+  it('uses created_at when first_published_at and published_at are absent', async () => {
+    mockFetchAllPosts.mockResolvedValue([
+      createPost({
+        first_published_at: null as unknown as string,
+        published_at: null as unknown as string,
+        created_at: '2023-01-01T00:00:00.000Z',
+      }),
+    ]);
+
+    const body = await (await GET()).text();
+    // Should still produce a valid item (pubDate from created_at fallback)
+    expect(body).toContain('<item>');
+  });
+
+  it('uses first_published_at as modifiedAt when published_at is null (line 17 || branch)', async () => {
+    mockFetchAllPosts.mockResolvedValue([
+      createPost({
+        first_published_at: '2024-03-01T00:00:00.000Z',
+        published_at: null as unknown as string,
+        created_at: '2024-02-01T00:00:00.000Z',
+      }),
+    ]);
+
+    const body = await (await GET()).text();
+    expect(body).toContain('<item>');
+  });
 });

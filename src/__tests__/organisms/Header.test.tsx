@@ -136,6 +136,129 @@ describe('Header', () => {
     });
   });
 
+  describe('Fallback values', () => {
+    it('defaults nav_items to [] when undefined (covers line 16 ?? branch)', () => {
+      const blok = createMockBlok({ nav_items: undefined });
+      render(<Header blok={blok} />);
+
+      // Should render without error and show NavBar with no items
+      expect(screen.getByTestId('navbar')).toBeInTheDocument();
+    });
+
+    it('uses item.link.url when cached_url is absent in mobile menu (line 169 ?? branch)', () => {
+      const blok = createMockBlok({
+        nav_items: [{
+          _uid: 'nav-url',
+          component: 'nav_item',
+          label: 'External',
+          link: {
+            cached_url: undefined as unknown as string,
+            url: 'https://example.com',
+            linktype: 'url' as const,
+          },
+        }],
+      });
+      render(<Header blok={blok} />);
+
+      // Open mobile menu
+      const menuToggle = screen.getByTestId('menu-toggle');
+      fireEvent.click(menuToggle);
+
+      expect(screen.getAllByText('External').length).toBeGreaterThan(0);
+    });
+
+    it('uses # fallback when nav item has no link urls (line 169 ?? "#" branch)', () => {
+      const blok = createMockBlok({
+        nav_items: [{
+          _uid: 'nav-no-link',
+          component: 'nav_item',
+          label: 'No Link Item',
+          link: {
+            cached_url: undefined as unknown as string,
+            url: undefined as unknown as string,
+            linktype: 'story' as const,
+          },
+        }],
+      });
+      render(<Header blok={blok} />);
+
+      const menuToggle = screen.getByTestId('menu-toggle');
+      fireEvent.click(menuToggle);
+
+      // Item should still render
+      expect(screen.getAllByText('No Link Item').length).toBeGreaterThan(0);
+    });
+
+    it('uses sub_item.link.url when cached_url is absent (line 213 ?? branch)', () => {
+      const blok = createMockBlok({
+        nav_items: [{
+          _uid: 'nav-1',
+          component: 'nav_item',
+          label: 'Services',
+          link: { cached_url: '/services', linktype: 'story' as const },
+          sub_items: [{
+            _uid: 'sub-1',
+            component: 'sub_nav_item' as const,
+            label: 'Sub Service',
+            link: {
+              cached_url: undefined as unknown as string,
+              url: '/sub-service',
+              linktype: 'url' as const,
+            },
+          }],
+        }],
+      });
+      const { getByTestId, container } = render(<Header blok={blok} />);
+
+      // Open mobile menu
+      const menuToggle = getByTestId('menu-toggle');
+      fireEvent.click(menuToggle);
+
+      // Expand the dropdown to reveal sub-items
+      const aside = container.querySelector('aside');
+      const dropdownButton = aside?.querySelector('button');
+      if (dropdownButton) fireEvent.click(dropdownButton);
+
+      // Sub-item link should use url fallback
+      const subLinks = container.querySelectorAll('aside a');
+      const subService = Array.from(subLinks).find(el => el.textContent?.includes('Sub Service'));
+      expect(subService).toBeInTheDocument();
+    });
+
+    it('uses # fallback for sub-item with no link urls (line 213 ?? "#" branch)', () => {
+      const blok = createMockBlok({
+        nav_items: [{
+          _uid: 'nav-1',
+          component: 'nav_item',
+          label: 'Parent',
+          link: { cached_url: '/parent', linktype: 'story' as const },
+          sub_items: [{
+            _uid: 'sub-no-url',
+            component: 'sub_nav_item' as const,
+            label: 'No URL Sub',
+            link: {
+              cached_url: undefined as unknown as string,
+              url: undefined as unknown as string,
+              linktype: 'story' as const,
+            },
+          }],
+        }],
+      });
+      const { getByTestId, container } = render(<Header blok={blok} />);
+
+      const menuToggle = getByTestId('menu-toggle');
+      fireEvent.click(menuToggle);
+
+      const aside = container.querySelector('aside');
+      const dropdownButton = aside?.querySelector('button');
+      if (dropdownButton) fireEvent.click(dropdownButton);
+
+      const subLinks = container.querySelectorAll('aside a');
+      const noUrlSub = Array.from(subLinks).find(el => el.textContent?.includes('No URL Sub'));
+      expect(noUrlSub).toBeInTheDocument();
+    });
+  });
+
   describe('Navigation', () => {
     it('renders NavBar component', () => {
       const blok = createMockBlok({
@@ -352,6 +475,24 @@ describe('Header', () => {
       // Click backdrop button to close
       const backdropButton = getByLabelText('Close mobile menu');
       fireEvent.click(backdropButton);
+
+      expect(menuToggle).toHaveTextContent('Menu');
+    });
+
+    it('closes mobile menu when Escape key pressed on backdrop', () => {
+      const blok = createMockBlok({
+        nav_items: [createMockNavItem('nav-1', 'Home')],
+      });
+      const { getByTestId, getByLabelText } = render(<Header blok={blok} />);
+
+      // Open mobile menu
+      const menuToggle = getByTestId('menu-toggle');
+      fireEvent.click(menuToggle);
+      expect(menuToggle).toHaveTextContent('Close');
+
+      // Press Escape on backdrop button
+      const backdropButton = getByLabelText('Close mobile menu');
+      fireEvent.keyDown(backdropButton, { key: 'Escape' });
 
       expect(menuToggle).toHaveTextContent('Menu');
     });

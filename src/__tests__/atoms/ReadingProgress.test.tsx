@@ -247,6 +247,17 @@ describe('ReadingProgressBar', () => {
     });
   });
 
+  describe('Position fallback', () => {
+    it('falls back to fixed classes for unknown position value', () => {
+      // positionMap[position] || positionMap['fixed'] — the || branch fires when
+      // position is not a key in positionMap (e.g. an unsupported value cast via TS)
+      render(<ReadingProgressBar position={'absolute' as 'fixed'} />);
+      const progressBar = screen.getByRole('progressbar');
+      // Should fall back to 'fixed' position classes
+      expect(progressBar).toHaveClass('fixed');
+    });
+  });
+
   describe('Error Handling', () => {
     it('produces no console errors during normal operation', () => {
       render(<ReadingProgressBar />);

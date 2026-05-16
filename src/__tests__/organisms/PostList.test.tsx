@@ -174,6 +174,26 @@ describe('PostList Server Component', () => {
     });
   });
 
+  describe('hasMore when total header is absent', () => {
+    it('treats total as 0 (hasMore=false) when headers.total is missing', async () => {
+      // Covers the `headers.total || '0'` branch (line 30) when total is undefined
+      mockGet.mockResolvedValue({
+        data: { stories: [] },
+        headers: {}, // no 'total' key
+      });
+
+      const blok: PostListBlok = {
+        _uid: 'test-uid',
+        component: 'post_list',
+      };
+
+      const component = await PostList({ blok });
+      render(component);
+
+      expect(screen.getByTestId('has-more')).toHaveTextContent('false');
+    });
+  });
+
   describe('Error handling', () => {
     it('handles Storyblok API errors gracefully', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});

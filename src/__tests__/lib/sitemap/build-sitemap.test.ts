@@ -86,4 +86,35 @@ describe('buildSitemap', () => {
     expect(xml).toContain('</urlset>');
     expect(xml).not.toContain('<url>');
   });
+
+  it('emits image caption when provided', () => {
+    const xml = buildSitemap({
+      entries: [
+        {
+          loc: 'https://example.com/post',
+          images: [{ loc: 'https://cdn.example.com/img.jpg', caption: 'A nice photo' }],
+        },
+      ],
+    });
+
+    expect(xml).toContain('<image:caption>A nice photo</image:caption>');
+  });
+
+  it('escapes all XML special chars: <, >, ", \' in loc and title', () => {
+    const xml = buildSitemap({
+      entries: [
+        {
+          loc: "https://example.com/<path>?a=\"b\"&c='d'",
+          images: [{ loc: 'https://cdn.example.com/img.jpg', title: "<title> with \"quotes\" & 'apostrophes'" }],
+        },
+      ],
+    });
+
+    expect(xml).toContain('&lt;path&gt;');
+    expect(xml).toContain('&quot;b&quot;');
+    expect(xml).toContain('&apos;d&apos;');
+    expect(xml).toContain('&lt;title&gt;');
+    expect(xml).toContain('&quot;quotes&quot;');
+    expect(xml).toContain("&apos;apostrophes&apos;");
+  });
 });

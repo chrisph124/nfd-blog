@@ -83,6 +83,17 @@ describe('Home Page', () => {
     await expect(Home()).rejects.toThrow('NEXT_NOT_FOUND');
     expect(mockNotFound).toHaveBeenCalled();
   });
+
+  it('uses default description when og_description is empty (covers line 53 || branch)', async () => {
+    const story = createMockStory({ og_description: '' });
+    mockFetchHomeStory.mockResolvedValue(story);
+
+    // Should render without error — description falls back to default
+    const Component = await Home();
+    render(Component);
+
+    expect(screen.getByTestId('storyblok-story')).toBeInTheDocument();
+  });
 });
 
 describe('Home generateMetadata', () => {

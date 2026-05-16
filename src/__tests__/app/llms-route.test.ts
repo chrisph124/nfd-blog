@@ -76,4 +76,59 @@ describe('GET /llms.txt', () => {
     expect(body).toContain('https://example.com/live');
     expect(body).not.toContain('https://example.com/draft');
   });
+
+  it('falls back to story.name when content.title is absent', async () => {
+    mockFetchAllPosts.mockResolvedValue([
+      createPost({
+        name: 'Story Name Fallback',
+        content: {
+          _uid: 'post-uid',
+          component: 'post',
+          title: undefined as unknown as string,
+          excerpt: 'a description',
+          body: [],
+        },
+      }),
+    ]);
+
+    const body = await (await GET()).text();
+    expect(body).toContain('[Story Name Fallback]');
+  });
+
+  it('falls back to og_description when excerpt is absent', async () => {
+    mockFetchAllPosts.mockResolvedValue([
+      createPost({
+        content: {
+          _uid: 'post-uid',
+          component: 'post',
+          title: 'My Post Title',
+          og_description: 'OG fallback',
+          excerpt: undefined as unknown as string,
+          body: [],
+        },
+      }),
+    ]);
+
+    const body = await (await GET()).text();
+    expect(body).toContain('OG fallback');
+  });
+
+  it('uses empty string description when both excerpt and og_description are absent', async () => {
+    mockFetchAllPosts.mockResolvedValue([
+      createPost({
+        content: {
+          _uid: 'post-uid',
+          component: 'post',
+          title: 'No Desc Post',
+          excerpt: undefined as unknown as string,
+          og_description: undefined as unknown as string,
+          body: [],
+        },
+      }),
+    ]);
+
+    const body = await (await GET()).text();
+    // Post should appear but without a colon-separated description
+    expect(body).toContain('[No Desc Post]');
+  });
 });

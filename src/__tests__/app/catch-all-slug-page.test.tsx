@@ -124,6 +124,16 @@ describe('generateMetadata ([...slug])', () => {
     expect(metadata.title).toBe('Nested Page');
   });
 
+  it('uses empty description when og_description is absent (covers line 27 || branch)', async () => {
+    const story = createMockStory();
+    story.content.og_description = undefined as unknown as string;
+    mockFetchStory.mockResolvedValue(story);
+
+    const metadata = await generateMetadata({ params: makeParams(['nested', 'page']) });
+
+    expect(metadata.description).toBe('');
+  });
+
   it('returns empty object when story not found', async () => {
     mockFetchStory.mockResolvedValue(null);
 

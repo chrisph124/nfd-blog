@@ -170,4 +170,52 @@ describe('GET /sitemap.xml', () => {
     expect(body).toContain('<loc>https://example.com</loc>');
     consoleSpy.mockRestore();
   });
+
+  it('uses story.name as image title when post has image but no content.title (line 34 || branch)', async () => {
+    mockGet.mockResolvedValue({
+      data: {
+        links: { '1': link({ id: 1, slug: 'posts/no-title' }) },
+      } as StoryblokLinksResponse,
+    });
+    mockFetchAllPosts.mockResolvedValue([
+      post({
+        name: 'Fallback Story Name',
+        full_slug: 'posts/no-title',
+        content: {
+          _uid: 'p-uid',
+          component: 'post',
+          title: undefined as unknown as string,
+          featured_image: { id: 2, filename: 'https://cdn.example.com/img.jpg', alt: 'img' },
+          body: [],
+        },
+      }),
+    ]);
+
+    const body = await (await GET()).text();
+    expect(body).toContain('<image:title>Fallback Story Name</image:title>');
+  });
+
+  it('omits image entry when post has no featured_image', async () => {
+    mockGet.mockResolvedValue({
+      data: {
+        links: { '1': link({ id: 1, slug: 'posts/no-image' }) },
+      } as StoryblokLinksResponse,
+    });
+    mockFetchAllPosts.mockResolvedValue([
+      post({
+        full_slug: 'posts/no-image',
+        content: {
+          _uid: 'p-uid',
+          component: 'post',
+          title: 'No image post',
+          featured_image: undefined,
+          body: [],
+        },
+      }),
+    ]);
+
+    const body = await (await GET()).text();
+    expect(body).not.toContain('<image:image>');
+    expect(body).toContain('<loc>https://example.com/no-image</loc>');
+  });
 });

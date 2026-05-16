@@ -305,4 +305,44 @@ describe('fetchAllPosts', () => {
     expect(result).toEqual([]);
     consoleSpy.mockRestore();
   });
+
+  it('falls back to empty array when response.data.stories is null', async () => {
+    // Covers the `stories ?? []` nullish-coalescing branch (line 142)
+    mockGet.mockResolvedValue({
+      data: { stories: null },
+      headers: { total: '0' },
+    } as unknown as { data: { story: StoryblokStory } });
+
+    const result = await fetchAllPosts();
+    expect(result).toEqual([]);
+  });
+
+  it('treats total as 0 when headers.total is empty string (covers || branch on line 145)', async () => {
+    // headers.total = '' is falsy → falls back to '0' → total = 0 → stops immediately
+    const page = [createMockPostStory('p-1')];
+    mockGet.mockResolvedValue({
+      data: { stories: page },
+      headers: { total: '' },
+    } as unknown as { data: { story: StoryblokStory } });
+
+    const result = await fetchAllPosts();
+    // total=0, allStories.length(1) >= 0 → break immediately after first page
+    expect(result).toHaveLength(1);
+    expect(mockGet).toHaveBeenCalledTimes(1);
+  });
+
+  it('stops fetching after 50 pages to prevent infinite loops', async () => {
+    // Each page returns 100 stories and total=99999 so normal termination never fires.
+    // The page > 50 guard at line 148 must stop the loop.
+    const page = Array.from({ length: 100 }, (_, i) => createMockPostStory(`p-${i}`));
+    mockGet.mockResolvedValue({
+      data: { stories: page },
+      headers: { total: '99999' },
+    } as unknown as { data: { story: StoryblokStory } });
+
+    const result = await fetchAllPosts();
+    // 50 pages × 100 stories = 5000 stories
+    expect(result).toHaveLength(5000);
+    expect(mockGet).toHaveBeenCalledTimes(50);
+  });
 });

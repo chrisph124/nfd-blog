@@ -139,6 +139,22 @@ describe('POST API Route', () => {
     });
   });
 
+  describe('Missing headers', () => {
+    it('treats total as 0 when headers.total is missing', async () => {
+      mockGet.mockResolvedValue({
+        data: { stories: [] },
+        headers: {},
+      });
+
+      const request = createMockRequest();
+      const response = await GET(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.total).toBe(0);
+    });
+  });
+
   describe('Error handling', () => {
     it('handles Storyblok API errors', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});

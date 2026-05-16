@@ -145,4 +145,30 @@ describe('buildRssFeed', () => {
 
     expect(xml).toContain('<pubDate>Wed, 25 Dec 2024 00:00:00 GMT</pubDate>');
   });
+
+  it('uses publishedAt as lastBuildDate when modifiedAt is absent', () => {
+    const xml = buildRssFeed({
+      siteUrl: 'https://example.com',
+      siteName: 'Notes',
+      siteDescription: '',
+      posts: [{ ...basePost, modifiedAt: undefined }],
+      generatedAt: new Date('2024-01-01T00:00:00.000Z'),
+    });
+
+    // lastBuildDate should come from publishedAt (2024-06-01), not generatedAt
+    expect(xml).toContain('<lastBuildDate>Sat, 01 Jun 2024 00:00:00 GMT</lastBuildDate>');
+  });
+
+  it('uses heroType as url arg to detectMime when provided', () => {
+    // heroType is passed as the url string to detectMime(), taking precedence
+    // over heroUrl. A heroType value ending in .webp triggers the webp branch.
+    const xml = buildRssFeed({
+      siteUrl: 'https://example.com',
+      siteName: 'Notes',
+      siteDescription: '',
+      posts: [{ ...basePost, heroUrl: 'https://cdn.example.com/img.png', heroType: 'override.webp' }],
+    });
+
+    expect(xml).toContain('type="image/webp"');
+  });
 });

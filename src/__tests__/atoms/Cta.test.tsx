@@ -317,6 +317,18 @@ describe('Cta', () => {
         expect(textSpan).toHaveClass('px-4', 'py-3');
         expect(link).not.toHaveClass('px-4', 'py-3');
       });
+
+      it('uses both primary and hug defaults when cta_type and cta_size are both undefined (covers || fallbacks on lines 58-59)', () => {
+        const blok = createMockBlok({ cta_type: undefined, cta_size: undefined });
+        render(<Cta blok={blok} />);
+
+        const link = screen.getByRole('link');
+        // Should render with primary wrapper styles (line 59 || 'primary' branch)
+        expect(link).toHaveClass('bg-primary-700');
+        // And hug size styles (line 58 || 'hug' branch)
+        const textSpan = link.querySelector('span.cta-text');
+        expect(textSpan).toHaveClass('px-4', 'py-3');
+      });
     });
   });
 

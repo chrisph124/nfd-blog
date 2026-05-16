@@ -108,4 +108,35 @@ describe('buildLlmsIndex', () => {
     expect(out).toContain('## About');
     expect(out).toContain('[About the author](https://example.com/about)');
   });
+
+  it('omits description tail when post description is empty string', () => {
+    const out = buildLlmsIndex({
+      siteName: 'Notes',
+      siteUrl: 'https://example.com',
+      description: '',
+      posts: [{ ...base, description: '' }],
+    });
+
+    // No colon suffix when description is empty
+    expect(out).toContain('- [Hello](https://example.com/hello)\n');
+  });
+
+  it('sorts posts without publishedAt to bottom (uses 0 as sort key — both branches)', () => {
+    // Covers both branches of the `a.publishedAt ? ... : 0` and `b.publishedAt ? ... : 0` ternaries
+    // by having multiple posts where both undefined and defined cases appear as a and b
+    const out = buildLlmsIndex({
+      siteName: 'Notes',
+      siteUrl: 'https://example.com',
+      description: '',
+      posts: [
+        { ...base, slug: 'no-date-a', publishedAt: undefined },
+        { ...base, slug: 'no-date-b', publishedAt: undefined },
+        { ...base, slug: 'dated', publishedAt: '2024-06-01T00:00:00.000Z' },
+      ],
+    });
+
+    const datedIdx = out.indexOf('example.com/dated');
+    const noDateIdx = out.indexOf('example.com/no-date');
+    expect(datedIdx).toBeLessThan(noDateIdx);
+  });
 });

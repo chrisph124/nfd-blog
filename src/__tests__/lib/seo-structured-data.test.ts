@@ -153,6 +153,50 @@ describe('buildPersonJsonLd', () => {
   });
 });
 
+describe('buildPersonJsonLd — extended', () => {
+  it('includes jobTitle when provided', () => {
+    const result = buildPersonJsonLd({
+      siteUrl: 'https://example.com',
+      name: 'Chris Pham',
+      sameAs: [],
+      jobTitle: 'Frontend Engineer',
+    });
+    expect(result).toHaveProperty('jobTitle', 'Frontend Engineer');
+  });
+
+  it('includes imageUrl when provided', () => {
+    const result = buildPersonJsonLd({
+      siteUrl: 'https://example.com',
+      name: 'Chris Pham',
+      sameAs: [],
+      imageUrl: 'https://example.com/avatar.jpg',
+    });
+    expect(result).toHaveProperty('image', 'https://example.com/avatar.jpg');
+  });
+});
+
+describe('buildBlogPostingJsonLd — extended', () => {
+  const baseParams = {
+    siteUrl: 'https://example.com',
+    slug: 'my-post',
+    title: 'Test Post',
+    description: 'A test post',
+    datePublished: '2024-01-15T00:00:00Z',
+    authorName: 'John Doe',
+  };
+
+  it('uses explicit organizationLogoUrl when provided', () => {
+    const result = buildBlogPostingJsonLd({
+      ...baseParams,
+      organizationLogoUrl: 'https://example.com/custom-logo.png',
+    });
+    expect(result.publisher.logo).toMatchObject({
+      '@type': 'ImageObject',
+      url: 'https://example.com/custom-logo.png',
+    });
+  });
+});
+
 describe('estimateWordCount', () => {
   it('counts words from plain text', () => {
     expect(estimateWordCount('one two three four')).toBe(4);
@@ -166,5 +210,10 @@ describe('estimateWordCount', () => {
 
   it('collapses whitespace', () => {
     expect(estimateWordCount('  a   b\n\nc  ')).toBe(3);
+  });
+
+  it('returns 0 when text is all whitespace (covers line 131 !cleaned branch)', () => {
+    expect(estimateWordCount('   ')).toBe(0);
+    expect(estimateWordCount('\n\n\t')).toBe(0);
   });
 });
