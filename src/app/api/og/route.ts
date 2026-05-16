@@ -1,6 +1,5 @@
-import { ImageResponse } from 'next/og';
-import { fetchStoryApi, fetchStoryBySlugApi } from '@/lib/storyblok-api';
 import type { NextRequest } from 'next/server';
+import { fetchStoryApi, fetchStoryBySlugApi } from '@/lib/storyblok-api';
 import type { StoryblokAsset, PostBlok } from '@/types/storyblok';
 
 export const runtime = 'edge';
@@ -21,10 +20,9 @@ function getImage(asset: StoryblokAsset | undefined): string | undefined {
   return asset?.filename || undefined;
 }
 
-// PNG-only output is intentional: `next/og` ImageResponse uses Satori which only emits
-// PNG, and Facebook/LinkedIn unfurlers do not officially support WebP for og:image.
-// Shrink upstream instead — transform the Storyblok source via its image service so
-// Satori rasterizes a smaller input.
+// Route used to render via `next/og` (Satori) which always emits PNG and produced
+// 500 KB–1 MB outputs. We now 302-redirect to the Storyblok image-service jpg so
+// social scrapers download the compressed source directly (~80–200 KB typical).
 export function optimizeStoryblokAsset(url: string | undefined): string | undefined {
   if (!url) return undefined;
   if (!url.includes('a.storyblok.com')) return url;
@@ -58,29 +56,12 @@ export async function GET(request: NextRequest) {
 
   const defaultImage = new URL('/og-default.jpg', request.url).toString();
   const finalImage = optimizeStoryblokAsset(resolvedImage) ?? defaultImage;
-  const isDefault = finalImage === defaultImage;
 
-  return new ImageResponse(
-    (
-      <div style={{ width: '100%', height: '100%', display: 'flex', background: '#0f172a' }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={finalImage}
-          alt=""
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: isDefault ? 'contain' : 'cover',
-          }}
-        />
-      </div>
-    ),
-    {
-      width: 1200,
-      height: 630,
-      headers: {
-        'Cache-Control': 'public, max-age=3600, s-maxage=604800, stale-while-revalidate=86400',
-      },
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: finalImage,
+      'Cache-Control': 'public, max-age=3600, s-maxage=604800, stale-while-revalidate=86400',
     },
-  );
+  });
 }

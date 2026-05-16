@@ -9,18 +9,6 @@ vi.mock('@/lib/storyblok-api', () => ({
   fetchStoryBySlugApi: (...args: [string]) => mockFetchStoryBySlugApi(...args),
 }));
 
-let capturedElement: unknown;
-let capturedOptions: unknown;
-
-vi.mock('next/og', () => ({
-  ImageResponse: class MockImageResponse {
-    constructor(element: unknown, options: unknown) {
-      capturedElement = element;
-      capturedOptions = options;
-    }
-  },
-}));
-
 import { GET, optimizeStoryblokAsset } from '@/app/api/og/route';
 import type { NextRequest } from 'next/server';
 
@@ -32,22 +20,13 @@ function createRequest(slug?: string): NextRequest {
   return { nextUrl: url, url: url.toString() } as NextRequest;
 }
 
-// Extracts the <img src> from the captured JSX tree.
-// Root element shape: { type: 'div', props: { children: { type: 'img', props: { src, style } } } }
-function getImageSrc(element: unknown): string | undefined {
-  const root = element as { props?: { children?: unknown } } | undefined;
-  const child = root?.props?.children as
-    | { type?: string; props?: { src?: string } }
-    | undefined;
-  return child?.type === 'img' ? child.props?.src : undefined;
-}
-
-function getImageObjectFit(element: unknown): string | undefined {
-  const root = element as { props?: { children?: unknown } } | undefined;
-  const child = root?.props?.children as
-    | { type?: string; props?: { style?: { objectFit?: string } } }
-    | undefined;
-  return child?.props?.style?.objectFit;
+async function getRedirect(slug?: string): Promise<{ location: string | null; status: number; cacheControl: string | null }> {
+  const res = await GET(createRequest(slug));
+  return {
+    location: res.headers.get('Location'),
+    status: res.status,
+    cacheControl: res.headers.get('Cache-Control'),
+  };
 }
 
 const createMockPageStory = (overrides?: Partial<PageBlok>): StoryblokStory<PageBlok> => ({
@@ -115,28 +94,25 @@ const createMockPostStory = (overrides?: Partial<PostBlok>): StoryblokStory<Post
 describe('OG Image Route - GET', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    capturedElement = undefined;
-    capturedOptions = undefined;
   });
 
   it('resolves home slug via fetchStoryApi', async () => {
     const story = createMockPageStory({ og_title: 'Home Title' });
     mockFetchStoryApi.mockResolvedValue(story);
 
-    await GET(createRequest('home'));
+    const { status } = await getRedirect('home');
 
     expect(mockFetchStoryApi).toHaveBeenCalledWith('home');
-    expect(capturedOptions).toEqual(expect.objectContaining({ width: 1200, height: 630 }));
+    expect(status).toBe(302);
   });
 
   it('resolves post slug via fetchStoryBySlugApi', async () => {
     const story = createMockPostStory({ title: 'My Post' });
     mockFetchStoryBySlugApi.mockResolvedValue(story);
 
-    await GET(createRequest('my-post'));
+    await getRedirect('my-post');
 
     expect(mockFetchStoryBySlugApi).toHaveBeenCalledWith('my-post');
-    expect(capturedElement).toBeDefined();
   });
 
   it('falls back to fetchStoryApi for nested slugs when fetchStoryBySlugApi returns null', async () => {
@@ -144,7 +120,7 @@ describe('OG Image Route - GET', () => {
     mockFetchStoryBySlugApi.mockResolvedValue(null);
     mockFetchStoryApi.mockResolvedValue(story);
 
-    await GET(createRequest('about/team'));
+    await getRedirect('about/team');
 
     expect(mockFetchStoryBySlugApi).toHaveBeenCalledWith('about/team');
     expect(mockFetchStoryApi).toHaveBeenCalledWith('about/team');
@@ -154,30 +130,28 @@ describe('OG Image Route - GET', () => {
     mockFetchStoryBySlugApi.mockResolvedValue(null);
     mockFetchStoryApi.mockResolvedValue(null);
 
-    await GET(createRequest('non-existent'));
+    const { location } = await getRedirect('non-existent');
 
-    expect(getImageSrc(capturedElement)).toBe(`${DEFAULT_ORIGIN}/og-default.jpg`);
-    expect(getImageObjectFit(capturedElement)).toBe('contain');
+    expect(location).toBe(`${DEFAULT_ORIGIN}/og-default.jpg`);
   });
 
-  it('uses og_image when set on page', async () => {
+  it('uses og_image when set on page (non-storyblok URL passes through)', async () => {
     const story = createMockPageStory({
       og_title: 'With Image',
       og_image: { id: 1, filename: 'https://example.com/og.jpg', alt: 'OG' },
     });
     mockFetchStoryApi.mockResolvedValue(story);
 
-    await GET(createRequest('home'));
+    const { location } = await getRedirect('home');
 
-    expect(getImageSrc(capturedElement)).toBe('https://example.com/og.jpg');
-    expect(getImageObjectFit(capturedElement)).toBe('cover');
+    expect(location).toBe('https://example.com/og.jpg');
   });
 
   it('defaults to home slug when no slug param', async () => {
     const story = createMockPageStory();
     mockFetchStoryApi.mockResolvedValue(story);
 
-    await GET(createRequest());
+    await getRedirect();
 
     expect(mockFetchStoryApi).toHaveBeenCalledWith('home');
   });
@@ -199,12 +173,11 @@ describe('OG Image Route - GET', () => {
     });
     mockFetchStoryBySlugApi.mockResolvedValue(story);
 
-    await GET(createRequest('my-post'));
+    const { location } = await getRedirect('my-post');
 
-    expect(getImageSrc(capturedElement)).toBe(
+    expect(location).toBe(
       'https://a.storyblok.com/featured.jpg/m/1200x630/filters:quality(75):format(jpg)'
     );
-    expect(getImageObjectFit(capturedElement)).toBe('cover');
   });
 
   it('uses featured_image when og_image not set on post', async () => {
@@ -213,9 +186,9 @@ describe('OG Image Route - GET', () => {
     });
     mockFetchStoryBySlugApi.mockResolvedValue(story);
 
-    await GET(createRequest('my-post'));
+    const { location } = await getRedirect('my-post');
 
-    expect(getImageSrc(capturedElement)).toBe(
+    expect(location).toBe(
       'https://a.storyblok.com/post.jpg/m/1200x630/filters:quality(75):format(jpg)'
     );
   });
@@ -227,9 +200,9 @@ describe('OG Image Route - GET', () => {
     });
     mockFetchStoryBySlugApi.mockResolvedValue(story);
 
-    await GET(createRequest('my-post'));
+    const { location } = await getRedirect('my-post');
 
-    expect(getImageSrc(capturedElement)).toBe(
+    expect(location).toBe(
       'https://a.storyblok.com/og.jpg/m/1200x630/filters:quality(75):format(jpg)'
     );
   });
@@ -238,9 +211,9 @@ describe('OG Image Route - GET', () => {
     const story = createMockPostStory();
     mockFetchStoryBySlugApi.mockResolvedValue(story);
 
-    await GET(createRequest('my-post'));
+    const { location } = await getRedirect('my-post');
 
-    expect(getImageSrc(capturedElement)).toBe(`${DEFAULT_ORIGIN}/og-default.jpg`);
+    expect(location).toBe(`${DEFAULT_ORIGIN}/og-default.jpg`);
   });
 
   it('nested slug with og_image uses that image', async () => {
@@ -250,9 +223,9 @@ describe('OG Image Route - GET', () => {
     mockFetchStoryBySlugApi.mockResolvedValue(null);
     mockFetchStoryApi.mockResolvedValue(story);
 
-    await GET(createRequest('about/team'));
+    const { location } = await getRedirect('about/team');
 
-    expect(getImageSrc(capturedElement)).toBe(
+    expect(location).toBe(
       'https://a.storyblok.com/nested.jpg/m/1200x630/filters:quality(75):format(jpg)'
     );
   });
@@ -261,16 +234,16 @@ describe('OG Image Route - GET', () => {
     mockFetchStoryBySlugApi.mockResolvedValue(null);
     mockFetchStoryApi.mockResolvedValue(null);
 
-    await GET(createRequest('missing'));
+    const { location } = await getRedirect('missing');
 
-    expect(getImageSrc(capturedElement)).toBe(`${DEFAULT_ORIGIN}/og-default.jpg`);
+    expect(location).toBe(`${DEFAULT_ORIGIN}/og-default.jpg`);
   });
 
   it('falls back to home slug when slug param contains unsafe chars', async () => {
     const story = createMockPageStory();
     mockFetchStoryApi.mockResolvedValue(story);
 
-    await GET(createRequest('<script>alert(1)</script>'));
+    await getRedirect('<script>alert(1)</script>');
 
     expect(mockFetchStoryApi).toHaveBeenCalledWith('home');
   });
@@ -279,7 +252,7 @@ describe('OG Image Route - GET', () => {
     const story = createMockPageStory();
     mockFetchStoryApi.mockResolvedValue(story);
 
-    await GET(createRequest('a'.repeat(500)));
+    await getRedirect('a'.repeat(500));
 
     expect(mockFetchStoryApi).toHaveBeenCalledWith('home');
   });
@@ -289,20 +262,28 @@ describe('OG Image Route - GET', () => {
     mockFetchStoryBySlugApi.mockResolvedValue(null);
     mockFetchStoryApi.mockResolvedValue(story);
 
-    await GET(createRequest('docs/getting-started'));
+    await getRedirect('docs/getting-started');
 
     expect(mockFetchStoryApi).toHaveBeenCalledWith('docs/getting-started');
   });
 
-  it('emits long-lived cache header on ImageResponse', async () => {
+  it('emits long-lived cache header on redirect', async () => {
     const story = createMockPageStory();
     mockFetchStoryApi.mockResolvedValue(story);
 
-    await GET(createRequest('home'));
+    const { cacheControl } = await getRedirect('home');
 
-    const opts = capturedOptions as { headers?: Record<string, string> };
-    expect(opts.headers?.['Cache-Control']).toContain('s-maxage=604800');
-    expect(opts.headers?.['Cache-Control']).toContain('stale-while-revalidate=86400');
+    expect(cacheControl).toContain('s-maxage=604800');
+    expect(cacheControl).toContain('stale-while-revalidate=86400');
+  });
+
+  it('returns 302 status code', async () => {
+    mockFetchStoryApi.mockResolvedValue(null);
+    mockFetchStoryBySlugApi.mockResolvedValue(null);
+
+    const { status } = await getRedirect('whatever');
+
+    expect(status).toBe(302);
   });
 });
 
