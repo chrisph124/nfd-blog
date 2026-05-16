@@ -49,7 +49,7 @@ const ContentCardBlock = memo(({ blok }: ContentCardBlockProps) => {
     >
       {title && <h3 className="text-gray-900">{title}</h3>}
       {subtitle && (
-        <h5 className="text-gray-700 font-normal">{subtitle}</h5>
+        <p className="text-gray-700 font-normal">{subtitle}</p>
       )}
       {renderedDescription && (
         <div

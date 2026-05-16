@@ -18,9 +18,15 @@ interface OrganizationJsonLdParams {
   siteUrl: string;
   name?: string;
   logoUrl?: string;
+  sameAs?: string[];
 }
 
-export function buildOrganizationJsonLd({ siteUrl, name = 'Notes of Dev', logoUrl }: OrganizationJsonLdParams) {
+export function buildOrganizationJsonLd({
+  siteUrl,
+  name = 'Notes of Dev',
+  logoUrl,
+  sameAs,
+}: OrganizationJsonLdParams) {
   const logo = logoUrl ?? `${siteUrl}/og-default.jpg`;
   return {
     '@context': 'https://schema.org',
@@ -31,6 +37,7 @@ export function buildOrganizationJsonLd({ siteUrl, name = 'Notes of Dev', logoUr
       '@type': 'ImageObject',
       url: logo,
     },
+    ...(sameAs && sameAs.length > 0 && { sameAs }),
   };
 }
 
@@ -130,4 +137,41 @@ export function estimateWordCount(text: string | undefined | null): number {
   const cleaned = text.replace(/\s+/g, ' ').trim();
   if (!cleaned) return 0;
   return cleaned.split(' ').length;
+}
+
+interface HomeJsonLdGraphParams {
+  siteUrl: string;
+  siteName: string;
+  description?: string;
+  sameAs?: string[];
+}
+
+/**
+ * Build a single JSON-LD `@graph` document combining WebSite + Organization for the home page.
+ *
+ * Reasoning: a single inline <script> with `@graph` is preferred over multiple scripts because
+ * it (a) shrinks the rendered HTML, (b) reduces parse work, and (c) lets search engines treat
+ * the entities as part of the same logical graph. Per-node `@context` is dropped — the outer
+ * `@context` covers the whole graph.
+ */
+export function buildHomeJsonLdGraph({
+  siteUrl,
+  siteName,
+  description,
+  sameAs,
+}: HomeJsonLdGraphParams) {
+  const website = buildWebSiteJsonLd({ siteUrl, siteName, description });
+  const organization = buildOrganizationJsonLd({ siteUrl, name: siteName, sameAs });
+
+  // Strip nested @context — the outer one covers every node in @graph.
+  const stripContext = <T extends { '@context'?: string }>(node: T) => {
+    const { '@context': _ctx, ...rest } = node;
+    void _ctx;
+    return rest;
+  };
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [stripContext(website), stripContext(organization)],
+  };
 }

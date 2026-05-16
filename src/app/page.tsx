@@ -2,7 +2,9 @@ import { fetchHomeStory, getSiteUrl } from '@/lib/storyblok';
 import { StoryblokStory } from '@storyblok/react/rsc';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { buildWebSiteJsonLd, buildOrganizationJsonLd } from '@/lib/seo-structured-data';
+import { buildHomeJsonLdGraph } from '@/lib/seo-structured-data';
+import { escapeJsonLd } from '@/lib/seo/json-ld-escape';
+import { AUTHOR_SAME_AS } from '@/lib/seo/author';
 import { stripEntities } from '@/lib/seo/strip-entities';
 
 export const revalidate = 86400; // Revalidate every 24 hours (webhook handles real-time updates)
@@ -54,25 +56,19 @@ export default async function Home() {
     stripEntities(story.content?.og_description?.trim()) ||
     'Thoughts on frontend engineering, AI, and building interfaces — by Hieu (Chris) Pham.';
 
-  const websiteJsonLd = buildWebSiteJsonLd({
+  const homeJsonLd = buildHomeJsonLdGraph({
     siteUrl,
     siteName: 'Notes of Dev',
     description,
+    sameAs: AUTHOR_SAME_AS,
   });
-  const orgJsonLd = buildOrganizationJsonLd({ siteUrl });
-
-  const escape = (json: object) => JSON.stringify(json).replace(/</g, '\\u003c');
 
   return (
     <div className="page">
       <h1 className="sr-only">Notes of Dev — frontend engineering, AI, and building interfaces</h1>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: escape(websiteJsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: escape(orgJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: escapeJsonLd(homeJsonLd) }}
       />
       <StoryblokStory story={story} />
     </div>

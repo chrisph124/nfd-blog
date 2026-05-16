@@ -4,6 +4,7 @@ import {
   buildBlogPostingJsonLd,
   buildOrganizationJsonLd,
   buildPersonJsonLd,
+  buildHomeJsonLdGraph,
   estimateWordCount,
 } from '@/lib/seo-structured-data';
 
@@ -124,6 +125,80 @@ describe('buildOrganizationJsonLd', () => {
       '@type': 'ImageObject',
       url: 'https://example.com/logo.png',
     });
+  });
+
+  it('includes sameAs when non-empty array provided', () => {
+    const result = buildOrganizationJsonLd({
+      siteUrl: 'https://example.com',
+      sameAs: ['https://github.com/chrisph124', 'https://linkedin.com/in/chrispham124'],
+    });
+    expect(result).toHaveProperty('sameAs', [
+      'https://github.com/chrisph124',
+      'https://linkedin.com/in/chrispham124',
+    ]);
+  });
+
+  it('omits sameAs when empty array provided', () => {
+    const result = buildOrganizationJsonLd({
+      siteUrl: 'https://example.com',
+      sameAs: [],
+    });
+    expect(result).not.toHaveProperty('sameAs');
+  });
+
+  it('omits sameAs when undefined', () => {
+    const result = buildOrganizationJsonLd({ siteUrl: 'https://example.com' });
+    expect(result).not.toHaveProperty('sameAs');
+  });
+});
+
+describe('buildHomeJsonLdGraph', () => {
+  it('returns @graph with WebSite + Organization nodes', () => {
+    const result = buildHomeJsonLdGraph({
+      siteUrl: 'https://example.com',
+      siteName: 'Notes of Dev',
+      description: 'A site',
+      sameAs: ['https://github.com/chrisph124'],
+    });
+
+    expect(result['@context']).toBe('https://schema.org');
+    expect(Array.isArray(result['@graph'])).toBe(true);
+    expect(result['@graph']).toHaveLength(2);
+
+    const [website, organization] = result['@graph'];
+    expect(website).toMatchObject({
+      '@type': 'WebSite',
+      name: 'Notes of Dev',
+      url: 'https://example.com',
+      description: 'A site',
+    });
+    expect(organization).toMatchObject({
+      '@type': 'Organization',
+      name: 'Notes of Dev',
+      url: 'https://example.com',
+      sameAs: ['https://github.com/chrisph124'],
+    });
+  });
+
+  it('strips nested @context from inner nodes', () => {
+    const result = buildHomeJsonLdGraph({
+      siteUrl: 'https://example.com',
+      siteName: 'Notes of Dev',
+    });
+
+    for (const node of result['@graph']) {
+      expect(node).not.toHaveProperty('@context');
+    }
+  });
+
+  it('omits sameAs on Organization when not provided', () => {
+    const result = buildHomeJsonLdGraph({
+      siteUrl: 'https://example.com',
+      siteName: 'Notes of Dev',
+    });
+
+    const organization = result['@graph'].find((n) => (n as { '@type': string })['@type'] === 'Organization');
+    expect(organization).not.toHaveProperty('sameAs');
   });
 });
 
