@@ -135,9 +135,9 @@ const HeroContent = memo(
     return (
       <div className={contentClasses} aria-label="Hero section content">
         {eyebrow && (
-          <h4 className="tracking-wide h5 uppercase text-primary-400 -mb-3">
+          <p className="tracking-wide h5 uppercase text-primary-400 -mb-3">
             {eyebrow}
-          </h4>
+          </p>
         )}
 
         <HeadingTag className="font-bold text-white">{heading}</HeadingTag>

@@ -17,7 +17,7 @@ const Footer = memo(({ blok }: StoryblokComponentProps<FooterBlok>) => {
         {/* Desktop: 3-column layout (domain, copyright, social) */}
         <div className="flex flex-col text-center gap-5 md:flex-row md:justify-between md:items-center">
           {/* Left: Domain name */}
-          <h4 className='logo-font font-semibold'>notesof.dev</h4>
+          <p className='logo-font font-semibold'>notesof.dev</p>
 
           {/* Center: Copyright (hardcoded, ignores blok.copyright) */}
           <p className="text-sm">© 2025 Hieu (Chris) Pham. All rights reserved.</p>

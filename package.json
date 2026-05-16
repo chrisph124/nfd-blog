@@ -1,6 +1,6 @@
 {
   "name": "nfd-blog",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "private": true,
   "pnpm": {
     "overrides": {
@@ -50,6 +50,7 @@
     "unist-util-visit": "~5.1.0"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.2.6",
     "@next/eslint-plugin-next": "^16.2.2",
     "@tailwindcss/postcss": "~4",
     "@testing-library/jest-dom": "~6.9.1",

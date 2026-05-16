@@ -1,11 +1,17 @@
 'use client';
 
 import { memo } from 'react';
+import dynamic from 'next/dynamic';
 import { renderRichText, StoryblokServerComponent } from '@storyblok/react/rsc';
 import { makeStoryblokEditable } from '@/lib/storyblok-utils';
 import type { ContentCardBlockBlok } from '@/types/storyblok';
 import { cn } from '@/lib/utils';
-import ImageCarousel from './ImageCarousel';
+import { ImageCarouselSkeleton } from '@/components/atoms/Skeleton';
+
+const ImageCarousel = dynamic(() => import('./ImageCarousel'), {
+  loading: () => <ImageCarouselSkeleton className="mt-auto" />,
+  ssr: false,
+});
 
 interface ContentCardBlockProps {
   blok: ContentCardBlockBlok;
