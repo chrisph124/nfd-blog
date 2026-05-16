@@ -85,6 +85,7 @@ export function formatDate(dateString: string, locale: string = 'en-US'): string
     year: 'numeric',
     month: 'long',
     day: 'numeric',
+    timeZone: 'UTC',
   });
 }
 
