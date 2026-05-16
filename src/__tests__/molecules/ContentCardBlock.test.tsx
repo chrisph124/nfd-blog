@@ -61,9 +61,15 @@ vi.mock('react-icons/hi2', () => ({
   HiChevronRight: () => <span data-testid="chevron-right">Right</span>,
 }));
 
-// Mock @storyblok/react/rsc (where the component imports renderRichText from)
+// Mock @storyblok/react (client — where StoryblokRichText now lives)
+vi.mock('@storyblok/react', () => ({
+  StoryblokRichText: ({ doc: _doc }: { doc: unknown }) => (
+    <p data-testid="storyblok-richtext">Rendered rich text content</p>
+  ),
+}));
+
+// Mock @storyblok/react/rsc (still used for StoryblokServerComponent)
 vi.mock('@storyblok/react/rsc', () => ({
-  renderRichText: vi.fn(() => '<p>Rendered rich text content</p>'),
   StoryblokServerComponent: ({ blok }: { blok: { _uid: string; component: string } }) => (
     <div data-testid={`cta-${blok._uid}`} data-component={blok.component}>CTA Component</div>
   ),
@@ -74,10 +80,6 @@ vi.mock('@/lib/storyblok-utils', async (importOriginal) => {
   const actual = await importOriginal() as Record<string, unknown>;
   return {
     ...actual,
-    renderRichText: vi.fn(() => '<p>Rendered rich text content</p>'),
-    StoryblokServerComponent: ({ blok }: { blok: { _uid: string; component: string } }) => (
-      <div data-testid={`cta-${blok._uid}`} data-component={blok.component}>CTA Component</div>
-    ),
     makeStoryblokEditable: vi.fn(() => ({})),
   };
 });
