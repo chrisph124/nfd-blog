@@ -4,9 +4,20 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import type { StoryblokLinksResponse, StoryblokStoryLink } from '@/types/storyblok';
 import Post from '@/components/templates/Post';
-import { buildBlogPostingJsonLd } from '@/lib/seo-structured-data';
+import {
+  buildBlogPostingJsonLd,
+  buildPersonJsonLd,
+  estimateWordCount,
+} from '@/lib/seo-structured-data';
+import { stripEntities } from '@/lib/seo/strip-entities';
 
 export const revalidate = 86400; // Revalidate every 24 hours (webhook handles real-time updates)
+
+const AUTHOR_NAME = 'Hieu (Chris) Pham';
+const AUTHOR_SAME_AS = [
+  'https://github.com/chrisph124',
+  'https://www.linkedin.com/in/chrispham124/',
+];
 
 interface PageProps {
   params: Promise<{
@@ -14,30 +25,74 @@ interface PageProps {
   }>;
 }
 
+function escapeJsonLd(json: object): string {
+  return JSON.stringify(json).replace(/</g, '\\u003c');
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const result = await fetchStoryBySlug(slug);
   if (!result) return {};
 
-  const { story } = result;
+  const { story, source } = result;
   const content = story.content;
   const siteUrl = getSiteUrl();
+  const canonicalUrl = `${siteUrl}/${slug}`;
 
-  const title = content.og_title?.trim() || content.title?.trim() || story.name;
-  const description = content.og_description?.trim() || content.excerpt?.trim() || '';
+  const title = stripEntities(content.og_title?.trim() || content.title?.trim() || story.name);
+  const description = stripEntities(
+    content.og_description?.trim() || content.excerpt?.trim() || ''
+  );
 
-  return {
+  const isPost = source === 'posts' && content.component === 'post';
+  const ogType: 'article' | 'profile' | 'website' = isPost
+    ? 'article'
+    : slug === 'about'
+      ? 'profile'
+      : 'website';
+
+  const metadata: Metadata = {
     title,
     description,
     alternates: {
       canonical: `/${slug}`,
     },
     openGraph: {
+      type: ogType,
+      url: canonicalUrl,
       title,
       description,
-      images: [{ url: `${siteUrl}/api/og?slug=${encodeURIComponent(slug)}`, width: 1200, height: 630 }],
+      images: [
+        {
+          url: `${siteUrl}/api/og?slug=${encodeURIComponent(slug)}`,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+    twitter: {
+      title,
+      description,
+      images: [`${siteUrl}/api/og?slug=${encodeURIComponent(slug)}`],
     },
   };
+
+  if (isPost) {
+    const datePublished = story.first_published_at || story.created_at;
+    const dateModified = story.published_at || datePublished;
+    const articleOther: Record<string, string | string[]> = {
+      'article:published_time': datePublished,
+      'article:modified_time': dateModified,
+      'article:author': AUTHOR_NAME,
+    };
+    if (story.tag_list && story.tag_list.length > 0) {
+      articleOther['article:tag'] = story.tag_list;
+    }
+    metadata.other = articleOther;
+  }
+
+  return metadata;
 }
 
 export default async function DynamicPage({ params }: PageProps) {
@@ -50,30 +105,60 @@ export default async function DynamicPage({ params }: PageProps) {
   }
 
   const { story, source } = result;
+  const siteUrl = getSiteUrl();
 
   if (source === 'posts' && story.content.component === 'post') {
-    const siteUrl = getSiteUrl();
+    const datePublished = story.first_published_at || story.created_at;
+    const dateModified = story.published_at || datePublished;
+    const title = stripEntities(story.content.title?.trim() || story.name);
+    const description = stripEntities(story.content.excerpt?.trim() || '');
+
+    const bodyText = JSON.stringify(story.content.body ?? '');
+    const wordCount = estimateWordCount(bodyText);
+
     const jsonLd = buildBlogPostingJsonLd({
       siteUrl,
       slug,
-      title: story.content.title?.trim() || story.name,
-      description: story.content.excerpt?.trim() || '',
-      datePublished: story.first_published_at || story.created_at,
+      title,
+      description,
+      datePublished,
+      dateModified,
       imageUrl: story.content.featured_image?.filename,
-      authorName: 'Hieu (Chris) Pham',
+      authorName: AUTHOR_NAME,
+      authorUrl: `${siteUrl}/about`,
+      wordCount: wordCount > 0 ? wordCount : undefined,
     });
 
     return (
       <div className="page">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: escapeJsonLd(jsonLd) }}
         />
         <Post
           blok={story.content}
           tags={story.tag_list}
-          createdAt={story.first_published_at || story.created_at}
+          createdAt={datePublished}
         />
+      </div>
+    );
+  }
+
+  if (slug === 'about') {
+    const personJsonLd = buildPersonJsonLd({
+      siteUrl,
+      name: AUTHOR_NAME,
+      description: 'Frontend engineer writing about software, AI, and building interfaces.',
+      sameAs: AUTHOR_SAME_AS,
+    });
+
+    return (
+      <div className="page">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: escapeJsonLd(personJsonLd) }}
+        />
+        <StoryblokStory story={story} />
       </div>
     );
   }

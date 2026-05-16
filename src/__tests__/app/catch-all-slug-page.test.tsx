@@ -108,8 +108,10 @@ describe('generateMetadata ([...slug])', () => {
     expect(metadata.description).toBe('Nested OG description');
     expect(metadata.alternates?.canonical).toBe('/docs/getting-started');
     expect(metadata.openGraph?.images).toEqual([
-      { url: 'https://example.com/api/og?slug=docs%2Fgetting-started', width: 1200, height: 630 },
+      { url: 'https://example.com/api/og?slug=docs%2Fgetting-started', width: 1200, height: 630, alt: 'Nested OG Title' },
     ]);
+    expect(metadata.openGraph?.type).toBe('website');
+    expect(metadata.openGraph?.url).toBe('https://example.com/docs/getting-started');
   });
 
   it('falls back to story name when og_title is empty', async () => {
@@ -120,6 +122,16 @@ describe('generateMetadata ([...slug])', () => {
     const metadata = await generateMetadata({ params: makeParams(['nested', 'page']) });
 
     expect(metadata.title).toBe('Nested Page');
+  });
+
+  it('uses empty description when og_description is absent (covers line 27 || branch)', async () => {
+    const story = createMockStory();
+    story.content.og_description = undefined as unknown as string;
+    mockFetchStory.mockResolvedValue(story);
+
+    const metadata = await generateMetadata({ params: makeParams(['nested', 'page']) });
+
+    expect(metadata.description).toBe('');
   });
 
   it('returns empty object when story not found', async () => {

@@ -3,6 +3,7 @@ import { StoryblokStory } from '@storyblok/react/rsc';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import type { StoryblokLinksResponse, StoryblokStoryLink } from '@/types/storyblok';
+import { stripEntities } from '@/lib/seo/strip-entities';
 
 export const revalidate = 86400; // Revalidate every 24 hours (webhook handles real-time updates)
 
@@ -20,9 +21,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const content = story.content;
   const siteUrl = getSiteUrl();
+  const canonicalUrl = `${siteUrl}/${fullSlug}`;
 
-  const title = content.og_title?.trim() || story.name;
-  const description = content.og_description?.trim() || '';
+  const title = stripEntities(content.og_title?.trim() || story.name);
+  const description = stripEntities(content.og_description?.trim() || '');
 
   return {
     title,
@@ -31,9 +33,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       canonical: `/${fullSlug}`,
     },
     openGraph: {
+      type: 'website',
+      url: canonicalUrl,
       title,
       description,
-      images: [{ url: `${siteUrl}/api/og?slug=${encodeURIComponent(fullSlug)}`, width: 1200, height: 630 }],
+      images: [
+        {
+          url: `${siteUrl}/api/og?slug=${encodeURIComponent(fullSlug)}`,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+    twitter: {
+      title,
+      description,
+      images: [`${siteUrl}/api/og?slug=${encodeURIComponent(fullSlug)}`],
     },
   };
 }

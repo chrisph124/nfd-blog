@@ -54,6 +54,14 @@ vi.mock('react-icons/hi2', () => ({
   HiChevronRight: () => <span data-testid="chevron-right">Right</span>,
 }));
 
+// Mock @storyblok/react/rsc (where the component imports renderRichText from)
+vi.mock('@storyblok/react/rsc', () => ({
+  renderRichText: vi.fn(() => '<p>Rendered rich text content</p>'),
+  StoryblokServerComponent: ({ blok }: { blok: { _uid: string; component: string } }) => (
+    <div data-testid={`cta-${blok._uid}`} data-component={blok.component}>CTA Component</div>
+  ),
+}));
+
 // Mock @/lib/storyblok-utils
 vi.mock('@/lib/storyblok-utils', async (importOriginal) => {
   const actual = await importOriginal() as Record<string, unknown>;
@@ -189,6 +197,18 @@ describe('ContentCardBlock', () => {
       const { container } = render(<ContentCardBlock blok={blok} />);
 
       expect(container.querySelector('.prose')).not.toBeInTheDocument();
+    });
+
+    it('renders description prose div when description is a rich-text object', () => {
+      const blok = createMockBlok({
+        description: { type: 'doc', content: [] } as unknown as ContentCardBlockBlok['description'],
+      });
+      const { container } = render(<ContentCardBlock blok={blok} />);
+
+      // renderRichText is mocked to return '<p>Rendered rich text content</p>'
+      const prose = container.querySelector('.prose');
+      expect(prose).toBeInTheDocument();
+      expect(prose?.innerHTML).toContain('rich text content');
     });
   });
 

@@ -83,6 +83,17 @@ describe('Home Page', () => {
     await expect(Home()).rejects.toThrow('NEXT_NOT_FOUND');
     expect(mockNotFound).toHaveBeenCalled();
   });
+
+  it('uses default description when og_description is empty (covers line 53 || branch)', async () => {
+    const story = createMockStory({ og_description: '' });
+    mockFetchHomeStory.mockResolvedValue(story);
+
+    // Should render without error — description falls back to default
+    const Component = await Home();
+    render(Component);
+
+    expect(screen.getByTestId('storyblok-story')).toBeInTheDocument();
+  });
 });
 
 describe('Home generateMetadata', () => {
@@ -99,8 +110,10 @@ describe('Home generateMetadata', () => {
     expect(metadata.title).toBe('Home OG Title');
     expect(metadata.description).toBe('Home OG Desc');
     expect(metadata.openGraph?.images).toEqual([
-      { url: 'https://example.com/api/og?slug=home', width: 1200, height: 630 },
+      { url: 'https://example.com/api/og?slug=home', width: 1200, height: 630, alt: 'Home OG Title' },
     ]);
+    expect(metadata.openGraph?.type).toBe('website');
+    expect(metadata.openGraph?.url).toBe('https://example.com');
   });
 
   it('returns fallback when no story', async () => {

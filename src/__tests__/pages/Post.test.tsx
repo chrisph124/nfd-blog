@@ -358,7 +358,7 @@ describe('Post', () => {
 
       const figure = container.querySelector('figure');
       expect(figure).toBeInTheDocument();
-      expect(figure).toHaveClass('w-full', 'max-w-[1280px]');
+      expect(figure).toHaveClass('w-full', 'max-w-[1080px]');
 
       const imageWrapper = figure?.querySelector('div');
       expect(imageWrapper).toHaveClass('relative', 'aspect-video', 'overflow-hidden', 'rounded-xl');
@@ -710,7 +710,7 @@ describe('Post', () => {
       expect(article).toHaveClass('gap-y-6', 'md:gap-y-12', 'pt-4');
 
       const figure = container.querySelector('figure');
-      expect(figure).toHaveClass('max-w-[1280px]');
+      expect(figure).toHaveClass('max-w-[1080px]');
 
       expect(screen.getByTestId('reading-progress')).toBeInTheDocument();
     });

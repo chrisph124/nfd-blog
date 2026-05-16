@@ -258,6 +258,30 @@ describe('PostListClient', () => {
       consoleSpy.mockRestore();
     });
 
+    it('uses generic error message when thrown value is not an Error instance', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const initialPosts = [createMockPost(1)];
+
+      // Throw a non-Error (string) to cover `err instanceof Error ? ... : 'Failed to load more posts'`
+      (global.fetch as ReturnType<typeof vi.fn>).mockRejectedValue('plain string error');
+
+      render(
+        <PostListClient
+          initialPosts={initialPosts}
+          perPage={12}
+          hasMore={true}
+        />
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: /load more posts/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText('Failed to load more posts')).toBeInTheDocument();
+      });
+
+      consoleSpy.mockRestore();
+    });
+
     it('allows retry after error', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       const initialPosts = [createMockPost(1)];

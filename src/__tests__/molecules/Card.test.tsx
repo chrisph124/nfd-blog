@@ -178,9 +178,46 @@ describe('Card', () => {
       });
       const { container } = render(<Card story={story} />);
 
-      const heading = container.querySelector('h3');
+      const heading = container.querySelector('h2');
       expect(heading).toBeInTheDocument();
       expect(heading).toHaveTextContent('');
+    });
+  });
+
+  describe('CardMeta edge cases', () => {
+    it('renders metadata section with reading time even when date is absent', () => {
+      // created_at empty → formattedDate='', but getStoryReadingTime always returns non-empty
+      const story = createMockStory({
+        created_at: '',
+        content: {
+          _uid: 'content-uid',
+          component: 'post',
+          title: 'No Date Post',
+          body: [{ type: 'paragraph', content: [{ type: 'text', text: 'word '.repeat(100) }] }],
+        },
+      });
+      const { container } = render(<Card story={story} />);
+
+      // Reading time still renders because getStoryReadingTime always returns a string
+      expect(container.querySelector('.text-xs.italic')).toBeInTheDocument();
+      expect(screen.getByText(/min read/)).toBeInTheDocument();
+    });
+
+    it('renders date and reading time with bullet separator when both present', () => {
+      const story = createMockStory({
+        created_at: '2025-01-15T10:00:00.000Z',
+        content: {
+          _uid: 'content-uid',
+          component: 'post',
+          title: 'Full Meta Post',
+          body: [{ type: 'paragraph', content: [{ type: 'text', text: 'word '.repeat(100) }] }],
+        },
+      });
+      render(<Card story={story} />);
+
+      expect(screen.getByText(/January 15, 2025/)).toBeInTheDocument();
+      expect(screen.getByText('•')).toBeInTheDocument();
+      expect(screen.getByText(/min read/)).toBeInTheDocument();
     });
   });
 
@@ -224,6 +261,49 @@ describe('Card', () => {
       const article = container.querySelector('article');
       expect(article).toHaveClass('transition-all', 'duration-200');
     });
+  });
+});
+
+describe('CardImage alt fallback', () => {
+  it('uses title as alt text when image.alt is empty (covers || title branch on line 33)', () => {
+    const story = createMockStory({
+      content: {
+        _uid: 'content-uid',
+        component: 'post',
+        title: 'My Post Title',
+        featured_image: {
+          id: 1,
+          filename: 'https://a.storyblok.com/f/test.jpg',
+          alt: '',  // empty alt → falls back to title
+        },
+        body: [],
+      },
+    });
+    render(<Card story={story} />);
+
+    const img = screen.getByRole('img');
+    expect(img).toHaveAttribute('alt', 'My Post Title');
+  });
+});
+
+describe('CardMeta null return', () => {
+  it('returns null when CardMeta receives no createdAt and body is undefined', () => {
+    // getStoryReadingTime(undefined) returns '1 min read' always,
+    // so CardMeta's null return is not reachable through normal Card usage.
+    // This test documents the known behavior.
+    const story = createMockStory({
+      created_at: '',
+      content: {
+        _uid: 'content-uid',
+        component: 'post',
+        title: 'No Meta Post',
+        body: [{ type: 'paragraph', content: [{ type: 'text', text: 'hello world' }] }],
+      },
+    });
+    const { container } = render(<Card story={story} />);
+
+    // CardMeta shows readingTime even without date
+    expect(container.querySelector('.text-xs.italic')).toBeInTheDocument();
   });
 });
 

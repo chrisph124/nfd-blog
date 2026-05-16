@@ -21,7 +21,7 @@ vi.mock('next/og', () => ({
   },
 }));
 
-import { GET } from '@/app/api/og/route';
+import { GET, optimizeStoryblokAsset } from '@/app/api/og/route';
 import type { NextRequest } from 'next/server';
 
 const DEFAULT_ORIGIN = 'https://notesof.dev';
@@ -201,7 +201,9 @@ describe('OG Image Route - GET', () => {
 
     await GET(createRequest('my-post'));
 
-    expect(getImageSrc(capturedElement)).toBe('https://a.storyblok.com/featured.jpg');
+    expect(getImageSrc(capturedElement)).toBe(
+      'https://a.storyblok.com/featured.jpg/m/1200x630/filters:quality(75):format(jpg)'
+    );
     expect(getImageObjectFit(capturedElement)).toBe('cover');
   });
 
@@ -213,7 +215,9 @@ describe('OG Image Route - GET', () => {
 
     await GET(createRequest('my-post'));
 
-    expect(getImageSrc(capturedElement)).toBe('https://a.storyblok.com/post.jpg');
+    expect(getImageSrc(capturedElement)).toBe(
+      'https://a.storyblok.com/post.jpg/m/1200x630/filters:quality(75):format(jpg)'
+    );
   });
 
   it('prefers og_image over featured_image when both set', async () => {
@@ -225,7 +229,9 @@ describe('OG Image Route - GET', () => {
 
     await GET(createRequest('my-post'));
 
-    expect(getImageSrc(capturedElement)).toBe('https://a.storyblok.com/og.jpg');
+    expect(getImageSrc(capturedElement)).toBe(
+      'https://a.storyblok.com/og.jpg/m/1200x630/filters:quality(75):format(jpg)'
+    );
   });
 
   it('post with no images falls back to default image', async () => {
@@ -246,7 +252,9 @@ describe('OG Image Route - GET', () => {
 
     await GET(createRequest('about/team'));
 
-    expect(getImageSrc(capturedElement)).toBe('https://a.storyblok.com/nested.jpg');
+    expect(getImageSrc(capturedElement)).toBe(
+      'https://a.storyblok.com/nested.jpg/m/1200x630/filters:quality(75):format(jpg)'
+    );
   });
 
   it('default image URL resolves against request origin', async () => {
@@ -256,5 +264,67 @@ describe('OG Image Route - GET', () => {
     await GET(createRequest('missing'));
 
     expect(getImageSrc(capturedElement)).toBe(`${DEFAULT_ORIGIN}/og-default.jpg`);
+  });
+
+  it('falls back to home slug when slug param contains unsafe chars', async () => {
+    const story = createMockPageStory();
+    mockFetchStoryApi.mockResolvedValue(story);
+
+    await GET(createRequest('<script>alert(1)</script>'));
+
+    expect(mockFetchStoryApi).toHaveBeenCalledWith('home');
+  });
+
+  it('falls back to home slug when slug param is excessively long', async () => {
+    const story = createMockPageStory();
+    mockFetchStoryApi.mockResolvedValue(story);
+
+    await GET(createRequest('a'.repeat(500)));
+
+    expect(mockFetchStoryApi).toHaveBeenCalledWith('home');
+  });
+
+  it('accepts valid nested slug', async () => {
+    const story = createMockPageStory();
+    mockFetchStoryBySlugApi.mockResolvedValue(null);
+    mockFetchStoryApi.mockResolvedValue(story);
+
+    await GET(createRequest('docs/getting-started'));
+
+    expect(mockFetchStoryApi).toHaveBeenCalledWith('docs/getting-started');
+  });
+
+  it('emits long-lived cache header on ImageResponse', async () => {
+    const story = createMockPageStory();
+    mockFetchStoryApi.mockResolvedValue(story);
+
+    await GET(createRequest('home'));
+
+    const opts = capturedOptions as { headers?: Record<string, string> };
+    expect(opts.headers?.['Cache-Control']).toContain('s-maxage=604800');
+    expect(opts.headers?.['Cache-Control']).toContain('stale-while-revalidate=86400');
+  });
+});
+
+describe('optimizeStoryblokAsset', () => {
+  it('appends transform path to a.storyblok.com URLs', () => {
+    expect(optimizeStoryblokAsset('https://a.storyblok.com/hero.jpg')).toBe(
+      'https://a.storyblok.com/hero.jpg/m/1200x630/filters:quality(75):format(jpg)'
+    );
+  });
+
+  it('returns non-Storyblok URLs unchanged', () => {
+    expect(optimizeStoryblokAsset('https://cdn.example.com/hero.jpg')).toBe(
+      'https://cdn.example.com/hero.jpg'
+    );
+  });
+
+  it('returns undefined for undefined input', () => {
+    expect(optimizeStoryblokAsset(undefined)).toBeUndefined();
+  });
+
+  it('does not double-apply transform path when /m/ already present', () => {
+    const already = 'https://a.storyblok.com/hero.jpg/m/800x800';
+    expect(optimizeStoryblokAsset(already)).toBe(already);
   });
 });

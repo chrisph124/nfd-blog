@@ -11,24 +11,30 @@ describe('robots', () => {
     vi.clearAllMocks();
   });
 
-  it('returns valid robots.txt configuration', () => {
+  it('returns wildcard rule disallowing /api/', () => {
     const result = robots();
-
-    expect(result).toEqual({
-      rules: [
-        {
-          userAgent: '*',
-          allow: '/',
-          disallow: '/api/',
-        },
-      ],
-      sitemap: 'https://example.com/sitemap.xml',
+    expect(result.rules).toContainEqual({
+      userAgent: '*',
+      allow: '/',
+      disallow: '/api/',
     });
+  });
+
+  it('explicitly allows known AI bots', () => {
+    const result = robots();
+    const userAgents = Array.isArray(result.rules)
+      ? result.rules.map((r) => r.userAgent)
+      : [result.rules.userAgent];
+
+    expect(userAgents).toContain('GPTBot');
+    expect(userAgents).toContain('ClaudeBot');
+    expect(userAgents).toContain('PerplexityBot');
+    expect(userAgents).toContain('Google-Extended');
+    expect(userAgents).toContain('CCBot');
   });
 
   it('includes sitemap URL derived from site URL', () => {
     const result = robots();
-
     expect(result.sitemap).toBe('https://example.com/sitemap.xml');
   });
 });

@@ -56,16 +56,16 @@ describe('Footer', () => {
       const blok = createMockBlok();
       render(<Footer blok={blok} />);
 
-      expect(screen.getByLabelText('GitHub https://github.com/chrisph124')).toBeInTheDocument();
-      expect(screen.getByLabelText('LinkedIn https://www.linkedin.com/in/chrispham124/')).toBeInTheDocument();
-      expect(screen.getByLabelText('Email mailto:chris.pham124@gmail.com')).toBeInTheDocument();
+      expect(screen.getByLabelText('GitHub')).toBeInTheDocument();
+      expect(screen.getByLabelText('LinkedIn')).toBeInTheDocument();
+      expect(screen.getByLabelText('Email')).toBeInTheDocument();
     });
 
     it('renders icons at correct size (24x24px)', () => {
       const blok = createMockBlok();
       render(<Footer blok={blok} />);
 
-      const githubIcon = screen.getByLabelText('GitHub https://github.com/chrisph124').querySelector('svg');
+      const githubIcon = screen.getByLabelText('GitHub').querySelector('svg');
       expect(githubIcon).toHaveClass('w-6', 'h-6');
     });
 
@@ -83,7 +83,7 @@ describe('Footer', () => {
       const blok = createMockBlok();
       render(<Footer blok={blok} />);
 
-      const githubLink = screen.getByLabelText('GitHub https://github.com/chrisph124');
+      const githubLink = screen.getByLabelText('GitHub');
       expect(githubLink).toHaveAttribute('href', 'https://github.com/chrisph124');
     });
 
@@ -91,7 +91,7 @@ describe('Footer', () => {
       const blok = createMockBlok();
       render(<Footer blok={blok} />);
 
-      const githubLink = screen.getByLabelText('GitHub https://github.com/chrisph124');
+      const githubLink = screen.getByLabelText('GitHub');
       expect(githubLink).toHaveAttribute('target', '_blank');
       expect(githubLink).toHaveAttribute('rel', 'noopener noreferrer');
     });
@@ -100,7 +100,7 @@ describe('Footer', () => {
       const blok = createMockBlok();
       render(<Footer blok={blok} />);
 
-      const emailLink = screen.getByLabelText('Email mailto:chris.pham124@gmail.com');
+      const emailLink = screen.getByLabelText('Email');
       expect(emailLink).toHaveAttribute('href', 'mailto:chris.pham124@gmail.com');
       expect(emailLink).not.toHaveAttribute('target');
       expect(emailLink).not.toHaveAttribute('rel');
@@ -128,12 +128,12 @@ describe('Footer', () => {
   });
 
   describe('Styles', () => {
-    it('has correct background and text colors', () => {
+    it('has pinned dark background and light text colors', () => {
       const blok = createMockBlok();
       render(<Footer blok={blok} />);
 
       const footer = screen.getByRole('contentinfo');
-      expect(footer).toHaveClass('bg-surface-inverted', 'text-on-surface-inverted');
+      expect(footer).toHaveClass('bg-[#111827]', 'text-[#F9FAFB]');
     });
 
     it('has full width', () => {
@@ -148,8 +148,8 @@ describe('Footer', () => {
       const blok = createMockBlok();
       render(<Footer blok={blok} />);
 
-      const githubLink = screen.getByLabelText('GitHub https://github.com/chrisph124');
-      expect(githubLink).toHaveClass('text-on-surface-inverted', 'hover:text-primary-400');
+      const githubLink = screen.getByLabelText('GitHub');
+      expect(githubLink).toHaveClass('!text-[#F9FAFB]', 'hover:text-primary-400');
     });
   });
 
@@ -191,16 +191,16 @@ describe('Footer', () => {
       const blok = createMockBlok();
       render(<Footer blok={blok} />);
 
-      expect(screen.getByLabelText('GitHub https://github.com/chrisph124')).toBeInTheDocument();
-      expect(screen.getByLabelText('LinkedIn https://www.linkedin.com/in/chrispham124/')).toBeInTheDocument();
-      expect(screen.getByLabelText('Email mailto:chris.pham124@gmail.com')).toBeInTheDocument();
+      expect(screen.getByLabelText('GitHub')).toBeInTheDocument();
+      expect(screen.getByLabelText('LinkedIn')).toBeInTheDocument();
+      expect(screen.getByLabelText('Email')).toBeInTheDocument();
     });
 
     it('has transition-colors for smooth hover', () => {
       const blok = createMockBlok();
       render(<Footer blok={blok} />);
 
-      const githubLink = screen.getByLabelText('GitHub https://github.com/chrisph124');
+      const githubLink = screen.getByLabelText('GitHub');
       expect(githubLink).toHaveClass('transition-colors');
     });
   });

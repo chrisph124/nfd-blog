@@ -53,7 +53,7 @@ export default function Post({ blok, tags = [], createdAt }: Readonly<PostProps>
         </header>
 
         {featured_image?.filename && (
-          <figure className="w-full max-w-[1280px] mx-auto px-4 md:px-8 lg:px-12 xl:px-5">
+          <figure className="w-full max-w-[1080px] mx-auto px-4 md:px-8 lg:px-12 xl:px-5">
             <div className="relative aspect-video w-full overflow-hidden rounded-xl">
               <Image
                 src={featured_image.filename}

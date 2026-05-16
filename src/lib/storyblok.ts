@@ -71,6 +71,7 @@ export function getSiteUrl(): string {
   if (process.env.NEXT_PUBLIC_SITE_URL) {
     let url = process.env.NEXT_PUBLIC_SITE_URL;
     while (url.endsWith('/')) url = url.slice(0, -1);
+    url = url.replace(/^https:\/\/notesof\.dev(?=\/|$)/, 'https://www.notesof.dev');
     return url;
   }
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
@@ -119,5 +120,37 @@ export const fetchStory = cache(async (fullSlug: string) => {
   } catch (error) {
     console.error(`Error fetching story for slug: ${fullSlug}`, error);
     return null;
+  }
+});
+
+export const fetchAllPosts = cache(async (): Promise<StoryblokStory<PostBlok>[]> => {
+  try {
+    const storyblokApi = getStoryblokApi();
+    const perPage = 100;
+    const allStories: StoryblokStory<PostBlok>[] = [];
+    let page = 1;
+
+    while (true) {
+      const response = (await storyblokApi.get('cdn/stories', {
+        version: storyblokVersion,
+        content_type: 'post',
+        sort_by: 'first_published_at:desc',
+        per_page: perPage,
+        page,
+      })) as { data: { stories: StoryblokStory<PostBlok>[] }; headers: { total?: string } };
+
+      const stories = response.data.stories ?? [];
+      allStories.push(...stories);
+
+      const total = Number.parseInt(response.headers.total || '0', 10);
+      if (allStories.length >= total || stories.length < perPage) break;
+      page += 1;
+      if (page > 50) break;
+    }
+
+    return allStories;
+  } catch (error) {
+    console.error('Error fetching all posts:', error);
+    return [];
   }
 });

@@ -153,8 +153,16 @@ describe('generateMetadata ([slug])', () => {
     expect(metadata.title).toBe('Post OG');
     expect(metadata.description).toBe('Post desc');
     expect(metadata.openGraph?.images).toEqual([
-      { url: 'https://example.com/api/og?slug=my-post', width: 1200, height: 630 },
+      { url: 'https://example.com/api/og?slug=my-post', width: 1200, height: 630, alt: 'Post OG' },
     ]);
+    expect(metadata.openGraph?.type).toBe('article');
+    expect(metadata.openGraph?.url).toBe('https://example.com/my-post');
+    expect(metadata.other).toMatchObject({
+      'article:published_time': '2024-01-01T00:00:00.000Z',
+      'article:modified_time': '2024-01-01T00:00:00.000Z',
+      'article:author': 'Hieu (Chris) Pham',
+      'article:tag': ['tech'],
+    });
   });
 
   it('returns empty object when not found', async () => {
@@ -163,6 +171,241 @@ describe('generateMetadata ([slug])', () => {
     const metadata = await generateMetadata({ params: makeParams('missing') });
 
     expect(metadata).toEqual({});
+  });
+});
+
+describe('DynamicPage — about slug (personJsonLd path)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGetSiteUrl.mockReturnValue('https://example.com');
+  });
+
+  it('renders StoryblokStory with personJsonLd script for about slug', async () => {
+    const story = createMockPageStory();
+    mockFetchStoryBySlug.mockResolvedValue({ story, source: 'pages' });
+
+    const Component = await DynamicPage({ params: makeParams('about') });
+    const { container } = render(Component);
+
+    expect(screen.getByTestId('storyblok-story')).toBeInTheDocument();
+    const script = container.querySelector('script[type="application/ld+json"]');
+    expect(script).toBeInTheDocument();
+    const parsed = JSON.parse(script!.innerHTML.replace(/\\u003c/g, '<'));
+    expect(parsed['@type']).toBe('Person');
+  });
+});
+
+describe('DynamicPage — generic non-post page (no JSON-LD)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGetSiteUrl.mockReturnValue('https://example.com');
+  });
+
+  it('renders StoryblokStory without script for a non-post, non-about page', async () => {
+    const story: typeof createMockPageStory extends () => infer R ? R : never = {
+      ...createMockPageStory(),
+      slug: 'contact',
+      full_slug: 'contact',
+    };
+    mockFetchStoryBySlug.mockResolvedValue({ story, source: 'pages' });
+
+    const Component = await DynamicPage({ params: makeParams('contact') });
+    const { container } = render(Component);
+
+    expect(screen.getByTestId('storyblok-story')).toBeInTheDocument();
+    expect(container.querySelector('script[type="application/ld+json"]')).toBeNull();
+  });
+});
+
+describe('generateMetadata — ogType branches', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGetSiteUrl.mockReturnValue('https://example.com');
+  });
+
+  it('uses ogType=profile for about slug', async () => {
+    const story = createMockPageStory();
+    mockFetchStoryBySlug.mockResolvedValue({ story, source: 'pages' });
+
+    const metadata = await generateMetadata({ params: makeParams('about') });
+    expect(metadata.openGraph?.type).toBe('profile');
+  });
+
+  it('uses ogType=website for other non-post pages', async () => {
+    const story = { ...createMockPageStory(), slug: 'contact', full_slug: 'contact' };
+    mockFetchStoryBySlug.mockResolvedValue({ story, source: 'pages' });
+
+    const metadata = await generateMetadata({ params: makeParams('contact') });
+    expect(metadata.openGraph?.type).toBe('website');
+  });
+
+  it('omits article:tag when story has no tags', async () => {
+    const story = { ...createMockPostStory(), tag_list: [] };
+    mockFetchStoryBySlug.mockResolvedValue({ story, source: 'posts' });
+
+    const metadata = await generateMetadata({ params: makeParams('my-post') });
+    expect((metadata.other as Record<string, unknown>)?.['article:tag']).toBeUndefined();
+  });
+});
+
+describe('DynamicPage — JSON-LD escaping', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGetSiteUrl.mockReturnValue('https://example.com');
+  });
+
+  it('escapes < in JSON-LD to prevent XSS', async () => {
+    const story = {
+      ...createMockPostStory(),
+      content: {
+        ...createMockPostStory().content,
+        title: 'A <script> title',
+        excerpt: 'desc',
+      },
+    };
+    mockFetchStoryBySlug.mockResolvedValue({ story, source: 'posts' });
+
+    const Component = await DynamicPage({ params: makeParams('my-post') });
+    const { container } = render(Component);
+
+    const script = container.querySelector('script[type="application/ld+json"]');
+    expect(script).toBeInTheDocument();
+    // The raw innerHTML should not contain literal < from injected title
+    expect(script!.innerHTML).not.toContain('<script>');
+    expect(script!.innerHTML).toContain('\\u003c');
+  });
+});
+
+describe('generateMetadata — title and description fallbacks', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGetSiteUrl.mockReturnValue('https://example.com');
+  });
+
+  it('falls back to story.name when og_title and title are both absent', async () => {
+    const story = {
+      ...createMockPageStory(),
+      name: 'Fallback Name',
+      content: {
+        ...createMockPageStory().content,
+        og_title: undefined as unknown as string,
+        title: undefined as unknown as string,
+      },
+    };
+    mockFetchStoryBySlug.mockResolvedValue({ story, source: 'pages' });
+
+    const metadata = await generateMetadata({ params: makeParams('about') });
+    expect(metadata.title).toBe('Fallback Name');
+  });
+
+  it('uses empty string description when both og_description and excerpt are absent', async () => {
+    const story = {
+      ...createMockPageStory(),
+      content: {
+        ...createMockPageStory().content,
+        og_description: undefined as unknown as string,
+        excerpt: undefined as unknown as string,
+      },
+    };
+    mockFetchStoryBySlug.mockResolvedValue({ story, source: 'pages' });
+
+    const metadata = await generateMetadata({ params: makeParams('about') });
+    expect(metadata.description).toBe('');
+  });
+});
+
+describe('generateMetadata — date fallback branches', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGetSiteUrl.mockReturnValue('https://example.com');
+  });
+
+  it('falls back to created_at when first_published_at is null (line 82)', async () => {
+    const story = {
+      ...createMockPostStory(),
+      first_published_at: null as unknown as string,
+      published_at: null as unknown as string,
+      created_at: '2024-06-01T00:00:00.000Z',
+    };
+    mockFetchStoryBySlug.mockResolvedValue({ story, source: 'posts' });
+
+    const metadata = await generateMetadata({ params: makeParams('my-post') });
+    // Should succeed — datePublished falls back to created_at
+    expect(metadata.other?.['article:published_time']).toBe('2024-06-01T00:00:00.000Z');
+    expect(metadata.other?.['article:modified_time']).toBe('2024-06-01T00:00:00.000Z');
+  });
+});
+
+describe('DynamicPage — title/description fallbacks in post JSON-LD', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGetSiteUrl.mockReturnValue('https://example.com');
+  });
+
+  it('falls back to story.name when post title is absent (line 113)', async () => {
+    const story = {
+      ...createMockPostStory(),
+      name: 'Story Name Used',
+      content: {
+        ...createMockPostStory().content,
+        title: undefined as unknown as string,
+        excerpt: '',
+      },
+    };
+    mockFetchStoryBySlug.mockResolvedValue({ story, source: 'posts' });
+
+    const Component = await DynamicPage({ params: makeParams('my-post') });
+    const { container } = render(Component);
+
+    const script = container.querySelector('script[type="application/ld+json"]');
+    expect(script).toBeInTheDocument();
+    const parsed = JSON.parse(script!.innerHTML.replace(/\\u003c/g, '<'));
+    expect(parsed.headline).toBe('Story Name Used');
+  });
+
+  it('uses empty description when excerpt is absent in post JSON-LD (line 114)', async () => {
+    const story = {
+      ...createMockPostStory(),
+      content: {
+        ...createMockPostStory().content,
+        excerpt: undefined as unknown as string,
+      },
+    };
+    mockFetchStoryBySlug.mockResolvedValue({ story, source: 'posts' });
+
+    const Component = await DynamicPage({ params: makeParams('my-post') });
+    const { container } = render(Component);
+
+    const script = container.querySelector('script[type="application/ld+json"]');
+    expect(script).toBeInTheDocument();
+    const parsed = JSON.parse(script!.innerHTML.replace(/\\u003c/g, '<'));
+    // description should be empty string when no excerpt
+    expect(parsed.description).toBe('');
+  });
+});
+
+describe('DynamicPage — date fallback in JSON-LD', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGetSiteUrl.mockReturnValue('https://example.com');
+  });
+
+  it('uses created_at fallback when first_published_at and published_at are null', async () => {
+    const story = {
+      ...createMockPostStory(),
+      first_published_at: null as unknown as string,
+      published_at: null as unknown as string,
+      created_at: '2024-07-01T00:00:00.000Z',
+    };
+    mockFetchStoryBySlug.mockResolvedValue({ story, source: 'posts' });
+
+    const Component = await DynamicPage({ params: makeParams('my-post') });
+    const { container } = render(Component);
+
+    const script = container.querySelector('script[type="application/ld+json"]');
+    expect(script).toBeInTheDocument();
+    const parsed = JSON.parse(script!.innerHTML.replace(/\\u003c/g, '<'));
+    expect(parsed.datePublished).toBe('2024-07-01T00:00:00.000Z');
   });
 });
 

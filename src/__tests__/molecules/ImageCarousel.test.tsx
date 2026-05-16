@@ -239,8 +239,16 @@ describe('ImageCarousel', () => {
   });
 
   describe('hideOnMobile Prop', () => {
-    it('applies hidden md:block when hideOnMobile is true', () => {
+    it('applies hidden md:block when hideOnMobile is true (single image)', () => {
       const images = [createMockImage()];
+      const { container } = render(<ImageCarousel images={images} hideOnMobile />);
+
+      const carouselContainer = container.querySelector('.hidden.md\\:block');
+      expect(carouselContainer).toBeInTheDocument();
+    });
+
+    it('applies hidden md:block when hideOnMobile is true (multiple images)', () => {
+      const images = [createMockImage({ id: 1 }), createMockImage({ id: 2 })];
       const { container } = render(<ImageCarousel images={images} hideOnMobile />);
 
       const carouselContainer = container.querySelector('.hidden.md\\:block');
@@ -264,11 +272,42 @@ describe('ImageCarousel', () => {
     });
   });
 
-  // Note: Autoplay handlers (lines 31, 35) are tightly coupled to useRef/useEmblaCarousel
-  // and require complex mocking. The mouseEnter/leave handlers on buttons are tested
-  // via the arrow hover test, but the direct autoplay stop/play calls are not directly testable
-  // without rewriting the component's hook structure. These internal callbacks are exercised
-  // in integration/E2E tests.
+  describe('Carousel container hover — stops/resumes autoplay', () => {
+    it('stops autoplay on carousel div mouseEnter', () => {
+      const images = [
+        createMockImage({ id: 1 }),
+        createMockImage({ id: 2 }),
+      ];
+      const { container } = render(<ImageCarousel images={images} />);
+
+      // The emblaRef div is the 2nd element with rounded-3xl overflow-hidden
+      // (outer wrapper also has these classes but no handler)
+      const allDivs = Array.from(container.querySelectorAll('.rounded-3xl.overflow-hidden')) as HTMLElement[];
+      // The inner emblaRef div comes after the outer wrapper
+      const emblaDiv = allDivs.find(el => el.parentElement?.classList.contains('rounded-3xl')) ?? allDivs[allDivs.length - 1];
+      act(() => {
+        fireEvent.mouseEnter(emblaDiv);
+      });
+
+      expect(mockAutoplayStop).toHaveBeenCalled();
+    });
+
+    it('resumes autoplay on carousel div mouseLeave', () => {
+      const images = [
+        createMockImage({ id: 1 }),
+        createMockImage({ id: 2 }),
+      ];
+      const { container } = render(<ImageCarousel images={images} />);
+
+      const allDivs = Array.from(container.querySelectorAll('.rounded-3xl.overflow-hidden')) as HTMLElement[];
+      const emblaDiv = allDivs.find(el => el.parentElement?.classList.contains('rounded-3xl')) ?? allDivs[allDivs.length - 1];
+      act(() => {
+        fireEvent.mouseLeave(emblaDiv);
+      });
+
+      expect(mockAutoplayPlay).toHaveBeenCalled();
+    });
+  });
 
   describe('Image Properties', () => {
     it('uses alt text when available', () => {
@@ -292,6 +331,30 @@ describe('ImageCarousel', () => {
       // Find the img element by src attribute since it has no accessible role
       const img = container.querySelector('img');
       expect(img).toHaveAttribute('alt', '');
+    });
+
+    it('uses title fallback in multi-image carousel (covers alt || title branch)', () => {
+      // Multiple images triggers Embla carousel path (lines 71-85)
+      const images = [
+        createMockImage({ id: 1, alt: undefined, title: 'Slide One' }),
+        createMockImage({ id: 2, alt: 'Slide Two Alt', title: 'Slide Two' }),
+      ];
+      const { container } = render(<ImageCarousel images={images} />);
+
+      const imgs = container.querySelectorAll('img');
+      expect(imgs[0]).toHaveAttribute('alt', 'Slide One');
+      expect(imgs[1]).toHaveAttribute('alt', 'Slide Two Alt');
+    });
+
+    it('uses empty string when both alt and title absent in multi-image carousel (|| "" branch)', () => {
+      const images = [
+        createMockImage({ id: 1, alt: undefined, title: undefined }),
+        createMockImage({ id: 2, alt: undefined, title: undefined }),
+      ];
+      const { container } = render(<ImageCarousel images={images} />);
+
+      const imgs = container.querySelectorAll('img');
+      expect(imgs[0]).toHaveAttribute('alt', '');
     });
   });
 

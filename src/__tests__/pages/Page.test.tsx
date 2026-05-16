@@ -28,15 +28,15 @@ describe('Page', () => {
       const blok = createMockBlok();
       const { container } = render(<Page blok={blok} />);
 
-      expect(container.querySelector('main')).toBeInTheDocument();
+      expect(container.querySelector('[data-testid="storyblok-editable"]')).toBeInTheDocument();
     });
 
-    it('renders as main element', () => {
+    it('renders as div container (not nested main landmark)', () => {
       const blok = createMockBlok();
       const { container } = render(<Page blok={blok} />);
 
-      const main = container.querySelector('main');
-      expect(main).toBeInTheDocument();
+      expect(container.querySelector('main')).not.toBeInTheDocument();
+      expect(container.firstChild?.nodeName).toBe('DIV');
     });
 
     it('renders with storyblok editable attributes', () => {
@@ -88,7 +88,7 @@ describe('Page', () => {
       const blok = createMockBlok({ body: undefined });
       const { container } = render(<Page blok={blok} />);
 
-      expect(container.querySelector('main')).toBeInTheDocument();
+      expect(container.querySelector('[data-testid="storyblok-editable"]')).toBeInTheDocument();
     });
   });
 
@@ -104,11 +104,11 @@ describe('Page', () => {
   });
 
   describe('Accessibility', () => {
-    it('uses semantic main element', () => {
+    it('does not nest a main landmark (root layout owns the main element)', () => {
       const blok = createMockBlok();
       const { container } = render(<Page blok={blok} />);
 
-      expect(container.querySelector('main')).toBeInTheDocument();
+      expect(container.querySelector('main')).not.toBeInTheDocument();
     });
   });
 });

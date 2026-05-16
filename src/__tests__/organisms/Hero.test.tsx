@@ -663,4 +663,33 @@ describe('Hero', () => {
       });
     });
   });
+
+  describe('Alt text fallbacks', () => {
+    it('uses empty string alt when hero image.alt is undefined (line 80 || branch)', () => {
+      const blok = createMockBlok({
+        image: {
+          id: 1,
+          filename: 'https://a.storyblok.com/f/12345/800x600/hash/test.jpg',
+          alt: undefined as unknown as string,
+        },
+        image_type: 'auto',
+      });
+      const { container } = render(<Hero blok={blok} />);
+      const img = container.querySelector('[data-testid="next-image"]');
+      expect(img).toHaveAttribute('data-alt', '');
+    });
+
+    it('uses empty string alt when background_image.alt is undefined (line 235 || branch)', () => {
+      const blok = createMockBlok({
+        background_image: {
+          id: 2,
+          filename: '/bg.jpg',
+          alt: undefined as unknown as string,
+        },
+      });
+      const { container } = render(<Hero blok={blok} />);
+      const bgImg = container.querySelector('[data-fill="true"]');
+      expect(bgImg).toHaveAttribute('data-alt', '');
+    });
+  });
 });

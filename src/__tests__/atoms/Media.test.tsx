@@ -227,6 +227,32 @@ describe('Media Component', () => {
       const figure = screen.getByRole('figure');
       expect(figure).toBeInTheDocument();
     });
+
+    it('builds embed params with muted=true (covers ? 1 branch on line 54)', () => {
+      const youtubeBlokMuted: MediaBlok = {
+        _uid: 'test-youtube-muted',
+        component: 'media',
+        media_file: {
+          id: 1,
+          filename: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+          alt: 'Muted YouTube video',
+          title: 'Muted YouTube video',
+          is_external_url: true,
+        },
+        autoplay: true,
+        loop: true,
+        muted: true,
+        controls: false,
+      };
+
+      render(<Media blok={youtubeBlokMuted} />);
+
+      const iframe = screen.getByTitle('Muted YouTube video');
+      expect(iframe).toHaveAttribute('src', expect.stringContaining('muted=1'));
+      expect(iframe).toHaveAttribute('src', expect.stringContaining('autoplay=1'));
+      expect(iframe).toHaveAttribute('src', expect.stringContaining('loop=1'));
+      expect(iframe).toHaveAttribute('src', expect.stringContaining('controls=0'));
+    });
   });
 
   describe('Video File Support', () => {
@@ -409,6 +435,58 @@ describe('Media Component', () => {
       const image = screen.getByTestId('mock-image');
       expect(image).toBeInTheDocument();
       expect(image).toHaveAttribute('aria-label', 'Media');
+    });
+  });
+
+  describe('Link Wrapping — additional branches', () => {
+    it('renders external link without rel when target is not _blank', () => {
+      const blokWithSelfLink: MediaBlok = {
+        ...mockBlok,
+        link: {
+          url: 'https://external-site.com',
+          linktype: 'url',
+          target: '_self',
+        },
+      };
+
+      render(<Media blok={blokWithSelfLink} />);
+
+      const link = screen.getByRole('link');
+      expect(link).toHaveAttribute('href', 'https://external-site.com');
+      expect(link).not.toHaveAttribute('rel');
+    });
+
+    it('uses link.url fallback when cached_url is absent', () => {
+      const blokWithUrlOnly: MediaBlok = {
+        ...mockBlok,
+        link: {
+          url: 'https://via-url.example.com',
+          linktype: 'url',
+          target: '_blank',
+        },
+      };
+
+      render(<Media blok={blokWithUrlOnly} />);
+
+      const link = screen.getByRole('link');
+      expect(link).toHaveAttribute('href', 'https://via-url.example.com');
+    });
+
+    it('defaults target to _self when link.target is absent (covers || branch on line 79)', () => {
+      const blokWithNoTarget: MediaBlok = {
+        ...mockBlok,
+        link: {
+          cached_url: '/some-page',
+          linktype: 'story',
+          // target is intentionally omitted
+        },
+      };
+
+      render(<Media blok={blokWithNoTarget} />);
+
+      const link = screen.getByRole('link');
+      // When no target specified and internal link, internal Next.js Link renders without target attribute
+      expect(link).toHaveAttribute('href', '/some-page');
     });
   });
 
