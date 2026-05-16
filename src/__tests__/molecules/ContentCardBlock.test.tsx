@@ -4,6 +4,13 @@ import { render, screen } from '@testing-library/react';
 import ContentCardBlock from '@/components/molecules/ContentCardBlock';
 import type { ContentCardBlockBlok, StoryblokAsset, CtaBlok } from '@/types/storyblok';
 
+// Mock next/dynamic — re-export the static ImageCarousel synchronously
+// so tests don't need to wait for the lazy import to resolve.
+vi.mock('next/dynamic', async () => {
+  const { default: ImageCarousel } = await import('@/components/molecules/ImageCarousel');
+  return { default: () => ImageCarousel };
+});
+
 // Mock next/image
 vi.mock('next/image', () => ({
   default: ({

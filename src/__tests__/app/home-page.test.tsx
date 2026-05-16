@@ -145,7 +145,7 @@ describe('Home generateMetadata', () => {
 
     const metadata = await generateMetadata();
 
-    expect(metadata.title).toBe('Notes of Dev');
-    expect(metadata.description).toBe('Thoughts on frontend engineering, AI, and building interfaces — by Hieu (Chris) Pham.');
+    expect(metadata.title).toBe('Notes of Dev — Frontend Engineering, AI & CMS Notes');
+    expect(metadata.description).toBe('A working notebook on frontend engineering, AI workflows, and headless CMS architecture — research, experiments, and patterns from building real interfaces.');
   });
 });
