@@ -62,11 +62,18 @@ export default function PostListClient({
     <div className="flex flex-col gap-6 max-w-[1280px] px-4 md:px-8 lg:px-12 xl:px-5 mx-auto">
       {/* Posts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
-        {posts.map((story, index) => (
-          <FadeIn key={story.uuid} delay={(index % perPage) * 0.12} direction="up">
-            <Card story={story} priority={index === 0} />
-          </FadeIn>
-        ))}
+        {posts.map((story, index) => {
+          const isFirst = index === 0;
+          const card = <Card story={story} priority={isFirst} />;
+          // Skip FadeIn for the first card so its opacity:0 initial state does not delay LCP.
+          return isFirst ? (
+            <div key={story.uuid}>{card}</div>
+          ) : (
+            <FadeIn key={story.uuid} delay={(index % perPage) * 0.12} direction="up">
+              {card}
+            </FadeIn>
+          );
+        })}
       </div>
 
       {/* Load More Button */}
