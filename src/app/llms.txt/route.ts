@@ -26,7 +26,7 @@ export async function GET() {
     siteName: 'Notes of Dev',
     siteUrl,
     description:
-      'Thoughts on frontend engineering, AI, and building interfaces — by Hieu (Chris) Pham.',
+      'A working notebook on frontend engineering, AI workflows, and headless CMS architecture — research, experiments, and patterns from building real interfaces.',
     posts,
     aboutUrl: `${siteUrl}/about`,
   });

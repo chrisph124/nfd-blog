@@ -14,10 +14,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const siteUrl = getSiteUrl();
   const content = story?.content;
 
-  const title = stripEntities(content?.og_title?.trim()) || 'Notes of Dev';
+  const title = stripEntities(content?.og_title?.trim()) || 'Notes of Dev — Frontend Engineering, AI & CMS Notes';
   const description =
     stripEntities(content?.og_description?.trim()) ||
-    'Thoughts on frontend engineering, AI, and building interfaces — by Hieu (Chris) Pham.';
+    'A working notebook on frontend engineering, AI workflows, and headless CMS architecture — research, experiments, and patterns from building real interfaces.';
 
   return {
     title,
@@ -54,7 +54,7 @@ export default async function Home() {
   const siteUrl = getSiteUrl();
   const description =
     stripEntities(story.content?.og_description?.trim()) ||
-    'Thoughts on frontend engineering, AI, and building interfaces — by Hieu (Chris) Pham.';
+    'A working notebook on frontend engineering, AI workflows, and headless CMS architecture — research, experiments, and patterns from building real interfaces.';
 
   const homeJsonLd = buildHomeJsonLdGraph({
     siteUrl,
