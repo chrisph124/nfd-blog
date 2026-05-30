@@ -444,6 +444,32 @@ h6, .h6 {
   animation: slideUp 0.3s ease-in-out;
 }
 
+/* @keyframes (not @starting-style) — fires on first style application,
+   so SSR'd elements animate after React hydrates them. */
+.post-card-reveal {
+  animation: post-card-reveal 0.6s ease-out backwards;
+  animation-delay: calc(var(--reveal-i, 0) * 0.12s);
+}
+
+@keyframes post-card-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .post-card-reveal {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* ============================================
    CTA Gradient Border Styles
    ============================================ */

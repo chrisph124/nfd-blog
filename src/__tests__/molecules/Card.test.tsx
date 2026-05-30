@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import type { CSSProperties } from 'react';
 import { render, screen } from '@testing-library/react';
 import Card from '@/components/molecules/Card';
 import type { StoryblokStory, PostBlok } from '@/types/storyblok';
@@ -218,6 +219,32 @@ describe('Card', () => {
       expect(screen.getByText(/January 15, 2025/)).toBeInTheDocument();
       expect(screen.getByText('•')).toBeInTheDocument();
       expect(screen.getByText(/min read/)).toBeInTheDocument();
+    });
+  });
+
+  describe('Forwarded props', () => {
+    it('forwards className prop to the outer article', () => {
+      const story = createMockStory();
+      const { container } = render(<Card story={story} className="custom-test-class" />);
+
+      const article = container.querySelector('article');
+      expect(article).toHaveClass('custom-test-class');
+      // Default classes still present
+      expect(article).toHaveClass('group', 'rounded-xl');
+    });
+
+    it('forwards style prop to the outer article (including CSS custom properties)', () => {
+      const story = createMockStory();
+      const { container } = render(
+        <Card
+          story={story}
+          style={{ '--reveal-i': 3, color: 'red' } as CSSProperties}
+        />
+      );
+
+      const article = container.querySelector('article') as HTMLElement;
+      expect(article.style.getPropertyValue('--reveal-i')).toBe('3');
+      expect(article.style.color).toBe('red');
     });
   });
 
