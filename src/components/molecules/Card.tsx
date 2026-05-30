@@ -9,6 +9,8 @@ import { cn, getStoryReadingTime, formatDate } from '@/lib/utils';
 interface CardProps {
   story: StoryblokStory<PostBlok>;
   priority?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
 }
 
 interface CardImageProps {
@@ -59,7 +61,7 @@ const CardMeta = memo(({ createdAt, body }: CardMetaProps) => {
 
 CardMeta.displayName = 'CardMeta';
 
-const Card = memo(({ story, priority = false }: CardProps) => {
+const Card = memo(({ story, priority = false, className, style }: CardProps) => {
   const { content, full_slug, created_at } = story;
   const { featured_image, title = '', excerpt, body } = content;
 
@@ -70,8 +72,10 @@ const Card = memo(({ story, priority = false }: CardProps) => {
     <article
       className={cn(
         'group relative flex flex-row md:flex-col h-full bg-background rounded-xl shadow-sm border border-gray-200',
-        'transition-all duration-200 hover:shadow-md max-w-full lg:max-w-[320px] xl:max-w-full'
+        'transition-all duration-200 hover:shadow-md max-w-full lg:max-w-[320px] xl:max-w-full',
+        className
       )}
+      style={style}
     >
       <Link href={`/${postSlug}`} className="block">
         <CardImage image={featured_image} title={title} priority={priority} />
