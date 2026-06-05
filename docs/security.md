@@ -12,6 +12,7 @@ Operational overview of the security features enabled on this repository, where 
 | Secret scanning + push protection | GitHub | Repo setting (Security & analysis) | Blocks commits containing detected secrets |
 | CodeQL code scanning | GitHub | Default setup (`state: configured`, `query_suite: default`) | Auto-detects JS/TS + actions; runs on push to `develop` + weekly |
 | `pnpm audit` gate | CI | `.github/workflows/ci.yml` | `--audit-level=high` — blocks merge on high/critical dep vulns |
+| pnpm `minimumReleaseAge` policy | CI + local | `pnpm-workspace.yaml` | Blocks installs of any lockfile entry younger than 24h (defense against compromised-maintainer accounts) |
 | Dependabot auto-merge | CI | `.github/workflows/dependabot-auto-merge.yml` | Patch + minor bumps on `develop` auto-squash after CI passes (see Auto-merge Policy) |
 | `develop` branch protection | GitHub | Repo setting (Branches) | Requires `Code Quality & Tests` check; admin bypass allowed |
 
@@ -68,6 +69,8 @@ If a Dependabot PR doesn't auto-merge:
 This complements — not duplicates — Dependabot alerts: `pnpm audit` is a one-shot gate at PR time; Dependabot is continuous and opens automated patch PRs.
 
 Dependency version overrides live in `pnpm-workspace.yaml` under the top-level `overrides:` key (pnpm 10+ moved this out of `package.json#pnpm.overrides`). Override selectors match the parent's declared range, so always include an upper bound when bumping within a major (e.g. `'>=1.1.13 <2'`, not `'>=1.1.13'`) or pnpm will resolve to the latest matching version across majors.
+
+`pnpm-workspace.yaml#minimumReleaseAge: 1440` (minutes; matches pnpm 11 default) enforces a 24h supply-chain delay on every install, locally and in CI. Any lockfile entry whose registry publish time is younger than the cutoff fails with `ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION`. Emergency bypass: run `pnpm install --config.minimumReleaseAge=0` locally for a one-off install; for CI, push a temporary commit lowering the workspace value to `0` and revert once the hot-fix lands.
 
 ## Disabling / Rollback
 

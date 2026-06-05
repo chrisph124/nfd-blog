@@ -3,6 +3,8 @@ allowBuilds:
   sharp: true
   unrs-resolver: true
 
+minimumReleaseAge: 1440  # minutes; 24h supply-chain delay (explicit pin to pnpm 11 default)
+
 overrides:
   vite: '>=7.3.2'
   'markdown-it@>=13.0.0 <14.1.1': '>=14.1.1'
