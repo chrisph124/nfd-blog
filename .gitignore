@@ -52,7 +52,8 @@ claude_code_zai_env.sh
 
 .repomixignore
 
-docs/
+docs/*
+!docs/security.md
 
 repomix-output.xml
 

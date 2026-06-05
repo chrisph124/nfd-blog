@@ -1,5 +1,7 @@
 # Notes of Dev Blog
 
+[![CodeQL](https://github.com/chrisph124/nfd-blog/actions/workflows/github-code-scanning/codeql/badge.svg?branch=develop)](https://github.com/chrisph124/nfd-blog/security/code-scanning)
+
 A personal blog by Hieu (Chris) Pham - notes on software engineering. Built with Next.js 16 and Storyblok CMS for seamless content management.
 
 ## Tech Stack
@@ -84,13 +86,16 @@ See [scripts/README.md](scripts/README.md) for details.
 
 ## Security
 
-Key security practices:
-- **Regular Security Updates**: Dependencies are regularly updated and audited (`pnpm audit`)
-- **Type-safe TypeScript**: strict mode, no `any`
-- **CVE Patches**: All critical React CVEs are patched (see [SECURITY.md](SECURITY.md))
-- **XSS Prevention**: Input sanitization and content security policies
-- **Type Safety**: Strict TypeScript configuration prevents runtime errors
-- **Environment Security**: Secure handling of API keys and secrets
+See [docs/security.md](docs/security.md) for the full security setup — Dependabot, CodeQL, secret scanning, `pnpm audit`, and the triage workflow. For vulnerability disclosure, see [SECURITY.md](SECURITY.md).
+
+Key practices:
+- **Dependency auditing**: `pnpm audit` gate in CI + Dependabot alerts and automated security PRs
+- **Static analysis**: CodeQL default-setup scans on push to `develop` and weekly
+- **Secret protection**: GitHub secret scanning with push protection
+- **Type safety**: TypeScript strict mode, no `any`
+- **XSS prevention**: Input sanitization and content security policies
+- **Environment security**: Secure handling of API keys and secrets
+
 ## Learn More
 
 - [Next.js Documentation](https://nextjs.org/docs)
