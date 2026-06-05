@@ -38,8 +38,21 @@ const getYouTubeId = (url: string): string | null => {
   return match?.[2]?.length === YOUTUBE_ID_LENGTH ? match[2] : null;
 };
 
+const YOUTUBE_HOSTS = new Set([
+  'youtube.com',
+  'www.youtube.com',
+  'm.youtube.com',
+  'youtube-nocookie.com',
+  'www.youtube-nocookie.com',
+  'youtu.be',
+]);
+
 const isYouTubeUrl = (url: string): boolean => {
-  return url.includes('youtube.com') || url.includes('youtu.be');
+  try {
+    return YOUTUBE_HOSTS.has(new URL(url).hostname);
+  } catch {
+    return false;
+  }
 };
 
 const getAspectRatioClass = (aspectRatio: string, defaultClass = ''): string => {
