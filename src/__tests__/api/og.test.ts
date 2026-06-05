@@ -308,4 +308,20 @@ describe('optimizeStoryblokAsset', () => {
     const already = 'https://a.storyblok.com/hero.jpg/m/800x800';
     expect(optimizeStoryblokAsset(already)).toBe(already);
   });
+
+  // Guard: hostname check prevents bypass via path-embedded or subdomain-embedded
+  // host (substring match would treat "evil.com/a.storyblok.com/…" as trusted).
+  it('does not append transform when "a.storyblok.com" appears in path of another host', () => {
+    const evil = 'https://evil.com/a.storyblok.com/hero.jpg';
+    expect(optimizeStoryblokAsset(evil)).toBe(evil);
+  });
+
+  it('does not append transform when "a.storyblok.com" appears in subdomain of another host', () => {
+    const evil = 'https://a.storyblok.com.evil.com/hero.jpg';
+    expect(optimizeStoryblokAsset(evil)).toBe(evil);
+  });
+
+  it('returns malformed URLs unchanged', () => {
+    expect(optimizeStoryblokAsset('not a url')).toBe('not a url');
+  });
 });

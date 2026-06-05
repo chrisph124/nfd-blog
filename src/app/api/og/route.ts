@@ -25,7 +25,13 @@ function getImage(asset: StoryblokAsset | undefined): string | undefined {
 // social scrapers download the compressed source directly (~80–200 KB typical).
 export function optimizeStoryblokAsset(url: string | undefined): string | undefined {
   if (!url) return undefined;
-  if (!url.includes('a.storyblok.com')) return url;
+  let hostname: string;
+  try {
+    hostname = new URL(url).hostname;
+  } catch {
+    return url;
+  }
+  if (hostname !== 'a.storyblok.com') return url;
   if (url.includes('/m/')) return url;
   return `${url}/m/1200x630/filters:quality(75):format(jpg)`;
 }

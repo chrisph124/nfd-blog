@@ -228,6 +228,63 @@ describe('Media Component', () => {
       expect(figure).toBeInTheDocument();
     });
 
+    // Guard: hostname check prevents bypass via path-embedded or subdomain-embedded
+    // host (substring match would treat "evil.com/youtube.com/…" as a YouTube URL).
+    it('does not embed when "youtube.com" appears in path of another host', () => {
+      const evilBlok: MediaBlok = {
+        _uid: 'test-evil-youtube-path',
+        component: 'media',
+        media_file: {
+          id: 1,
+          filename: 'https://evil.com/youtube.com/watch?v=dQw4w9WgXcQ',
+          alt: 'Evil URL',
+          title: 'Evil URL',
+          is_external_url: true,
+        },
+      };
+
+      const { container } = render(<Media blok={evilBlok} />);
+
+      expect(container.querySelector('iframe')).toBeNull();
+    });
+
+    it('renders YouTube embed for m.youtube.com URLs', () => {
+      const mobileBlok: MediaBlok = {
+        _uid: 'test-m-youtube',
+        component: 'media',
+        media_file: {
+          id: 1,
+          filename: 'https://m.youtube.com/watch?v=dQw4w9WgXcQ',
+          alt: 'Mobile YouTube',
+          title: 'Mobile YouTube',
+          is_external_url: true,
+        },
+      };
+
+      render(<Media blok={mobileBlok} />);
+
+      const iframe = screen.getByTitle('Mobile YouTube');
+      expect(iframe).toHaveAttribute('src', expect.stringContaining('youtube.com/embed/dQw4w9WgXcQ'));
+    });
+
+    it('does not embed when "youtu.be" appears in subdomain of another host', () => {
+      const evilBlok: MediaBlok = {
+        _uid: 'test-evil-youtube-subdomain',
+        component: 'media',
+        media_file: {
+          id: 1,
+          filename: 'https://youtu.be.evil.com/watch?v=dQw4w9WgXcQ',
+          alt: 'Evil URL',
+          title: 'Evil URL',
+          is_external_url: true,
+        },
+      };
+
+      const { container } = render(<Media blok={evilBlok} />);
+
+      expect(container.querySelector('iframe')).toBeNull();
+    });
+
     it('builds embed params with muted=true (covers ? 1 branch on line 54)', () => {
       const youtubeBlokMuted: MediaBlok = {
         _uid: 'test-youtube-muted',
