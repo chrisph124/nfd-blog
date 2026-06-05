@@ -67,6 +67,8 @@ If a Dependabot PR doesn't auto-merge:
 
 This complements — not duplicates — Dependabot alerts: `pnpm audit` is a one-shot gate at PR time; Dependabot is continuous and opens automated patch PRs.
 
+Dependency version overrides live in `pnpm-workspace.yaml` under the top-level `overrides:` key (pnpm 10+ moved this out of `package.json#pnpm.overrides`). Override selectors match the parent's declared range, so always include an upper bound when bumping within a major (e.g. `'>=1.1.13 <2'`, not `'>=1.1.13'`) or pnpm will resolve to the latest matching version across majors.
+
 ## Disabling / Rollback
 
 Repo-setting toggles can be flipped off via `gh api`:
