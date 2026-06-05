@@ -12,6 +12,8 @@ Operational overview of the security features enabled on this repository, where 
 | Secret scanning + push protection | GitHub | Repo setting (Security & analysis) | Blocks commits containing detected secrets |
 | CodeQL code scanning | GitHub | Default setup (`state: configured`, `query_suite: default`) | Auto-detects JS/TS + actions; runs on push to `develop` + weekly |
 | `pnpm audit` gate | CI | `.github/workflows/ci.yml` | `--audit-level=high` — blocks merge on high/critical dep vulns |
+| Dependabot auto-merge | CI | `.github/workflows/dependabot-auto-merge.yml` | Patch + minor bumps on `develop` auto-squash after CI passes (see Auto-merge Policy) |
+| `develop` branch protection | GitHub | Repo setting (Branches) | Requires `Code Quality & Tests` check; admin bypass allowed |
 
 ## Where Alerts Appear
 
@@ -39,6 +41,26 @@ Operational overview of the security features enabled on this repository, where 
 
 4. **Escalation.** Unresolved critical findings after 24h → ping repo owner.
 
+## Auto-merge Policy
+
+Dependabot PRs targeting `develop` auto-merge after CI passes when:
+
+| Ecosystem | Update type | Action |
+|---|---|---|
+| `pnpm` | semver-patch | Auto-squash-merged |
+| `pnpm` | semver-minor | Auto-squash-merged |
+| `pnpm` | semver-major | Human review required |
+| `github-actions` | semver-patch | Auto-squash-merged |
+| `github-actions` | semver-minor | Auto-squash-merged |
+| `github-actions` | semver-major | Human review required |
+
+Configured via `.github/workflows/dependabot-auto-merge.yml`. PRs targeting `main` are NOT auto-merged — release flow stays human-reviewed.
+
+If a Dependabot PR doesn't auto-merge:
+1. Check `Actions → Dependabot auto-merge` for a failed run
+2. Verify branch protection's required status check name still matches `Code Quality & Tests`
+3. For majors: review manually, merge via UI
+
 ## CI Complementary Checks
 
 `pnpm audit --audit-level=high` runs on every PR (`.github/workflows/ci.yml`). It blocks merge on any high/critical dependency vulnerability.
@@ -53,4 +75,8 @@ Repo-setting toggles can be flipped off via `gh api`:
 gh api -X PATCH repos/chrisph124/nfd-blog/code-scanning/default-setup -f state=not-configured
 gh api -X DELETE repos/chrisph124/nfd-blog/automated-security-fixes
 gh api -X DELETE repos/chrisph124/nfd-blog/vulnerability-alerts
+
+# Auto-merge: disable workflow file OR drop branch protection
+gh api -X PATCH repos/chrisph124/nfd-blog -F allow_auto_merge=false
+gh api -X DELETE repos/chrisph124/nfd-blog/branches/develop/protection
 ```
