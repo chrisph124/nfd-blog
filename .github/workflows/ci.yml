@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main, develop]
 
+permissions:
+  contents: read
+
 jobs:
   quality:
     name: Code Quality & Tests
@@ -20,7 +23,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: '10.33.0'
+          version: '11.2.2'
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -46,6 +49,8 @@ jobs:
         env:
           NEXT_PUBLIC_STORYBLOK_CONTENT_API_ACCESS_TOKEN: ${{ secrets.STORYBLOK_TOKEN }}
 
+      # PR decoration is via the SonarCloud GitHub App, not GITHUB_TOKEN —
+      # contents: read is sufficient for this step.
       - name: Upload coverage to SonarCloud
         uses: SonarSource/sonarqube-scan-action@v6
         env:
