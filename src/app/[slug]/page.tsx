@@ -13,7 +13,7 @@ import { escapeJsonLd } from '@/lib/seo/json-ld-escape';
 import { AUTHOR_NAME, AUTHOR_SAME_AS } from '@/lib/seo/author';
 import { stripEntities } from '@/lib/seo/strip-entities';
 
-export const revalidate = 86400; // Revalidate every 24 hours (webhook handles real-time updates)
+export const revalidate = 3600; // Revalidate every 1 hour (webhook handles real-time updates; this is fallback)
 
 interface PageProps {
   params: Promise<{

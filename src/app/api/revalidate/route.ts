@@ -20,12 +20,25 @@ export async function POST(request: NextRequest) {
     // Revalidate homepage
     revalidatePath('/');
 
+    // Revalidate SEO surfaces (sitemap, RSS, llms.txt) — affected by every publish/unpublish
+    revalidatePath('/sitemap.xml');
+    revalidatePath('/rss.xml');
+    revalidatePath('/llms.txt');
+
     // Revalidate specific story path if provided
     if (story?.full_slug) {
       const slug = story.full_slug;
 
       // Revalidate the specific page
       revalidatePath(`/${slug}`);
+
+      // The site strips the `posts/` prefix at routing time (see generateStaticParams).
+      // Stories live at full_slug = "posts/my-post" but render at /my-post, so the
+      // stripped path is the cache key that actually exists.
+      if (slug.startsWith('posts/')) {
+        const strippedSlug = slug.replace(/^posts\//, '');
+        revalidatePath(`/${strippedSlug}`);
+      }
 
       // Revalidate catch-all route
       const slugParts = slug.split('/');
@@ -45,6 +58,12 @@ export async function POST(request: NextRequest) {
     if (reload) {
       revalidateTag('posts', 'page');
     }
+
+    console.log('[revalidate]', {
+      slug: story?.full_slug ?? null,
+      reload: Boolean(reload),
+      timestamp: Date.now(),
+    });
 
     return NextResponse.json({
       revalidated: true,
