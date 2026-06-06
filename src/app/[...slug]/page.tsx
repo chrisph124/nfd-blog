@@ -5,7 +5,7 @@ import type { Metadata } from 'next';
 import type { StoryblokLinksResponse, StoryblokStoryLink } from '@/types/storyblok';
 import { stripEntities } from '@/lib/seo/strip-entities';
 
-export const revalidate = 3600; // Revalidate every 1 hour (webhook handles real-time updates; this is fallback)
+export const revalidate = 86400; // Revalidate every 24 hours as fallback; webhook (/api/revalidate) handles real-time updates on publish
 
 interface PageProps {
   params: Promise<{
