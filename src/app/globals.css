@@ -1,4 +1,12 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+/* next-themes toggles [data-theme="dark"] (not the OS media query). Retarget
+   Tailwind's built-in dark: variant to follow the theme toggle. Use :is() — it
+   carries the attribute's (0,1,0) specificity; :where() would be zero-specificity
+   and silently drop dark styling on ties. Site-wide: existing dark: utilities
+   (Header/Footer/Post/ContentCardBlock) now follow the toggle instead of OS pref. */
+@custom-variant dark (&:is([data-theme="dark"] *));
 
 :root {
   /* Base colors */
@@ -76,6 +84,30 @@
   /* Semantic surface tokens */
   --surface-inverted: #1F2937;
   --on-surface-inverted: #F9FAFB;
+
+  /* shadcn/ui semantic role tokens — mapped onto brand values (NOT shadcn
+     defaults). Each resolves through a brand var() so the [data-theme="dark"]
+     brand inversions reach them automatically; only fixed-value exceptions are
+     re-declared in the dark block. No literal colors here (keeps the theme
+     switchable). */
+  --card: var(--background);
+  --card-foreground: var(--foreground);
+  --popover: var(--background);
+  --popover-foreground: var(--foreground);
+  --muted: var(--gray-100);
+  --muted-foreground: var(--gray-600);
+  --accent: var(--gray-100);
+  --accent-foreground: var(--gray-900);
+  --border: var(--gray-200);
+  --input: var(--gray-200);
+  --ring: var(--primary-500);
+  --destructive: var(--viva-magenta-600);
+  /* Text on brand-colored surfaces: tied to --background so it inverts to the
+     readable contrast in dark (brand color scales fully invert). */
+  --primary-foreground: var(--background);
+  --secondary-foreground: var(--background);
+  --destructive-foreground: var(--background);
+  --radius: 0.625rem;
 }
 
 /* Dark theme overrides — only semantic aliases swap, raw --white/--black stay fixed */
@@ -226,6 +258,25 @@
   /* Semantic surface tokens */
   --color-surface-inverted: var(--surface-inverted);
   --color-on-surface-inverted: var(--on-surface-inverted);
+
+  /* shadcn/ui role token utilities (bg-card, text-muted-foreground,
+     border-border, ring-ring, bg-accent, …). --color-primary/--color-secondary
+     already defined above and are reused as-is for bg-primary/bg-secondary. */
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
 
   /* Font families */
   --font-sans: var(--font-nunito);

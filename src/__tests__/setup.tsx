@@ -37,3 +37,34 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: vi.fn(),
   })),
 });
+
+// Radix UI primitives (Sheet/NavigationMenu/Accordion/Tabs) require these browser
+// APIs that jsdom does not implement. Without them the primitives throw on mount
+// before any assertion runs. Added in Phase 1 as a prerequisite for later phases.
+class ResizeObserverMock {
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+}
+global.ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver;
+
+if (typeof globalThis.PointerEvent === 'undefined') {
+  class PointerEvent extends MouseEvent {
+    public pointerId: number;
+    public pointerType: string;
+    public isPrimary: boolean;
+
+    constructor(type: string, params: PointerEventInit = {}) {
+      super(type, params);
+      this.pointerId = params.pointerId ?? 0;
+      this.pointerType = params.pointerType ?? '';
+      this.isPrimary = params.isPrimary ?? false;
+    }
+  }
+  globalThis.PointerEvent = PointerEvent as unknown as typeof globalThis.PointerEvent;
+}
+
+Element.prototype.scrollIntoView = vi.fn();
+Element.prototype.hasPointerCapture = vi.fn();
+Element.prototype.setPointerCapture = vi.fn();
+Element.prototype.releasePointerCapture = vi.fn();
