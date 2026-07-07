@@ -157,6 +157,25 @@ export interface MarkdownBlok extends StoryblokBlok {
 }
 
 /**
+ * code_tab component — a single tab of code inside a code_tabs blok.
+ */
+export interface CodeTabBlok extends StoryblokBlok {
+  component: 'code_tab';
+  label: string;
+  language?: string;
+  code: string;
+}
+
+/**
+ * code_tabs component — a first-class sibling blok in a post body that renders
+ * tabbed, server-highlighted code (e.g. npm / pnpm / yarn).
+ */
+export interface CodeTabsBlok extends StoryblokBlok {
+  component: 'code_tabs';
+  tabs?: CodeTabBlok[];
+}
+
+/**
  * media component
  */
 export interface MediaBlok extends StoryblokBlok {
@@ -202,7 +221,7 @@ export interface PostBlok extends StoryblokBlok {
   title?: string;
   featured_image?: StoryblokAsset;
   excerpt?: string;
-  body?: (RichtextBlok | MarkdownBlok | MediaBlok)[];
+  body?: (RichtextBlok | MarkdownBlok | MediaBlok | CodeTabsBlok)[];
   SEO?: Record<string, unknown>;
   og_title?: string;
   og_description?: string;
@@ -290,6 +309,8 @@ export interface StoryblokComponentProps<T extends StoryblokBlok = StoryblokBlok
  */
 export type AnyBlok =
   | CardItemBlok
+  | CodeTabBlok
+  | CodeTabsBlok
   | ContentCardBlockBlok
   | ContentCardsBlok
   | CtaBlok

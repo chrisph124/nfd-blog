@@ -14,6 +14,7 @@ import TabItem from "@/components/molecules/TabItem";
 import Cta from "@/components/atoms/Cta";
 import Richtext from "@/components/atoms/Richtext";
 import Markdown from "@/components/atoms/Markdown";
+import CodeTabs from "@/components/molecules/CodeTabs";
 import Media from "@/components/atoms/Media";
 import CardItem from "@/components/molecules/CardItem";
 import PostList from "@/components/organisms/PostList";
@@ -46,6 +47,7 @@ const components = {
   cta: Cta,
   richtext: Richtext,
   markdown: Markdown,
+  code_tabs: CodeTabs,
   media: Media,
   card_item: CardItem,
   post_list: PostList,

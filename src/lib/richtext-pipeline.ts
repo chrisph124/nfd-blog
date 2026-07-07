@@ -1,32 +1,12 @@
 import { unified } from 'unified';
 import rehypeParse from 'rehype-parse';
 import rehypeStringify from 'rehype-stringify';
-import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
+import rehypeSanitize from 'rehype-sanitize';
 import rehypeShiki from '@shikijs/rehype';
 import { visit } from 'unist-util-visit';
 import type { Root, Element, Text, Parent } from 'hast';
-
-// Custom sanitize schema — allow Storyblok content tags with strict XSS protection
-const sanitizeSchema = {
-  ...defaultSchema,
-  protocols: {
-    href: ['http', 'https', 'mailto'],
-    src: ['http', 'https'],
-  },
-  attributes: {
-    ...defaultSchema.attributes,
-    img: [...(defaultSchema.attributes?.img || []), 'loading', 'srcset', 'sizes'],
-    iframe: [...(defaultSchema.attributes?.iframe || []), 'loading', 'src', 'allowfullscreen'],
-    video: [...(defaultSchema.attributes?.video || []), 'preload', 'src', 'controls'],
-    // Shiki will add its own attributes AFTER sanitize, so no need to allow here
-    code: [...(defaultSchema.attributes?.code || []), 'class'],
-    pre: [...(defaultSchema.attributes?.pre || []), 'class'],
-  },
-  tagNames: [
-    ...(defaultSchema.tagNames || []),
-    'iframe', 'video', 'source', 'figure', 'figcaption',
-  ],
-};
+import { richtextSanitizeSchema } from './richtext-sanitize-schema';
+import { shikiRehypeOptions } from './shiki-theme';
 
 /**
  * Rehype plugin to add lazy loading attributes to media elements
@@ -149,15 +129,9 @@ function rehypeMarkdownDetect() {
 export async function processRichtext(html: string): Promise<string> {
   const result = await unified()
     .use(rehypeParse, { fragment: true })
-    .use(rehypeSanitize, sanitizeSchema) // sanitize XSS BEFORE markdown detection
+    .use(rehypeSanitize, richtextSanitizeSchema) // sanitize XSS BEFORE markdown detection
     .use(rehypeMarkdownDetect) // detect markdown patterns after sanitize
-    .use(rehypeShiki, {
-      themes: {
-        light: 'one-dark-pro',
-        dark: 'one-dark-pro',
-      },
-      defaultColor: false, // CSS variables mode for light/dark switching
-    })
+    .use(rehypeShiki, shikiRehypeOptions)
     .use(rehypeLazyLoading)
     .use(rehypeStringify)
     .process(html);
