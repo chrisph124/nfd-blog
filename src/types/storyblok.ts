@@ -60,6 +60,25 @@ export interface CardItemBlok extends StoryblokBlok {
 }
 
 /**
+ * code_tab component
+ */
+export interface CodeTabBlok extends StoryblokBlok {
+  component: 'code_tab';
+  label: string;
+  language?: string;
+  code: string;
+  filename?: string;
+}
+
+/**
+ * code_tabs component
+ */
+export interface CodeTabsBlok extends StoryblokBlok {
+  component: 'code_tabs';
+  tabs?: (CodeTabBlok)[];
+}
+
+/**
  * content_card_block component
  */
 export interface ContentCardBlockBlok extends StoryblokBlok {
@@ -154,27 +173,6 @@ export interface HeroBlockBlok extends StoryblokBlok {
 export interface MarkdownBlok extends StoryblokBlok {
   component: 'markdown';
   content?: string;
-}
-
-/**
- * code_tab component — a single tab of code inside a code_tabs blok.
- */
-export interface CodeTabBlok extends StoryblokBlok {
-  component: 'code_tab';
-  label: string;
-  language?: string;
-  code: string;
-  /** Optional Astro-style filename shown in a header bar above the tab's code. */
-  filename?: string;
-}
-
-/**
- * code_tabs component — a first-class sibling blok in a post body that renders
- * tabbed, server-highlighted code (e.g. npm / pnpm / yarn).
- */
-export interface CodeTabsBlok extends StoryblokBlok {
-  component: 'code_tabs';
-  tabs?: CodeTabBlok[];
 }
 
 /**
@@ -344,7 +342,6 @@ export interface StoryblokStoryLink {
   is_folder: boolean;
   parent_id: number | null;
   published: boolean;
-  published_at: string | null;
   position: number;
   uuid: string;
   is_startpage: boolean;
