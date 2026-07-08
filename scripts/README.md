@@ -17,6 +17,27 @@ This script automatically generates TypeScript types from your Storyblok compone
 
    Note: The script uses `dotenv` (already installed) to load these variables.
 
+## Provisioning the `code_tabs` components
+
+`create-storyblok-code-tabs-components.ts` is a one-time, local setup step that
+makes CMS-authored code tabs usable. It (1) creates the `code_tab` and
+`code_tabs` component schemas and (2) adds `code_tabs` to the `post` body field
+so editors can insert it alongside markdown/richtext.
+
+Uses the same `STORYBLOK_MANAGEMENT_TOKEN` + `STORYBLOK_SPACE_ID` as above:
+
+```bash
+STORYBLOK_MANAGEMENT_TOKEN=xxx STORYBLOK_SPACE_ID=123456 \
+  pnpm tsx scripts/create-storyblok-code-tabs-components.ts
+```
+
+- **Idempotent & additive:** existing components are skipped and the body
+  whitelist is merged (never replaced), so re-runs are safe.
+- After it succeeds, run `npm run generate-types` to sync the new/updated
+  schema into `src/types/storyblok.ts`.
+- **Security:** the Management token is space-wide write access — keep it in
+  `.env.local` only, never commit it, and never add it as a CI secret.
+
 ## Usage
 
 Run the script whenever you create or update components in Storyblok:
