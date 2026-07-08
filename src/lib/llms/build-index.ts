@@ -45,7 +45,8 @@ export function buildLlmsIndex(opts: LlmsIndexOptions): string {
       const desc = compactDescription(post.description);
       const link = `${siteUrl}/${post.slug}`;
       const tail = desc ? `: ${desc}` : '';
-      lines.push(`- [${stripEntities(post.title)}](${link})${tail}`);
+      // Point AI agents at the lossless machine-readable variant alongside the page.
+      lines.push(`- [${stripEntities(post.title)}](${link}) ([md](${link}.md))${tail}`);
     }
   }
 

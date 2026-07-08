@@ -114,6 +114,29 @@ export const fetchStoryBySlug = cache(async (slug: string) => {
   return null;
 });
 
+/**
+ * Fetch a story by slug forcing `version: 'published'`, regardless of the
+ * env-derived `storyblokVersion`. Used by the machine-readable `.md` surface so
+ * drafts never leak — even in dev/preview where the default version is 'draft'
+ * (RT#1). Mirrors `fetchStoryBySlug`'s posts-before-pages resolution.
+ */
+export const fetchPublishedStoryBySlug = cache(async (slug: string) => {
+  const storyblokApi = getStoryblokApi();
+
+  const [postsResult, pagesResult] = await Promise.allSettled([
+    storyblokApi.get(`cdn/stories/posts/${slug}`, { version: 'published' }),
+    storyblokApi.get(`cdn/stories/${slug}`, { version: 'published' }),
+  ]);
+
+  if (postsResult.status === 'fulfilled') {
+    return { story: postsResult.value.data.story as StoryblokStory<PostBlok>, source: 'posts' as const };
+  }
+  if (pagesResult.status === 'fulfilled') {
+    return { story: pagesResult.value.data.story as StoryblokStory<PostBlok>, source: 'pages' as const };
+  }
+  return null;
+});
+
 export const fetchStory = cache(async (fullSlug: string) => {
   try {
     const storyblokApi = getStoryblokApi();

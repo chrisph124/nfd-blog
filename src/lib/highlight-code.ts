@@ -14,7 +14,7 @@ import { escapeHtml } from './html-escape';
  * validated against this set BEFORE use — never interpolated raw. Anything
  * outside the list falls back to `plaintext` (which also covers unknown langs).
  */
-const ALLOWED_LANGUAGES = new Set<string>([
+export const ALLOWED_LANGUAGES = new Set<string>([
   'plaintext', 'text', 'txt',
   'bash', 'sh', 'shell', 'zsh', 'console', 'powershell', 'ps', 'ps1',
   'js', 'javascript', 'jsx', 'ts', 'typescript', 'tsx',
