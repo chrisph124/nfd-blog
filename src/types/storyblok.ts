@@ -60,6 +60,25 @@ export interface CardItemBlok extends StoryblokBlok {
 }
 
 /**
+ * code_tab component
+ */
+export interface CodeTabBlok extends StoryblokBlok {
+  component: 'code_tab';
+  label: string;
+  language?: string;
+  code: string;
+  filename?: string;
+}
+
+/**
+ * code_tabs component
+ */
+export interface CodeTabsBlok extends StoryblokBlok {
+  component: 'code_tabs';
+  tabs?: (CodeTabBlok)[];
+}
+
+/**
  * content_card_block component
  */
 export interface ContentCardBlockBlok extends StoryblokBlok {
@@ -202,7 +221,7 @@ export interface PostBlok extends StoryblokBlok {
   title?: string;
   featured_image?: StoryblokAsset;
   excerpt?: string;
-  body?: (RichtextBlok | MarkdownBlok | MediaBlok)[];
+  body?: (RichtextBlok | MarkdownBlok | MediaBlok | CodeTabsBlok)[];
   SEO?: Record<string, unknown>;
   og_title?: string;
   og_description?: string;
@@ -290,6 +309,8 @@ export interface StoryblokComponentProps<T extends StoryblokBlok = StoryblokBlok
  */
 export type AnyBlok =
   | CardItemBlok
+  | CodeTabBlok
+  | CodeTabsBlok
   | ContentCardBlockBlok
   | ContentCardsBlok
   | CtaBlok

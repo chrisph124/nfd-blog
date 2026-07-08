@@ -4,6 +4,7 @@ import { memo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { StoryblokStory, PostBlok } from '@/types/storyblok';
+import { Card as CardShell, CardContent } from '@/components/ui/card';
 import { cn, getStoryReadingTime, formatDate } from '@/lib/utils';
 
 interface CardProps {
@@ -69,35 +70,40 @@ const Card = memo(({ story, priority = false, className, style }: CardProps) => 
   const postSlug = full_slug.replace(/^posts\//, '');
 
   return (
-    <article
+    // shadcn Card supplies rounded-xl / border / bg-card / text-card-foreground /
+    // shadow-sm; asChild keeps the semantic <article>. Overrides restore the
+    // bespoke layout (row→col, no outer padding/gap) and explicit border color
+    // (no global border base layer is added, so `border` alone would be currentColor).
+    <CardShell
+      asChild
       className={cn(
-        'group relative flex flex-row md:flex-col h-full bg-background rounded-xl shadow-sm border border-gray-200',
+        'group relative h-full flex flex-row md:flex-col gap-0 py-0 border-gray-200',
         'transition-all duration-200 hover:shadow-md max-w-full lg:max-w-[320px] xl:max-w-full',
         className
       )}
-      style={style}
     >
-      <Link href={`/${postSlug}`} className="block">
-        <CardImage image={featured_image} title={title} priority={priority} />
-      </Link>
-
-      <div className="flex flex-col gap-2 p-4 flex-1">
-
-        <Link href={`/${postSlug}`} className='no-underline!'>
-          <h2 className="h3 body-1 font-semibold line-clamp-3 group-hover:text-primary-700 transition-colors">
-            {title}
-          </h2>
+      <article style={style}>
+        <Link href={`/${postSlug}`} className="block">
+          <CardImage image={featured_image} title={title} priority={priority} />
         </Link>
 
-        <CardMeta createdAt={created_at} body={body} />
+        <CardContent className="flex flex-col gap-2 p-4 flex-1">
+          <Link href={`/${postSlug}`} className='no-underline!'>
+            <h2 className="h3 body-1 font-semibold line-clamp-3 group-hover:text-primary-700 transition-colors">
+              {title}
+            </h2>
+          </Link>
 
-        {excerpt && (
-          <p className="subtitle-2 line-clamp-4 mt-auto">
-            {excerpt}
-          </p>
-        )}
-      </div>
-    </article>
+          <CardMeta createdAt={created_at} body={body} />
+
+          {excerpt && (
+            <p className="subtitle-2 line-clamp-4 mt-auto">
+              {excerpt}
+            </p>
+          )}
+        </CardContent>
+      </article>
+    </CardShell>
   );
 });
 

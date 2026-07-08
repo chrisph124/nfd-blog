@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { CSSProperties } from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import Card from '@/components/molecules/Card';
 import type { StoryblokStory, PostBlok } from '@/types/storyblok';
 
@@ -150,7 +150,7 @@ describe('Card', () => {
   });
 
   describe('Props Handling', () => {
-    it('handles missing excerpt', () => {
+    it('omits the excerpt paragraph when excerpt is not provided', () => {
       const story = createMockStory({
         content: {
           _uid: 'content-uid',
@@ -160,12 +160,22 @@ describe('Card', () => {
           body: [],
         },
       });
-      const { container } = render(<Card story={story} />);
+      render(<Card story={story} />);
 
       expect(screen.getByText('Post without description text')).toBeInTheDocument();
+      // Behavioral check: the excerpt text is simply absent. (Replaces a prior
+      // selector `p.text-sm.text-gray-600` that never matched the real DOM and
+      // therefore passed vacuously whether or not an excerpt rendered.)
+      expect(
+        screen.queryByText('This is a test excerpt for the post.')
+      ).not.toBeInTheDocument();
+    });
 
-      const excerpt = container.querySelector('p.text-sm.text-gray-600');
-      expect(excerpt).not.toBeInTheDocument();
+    it('renders the excerpt paragraph when excerpt is provided', () => {
+      render(<Card story={createMockStory()} />); // default mock has an excerpt
+      expect(
+        screen.getByText('This is a test excerpt for the post.')
+      ).toBeInTheDocument();
     });
 
     it('handles missing title with fallback', () => {
@@ -223,70 +233,45 @@ describe('Card', () => {
   });
 
   describe('Forwarded props', () => {
-    it('forwards className prop to the outer article', () => {
-      const story = createMockStory();
-      const { container } = render(<Card story={story} className="custom-test-class" />);
+    it('forwards className prop onto the outer article', () => {
+      render(<Card story={createMockStory()} className="custom-test-class" />);
 
-      const article = container.querySelector('article');
+      const article = screen.getByRole('article');
+      expect(article.tagName).toBe('ARTICLE');
       expect(article).toHaveClass('custom-test-class');
-      // Default classes still present
-      expect(article).toHaveClass('group', 'rounded-xl');
     });
 
     it('forwards style prop to the outer article (including CSS custom properties)', () => {
-      const story = createMockStory();
-      const { container } = render(
+      render(
         <Card
-          story={story}
+          story={createMockStory()}
           style={{ '--reveal-i': 3, color: 'red' } as CSSProperties}
         />
       );
 
-      const article = container.querySelector('article') as HTMLElement;
+      const article = screen.getByRole('article') as HTMLElement;
       expect(article.style.getPropertyValue('--reveal-i')).toBe('3');
       expect(article.style.color).toBe('red');
     });
   });
 
-  describe('Layout', () => {
-    it('has correct card styling classes', () => {
-      const story = createMockStory();
-      const { container } = render(<Card story={story} />);
+  describe('Structure', () => {
+    it('renders the outer element as an <article> (role="article") after the shadcn migration', () => {
+      render(<Card story={createMockStory()} />);
 
-      const article = container.querySelector('article');
-      expect(article).toHaveClass('group', 'relative', 'flex', 'h-full', 'bg-background', 'rounded-xl');
+      const article = screen.getByRole('article');
+      expect(article.tagName).toBe('ARTICLE');
     });
 
-    it('applies responsive flex direction (flex-row md:flex-col)', () => {
-      const story = createMockStory();
-      const { container } = render(<Card story={story} />);
+    it('nests image, title heading, and excerpt inside the article', () => {
+      render(<Card story={createMockStory()} />);
 
-      const article = container.querySelector('article');
-      expect(article).toHaveClass('flex', 'flex-row', 'md:flex-col');
-    });
-
-    it('applies hover effects', () => {
-      const story = createMockStory();
-      const { container } = render(<Card story={story} />);
-
-      const article = container.querySelector('article');
-      expect(article).toHaveClass('hover:shadow-md');
-    });
-
-    it('has max-width constraint (max-w-full lg:max-w-[320px])', () => {
-      const story = createMockStory();
-      const { container } = render(<Card story={story} />);
-
-      const article = container.querySelector('article');
-      expect(article).toHaveClass('max-w-full', 'lg:max-w-[320px]');
-    });
-
-    it('applies transition effects', () => {
-      const story = createMockStory();
-      const { container } = render(<Card story={story} />);
-
-      const article = container.querySelector('article');
-      expect(article).toHaveClass('transition-all', 'duration-200');
+      const article = screen.getByRole('article');
+      // Both the image wrapper and the title are links to the post.
+      expect(within(article).getAllByRole('link').length).toBeGreaterThanOrEqual(2);
+      expect(within(article).getByRole('img')).toBeInTheDocument();
+      expect(within(article).getByRole('heading', { level: 2 })).toHaveTextContent('Test Post Title');
+      expect(within(article).getByText('This is a test excerpt for the post.')).toBeInTheDocument();
     });
   });
 });

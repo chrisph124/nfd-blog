@@ -230,6 +230,83 @@ describe('processRichtext', () => {
     });
   });
 
+  describe('Code frame (Astro-style filename header)', () => {
+    // Shiki is mocked in this file, so this asserts the frame survives SANITIZE
+    // (the schema change is the real risk). Real Shiki highlighting is covered
+    // by highlight-code.test.ts.
+    it('preserves figure.code-frame + figcaption class through sanitize', async () => {
+      const html =
+        '<figure class="code-frame"><figcaption class="code-frame__title">src/foo.ts</figcaption>' +
+        '<pre><code class="language-ts">const a = 1;</code></pre></figure>';
+      const result = await processRichtext(html);
+      expect(result).toContain('class="code-frame"');
+      expect(result).toContain('code-frame__title');
+      expect(result).toContain('src/foo.ts');
+      expect(result).toContain('class="language-ts"');
+    });
+  });
+
+  describe('Inline image figure', () => {
+    it('wraps a markdown image (img in a p) in figure.image-figure', async () => {
+      const html = '<p><img src="https://a.com/x.png" alt="Alt"></p>';
+      const result = await processRichtext(html);
+      expect(result).toContain('class="image-figure"');
+      expect(result).toContain('loading="lazy"');
+    });
+
+    it('renders a caption from the image title attribute', async () => {
+      const html = '<p><img src="https://a.com/x.png" alt="Alt" title="My caption"></p>';
+      const result = await processRichtext(html);
+      expect(result).toContain('class="image-figure"');
+      expect(result).toContain('<figcaption');
+      expect(result).toContain('My caption');
+    });
+
+    it('omits the caption when the image has no title', async () => {
+      const html = '<p><img src="https://a.com/x.png" alt="Alt"></p>';
+      const result = await processRichtext(html);
+      expect(result).toContain('class="image-figure"');
+      expect(result).not.toContain('<figcaption');
+    });
+
+    it('does not wrap a bare img that is not inside a paragraph', async () => {
+      const html = '<img src="https://a.com/x.png" alt="Alt">';
+      const result = await processRichtext(html);
+      expect(result).not.toContain('image-figure');
+      expect(result).toContain('loading="lazy"');
+    });
+  });
+
+  describe('Inline YouTube embed', () => {
+    it('embeds a lone youtu.be URL as a responsive iframe', async () => {
+      const html = '<p><a href="https://youtu.be/dQw4w9WgXcQ">https://youtu.be/dQw4w9WgXcQ</a></p>';
+      const result = await processRichtext(html);
+      expect(result).toContain('class="video-embed"');
+      expect(result).toContain('youtube.com/embed/dQw4w9WgXcQ');
+    });
+
+    it('embeds a lone youtube.com watch URL', async () => {
+      const html =
+        '<p><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">https://www.youtube.com/watch?v=dQw4w9WgXcQ</a></p>';
+      const result = await processRichtext(html);
+      expect(result).toContain('class="video-embed"');
+      expect(result).toContain('youtube.com/embed/dQw4w9WgXcQ');
+    });
+
+    it('leaves a non-YouTube link untouched', async () => {
+      const html = '<p><a href="https://example.com">https://example.com</a></p>';
+      const result = await processRichtext(html);
+      expect(result).not.toContain('video-embed');
+      expect(result).toContain('href="https://example.com"');
+    });
+
+    it('does not embed a YouTube link mixed with other text', async () => {
+      const html = '<p>Watch <a href="https://youtu.be/dQw4w9WgXcQ">this</a> now</p>';
+      const result = await processRichtext(html);
+      expect(result).not.toContain('video-embed');
+    });
+  });
+
   describe('Non-markdown patterns', () => {
     it('does not modify regular text with # character', async () => {
       const html = '<p>Shop #1 for deals</p>';
