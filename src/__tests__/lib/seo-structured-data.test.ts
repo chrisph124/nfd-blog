@@ -7,6 +7,7 @@ import {
   buildHomeJsonLdGraph,
   estimateWordCount,
 } from '@/lib/seo-structured-data';
+import { escapeJsonLd } from '@/lib/seo/json-ld-escape';
 
 describe('buildWebSiteJsonLd', () => {
   it('returns minimal WebSite schema', () => {
@@ -101,6 +102,85 @@ describe('buildBlogPostingJsonLd', () => {
       name: 'John Doe',
       url: 'https://example.com/about',
     });
+  });
+});
+
+describe('buildBlogPostingJsonLd — articleBody & code samples (Phase 3)', () => {
+  const base = {
+    siteUrl: 'https://example.com',
+    slug: 'my-post',
+    title: 'Test',
+    description: 'desc',
+    datePublished: '2024-01-15T00:00:00Z',
+    authorName: 'John Doe',
+  };
+
+  it('omits articleBody and hasPart when the inputs are absent (backward compatible)', () => {
+    const result = buildBlogPostingJsonLd(base);
+    expect(result).not.toHaveProperty('articleBody');
+    expect(result).not.toHaveProperty('hasPart');
+  });
+
+  it('includes trimmed articleBody when provided', () => {
+    const result = buildBlogPostingJsonLd({ ...base, articleBody: '  Prose body.  ' });
+    expect(result).toHaveProperty('articleBody', 'Prose body.');
+  });
+
+  it('omits articleBody when it is blank', () => {
+    const result = buildBlogPostingJsonLd({ ...base, articleBody: '   ' });
+    expect(result).not.toHaveProperty('articleBody');
+  });
+
+  it('caps articleBody at 5000 characters (RT#11)', () => {
+    const result = buildBlogPostingJsonLd({ ...base, articleBody: 'x'.repeat(6000) });
+    expect((result as { articleBody: string }).articleBody).toHaveLength(5000);
+  });
+
+  it('emits SoftwareSourceCode hasPart with name/language/url and no text (RT#11)', () => {
+    // Full code samples (incl. `code`) are accepted; `code` is intentionally dropped.
+    const samples = [
+      { name: 'app.ts', language: 'ts', code: 'const a = 1;' },
+      { name: 'app.py', language: 'python', code: 'a = 1' },
+    ];
+    const result = buildBlogPostingJsonLd({ ...base, codeSamples: samples });
+    const parts = (result as { hasPart: Array<Record<string, unknown>> }).hasPart;
+
+    expect(parts).toHaveLength(2);
+    expect(parts[0]).toEqual({
+      '@type': 'SoftwareSourceCode',
+      name: 'app.ts',
+      programmingLanguage: 'ts',
+      url: 'https://example.com/my-post.md',
+    });
+    expect(parts[0]).not.toHaveProperty('text');
+    expect(parts[1].programmingLanguage).toBe('python');
+  });
+
+  it('omits empty name/language and drops hasPart for an empty array', () => {
+    const withBlank = buildBlogPostingJsonLd({
+      ...base,
+      codeSamples: [{ name: '', language: '' }],
+    });
+    const parts = (withBlank as { hasPart: Array<Record<string, unknown>> }).hasPart;
+    expect(parts[0]).toEqual({
+      '@type': 'SoftwareSourceCode',
+      url: 'https://example.com/my-post.md',
+    });
+
+    const empty = buildBlogPostingJsonLd({ ...base, codeSamples: [] });
+    expect(empty).not.toHaveProperty('hasPart');
+  });
+
+  it('stays escapable — hostile name/prose cannot break out of the <script>', () => {
+    const json = buildBlogPostingJsonLd({
+      ...base,
+      articleBody: 'Body with <script>alert(1)</script> & "quotes"',
+      codeSamples: [{ name: '<img src=x onerror=1>', language: 'ts' }],
+    });
+    const serialized = escapeJsonLd(json);
+    expect(serialized).not.toContain('<script>');
+    expect(serialized).not.toContain('<img');
+    expect(serialized).toContain('\\u003c');
   });
 });
 

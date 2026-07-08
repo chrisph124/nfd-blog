@@ -61,7 +61,7 @@ describe('GET /llms.txt', () => {
     const body = await (await GET()).text();
 
     expect(body).toContain('# Notes of Dev');
-    expect(body).toContain('- [My Post Title](https://example.com/my-post): A short excerpt');
+    expect(body).toContain('- [My Post Title](https://example.com/my-post) ([md](https://example.com/my-post.md)): A short excerpt');
     expect(body).toContain('## About');
   });
 

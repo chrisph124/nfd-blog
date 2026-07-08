@@ -105,6 +105,53 @@ describe('CodeTabs (server component)', () => {
     expect(container.querySelector('.code-frame__title')).not.toBeInTheDocument();
   });
 
+  it('wraps the group in a <figure> with a file-count accessible name', async () => {
+    const ui = await CodeTabs({
+      blok: makeBlok([makeTab('t1', 'npm', 'a', 'ts', 'a.ts'), makeTab('t2', 'pnpm', 'b', 'ts', 'b.ts')]),
+    });
+    const { container } = render(ui);
+    const figure = container.querySelector('figure.code-tabs');
+    expect(figure?.tagName).toBe('FIGURE');
+    expect(figure).toHaveAttribute('aria-label', 'Code example, 2 files');
+  });
+
+  it('uses the singular "file" for a single-tab group', async () => {
+    const ui = await CodeTabs({ blok: makeBlok([makeTab('t1', 'npm', 'a')]) });
+    const { container } = render(ui);
+    expect(container.querySelector('figure.code-tabs')).toHaveAttribute(
+      'aria-label',
+      'Code example, 1 file',
+    );
+  });
+
+  it('tags each panel with data-file, data-file-index and data-lang', async () => {
+    const ui = await CodeTabs({
+      blok: makeBlok([
+        makeTab('t1', 'npm', 'a', 'ts', 'app.ts'),
+        makeTab('t2', 'pnpm', 'b', 'python'),
+      ]),
+    });
+    const { container } = render(ui);
+    const panels = container.querySelectorAll('[data-slot="tabs-content"]');
+    expect(panels[0]).toHaveAttribute('data-file', 'app.ts');
+    expect(panels[0]).toHaveAttribute('data-file-index', '1/2');
+    expect(panels[0]).toHaveAttribute('data-lang', 'ts');
+    // No filename → data-file falls back to the tab label.
+    expect(panels[1]).toHaveAttribute('data-file', 'pnpm');
+    expect(panels[1]).toHaveAttribute('data-file-index', '2/2');
+    expect(panels[1]).toHaveAttribute('data-lang', 'python');
+  });
+
+  it('renders the filename as a <figcaption> tied to the code', async () => {
+    const ui = await CodeTabs({
+      blok: makeBlok([makeTab('t1', 'npm', 'a', 'ts', 'package.json')]),
+    });
+    const { container } = render(ui);
+    const caption = container.querySelector('figcaption.code-frame__title');
+    expect(caption?.tagName).toBe('FIGCAPTION');
+    expect(caption).toHaveTextContent('package.json');
+  });
+
   it('spreads makeStoryblokEditable onto the wrapper', async () => {
     const ui = await CodeTabs({ blok: makeBlok([makeTab('t1', 'npm', 'npm i')]) });
     const { container } = render(ui);

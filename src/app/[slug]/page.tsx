@@ -9,6 +9,7 @@ import {
   buildPersonJsonLd,
   estimateWordCount,
 } from '@/lib/seo-structured-data';
+import { extractPostContent } from '@/lib/llms/post-to-markdown';
 import { escapeJsonLd } from '@/lib/seo/json-ld-escape';
 import { AUTHOR_NAME, AUTHOR_SAME_AS } from '@/lib/seo/author';
 import { stripEntities } from '@/lib/seo/strip-entities';
@@ -43,12 +44,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       ? 'profile'
       : 'website';
 
+  // Advertise the machine-readable markdown variant on posts only; non-post
+  // pages have no `/{slug}.md` route, so the alternate would 404 (RT#14).
+  const alternates: Metadata['alternates'] = {
+    canonical: `/${slug}`,
+    ...(isPost && { types: { 'text/markdown': `/${slug}.md` } }),
+  };
+
   const metadata: Metadata = {
     title,
     description,
-    alternates: {
-      canonical: `/${slug}`,
-    },
+    alternates,
     openGraph: {
       type: ogType,
       url: canonicalUrl,
@@ -105,8 +111,10 @@ export default async function DynamicPage({ params }: PageProps) {
     const title = stripEntities(story.content.title?.trim() || story.name);
     const description = stripEntities(story.content.excerpt?.trim() || '');
 
-    const bodyText = JSON.stringify(story.content.body ?? '');
-    const wordCount = estimateWordCount(bodyText);
+    // Single source of truth (Phase 1 serializer): prose feeds articleBody and
+    // wordCount; code samples become SoftwareSourceCode nodes. No second traversal.
+    const { prose, codeSamples } = extractPostContent(story.content.body);
+    const wordCount = estimateWordCount(prose);
 
     const jsonLd = buildBlogPostingJsonLd({
       siteUrl,
@@ -119,6 +127,8 @@ export default async function DynamicPage({ params }: PageProps) {
       authorName: AUTHOR_NAME,
       authorUrl: `${siteUrl}/about`,
       wordCount: wordCount > 0 ? wordCount : undefined,
+      articleBody: prose || undefined,
+      codeSamples: codeSamples.length > 0 ? codeSamples : undefined,
     });
 
     return (

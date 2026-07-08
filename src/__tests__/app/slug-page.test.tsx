@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import type { StoryblokStory, PageBlok, PostBlok } from '@/types/storyblok';
 
 const mockFetchStoryBySlug = vi.fn();
-const mockGetSiteUrl = vi.fn<[], string>();
+const mockGetSiteUrl = vi.fn<() => string>();
 const mockGetStoryblokApi = vi.fn();
 const mockNotFound = vi.fn();
 
@@ -406,6 +406,71 @@ describe('DynamicPage — date fallback in JSON-LD', () => {
     expect(script).toBeInTheDocument();
     const parsed = JSON.parse(script!.innerHTML.replace(/\\u003c/g, '<'));
     expect(parsed.datePublished).toBe('2024-07-01T00:00:00.000Z');
+  });
+});
+
+describe('DynamicPage — Phase 3 JSON-LD enrichment', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGetSiteUrl.mockReturnValue('https://example.com');
+  });
+
+  const parseJsonLd = (container: HTMLElement) => {
+    const script = container.querySelector('script[type="application/ld+json"]');
+    return JSON.parse(script!.innerHTML.replace(/\\u003c/g, '<'));
+  };
+
+  it('adds serializer-derived articleBody and SoftwareSourceCode hasPart', async () => {
+    const story = {
+      ...createMockPostStory(),
+      content: {
+        ...createMockPostStory().content,
+        body: [
+          {
+            _uid: 'r',
+            component: 'richtext',
+            content: {
+              type: 'doc',
+              content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Intro prose.' }] }],
+            },
+          },
+          {
+            _uid: 'c',
+            component: 'code_tabs',
+            tabs: [
+              { _uid: 't', component: 'code_tab', label: 'app.ts', language: 'ts', code: 'const a = 1;', filename: 'app.ts' },
+            ],
+          },
+        ] as unknown as PostBlok['body'],
+      },
+    };
+    mockFetchStoryBySlug.mockResolvedValue({ story, source: 'posts' });
+
+    const Component = await DynamicPage({ params: makeParams('my-post') });
+    const { container } = render(Component);
+    const parsed = parseJsonLd(container);
+
+    expect(parsed.articleBody).toContain('Intro prose.');
+    expect(parsed.articleBody).not.toContain('const a = 1;');
+    expect(parsed.hasPart).toEqual([
+      {
+        '@type': 'SoftwareSourceCode',
+        name: 'app.ts',
+        programmingLanguage: 'ts',
+        url: 'https://example.com/my-post.md',
+      },
+    ]);
+  });
+
+  it('omits articleBody/hasPart for a post with an empty body (regression)', async () => {
+    mockFetchStoryBySlug.mockResolvedValue({ story: createMockPostStory(), source: 'posts' });
+
+    const Component = await DynamicPage({ params: makeParams('my-post') });
+    const { container } = render(Component);
+    const parsed = parseJsonLd(container);
+
+    expect(parsed).not.toHaveProperty('articleBody');
+    expect(parsed).not.toHaveProperty('hasPart');
   });
 });
 
