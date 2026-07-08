@@ -20,6 +20,7 @@ export default async function CodeTabs({ blok }: Readonly<CodeTabsProps>) {
     tabs.map(async (tab) => ({
       uid: tab._uid,
       label: tab.label,
+      filename: tab.filename,
       html: await highlightCode(tab.code ?? '', tab.language ?? 'bash'),
     }))
   );

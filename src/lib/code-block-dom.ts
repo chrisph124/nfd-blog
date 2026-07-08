@@ -43,8 +43,17 @@ const copyStateConfig = (state: CopyState): { label: string; icon: string; toolt
   }
 };
 
-const findPre = (el: HTMLElement): HTMLPreElement | null =>
-  el.closest('pre.shiki') as HTMLPreElement | null;
+/** A framed code block (markdown code-frame) or a code_tabs panel. */
+const CODE_CONTAINER_SELECTOR = '.code-frame, [data-slot="tabs-content"]';
+
+// The copy button may live inside the pre (bare block) or in the frame/tab
+// title bar (framed block). Resolve the pre from either home.
+const findPre = (el: HTMLElement): HTMLPreElement | null => {
+  const withinPre = el.closest('pre.shiki') as HTMLPreElement | null;
+  if (withinPre) return withinPre;
+  const container = el.closest(CODE_CONTAINER_SELECTOR);
+  return container ? container.querySelector<HTMLPreElement>('pre.shiki') : null;
+};
 
 export function setCopyButtonState(btn: HTMLButtonElement, state: CopyState): void {
   const label = btn.querySelector<HTMLElement>('[data-copy-label]');
@@ -117,7 +126,13 @@ export function evaluateCollapsible(pre: HTMLPreElement): void {
 export function enhancePre(pre: HTMLPreElement): void {
   if (pre.dataset.enhanced === 'true') return;
   pre.dataset.enhanced = 'true';
-  pre.appendChild(createCopyButton());
+
+  // Prefer the frame/tab title bar so the copy button sits with the filename;
+  // fall back to the code block itself for bare (untitled) code blocks.
+  const container = pre.closest(CODE_CONTAINER_SELECTOR);
+  const title = container?.querySelector<HTMLElement>('.code-frame__title');
+  (title ?? pre).appendChild(createCopyButton());
+
   evaluateCollapsible(pre);
 }
 

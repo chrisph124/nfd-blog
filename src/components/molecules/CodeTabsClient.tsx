@@ -6,6 +6,8 @@ import CodeBlockEnhancer from '@/components/atoms/CodeBlockEnhancer';
 export interface RenderedCodeTab {
   uid: string;
   label: string;
+  /** Optional Astro-style filename shown in a header bar above the code. */
+  filename?: string;
   /** Server-highlighted `pre.shiki` HTML for this tab. */
   html: string;
 }
@@ -23,26 +25,33 @@ export default function CodeTabsClient({ tabs }: Readonly<CodeTabsClientProps>) 
     // wires copy/collapse across all tabs. Its ResizeObserver re-evaluates a
     // hidden tab's collapse height the first time it becomes visible.
     <CodeBlockEnhancer>
-      <Tabs defaultValue={tabs[0].uid} className="my-6 gap-0">
-        <TabsList className="w-fit rounded-b-none">
-          {tabs.map((tab) => (
-            <TabsTrigger key={tab.uid} value={tab.uid}>
-              {tab.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+      {/* One dark rounded frame: tab strip + optional filename + code read as a
+          single piece, instead of a floating pill above a separate code block. */}
+      <div className="code-tabs my-6">
+        <Tabs defaultValue={tabs[0].uid} className="gap-0">
+          <TabsList className="code-tabs__list">
+            {tabs.map((tab) => (
+              <TabsTrigger key={tab.uid} value={tab.uid} className="code-tabs__trigger">
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-        {tabs.map((tab) => (
-          <TabsContent
-            key={tab.uid}
-            value={tab.uid}
-            forceMount
-            className="mt-0 data-[state=inactive]:hidden"
-          >
-            <div dangerouslySetInnerHTML={{ __html: tab.html }} />
-          </TabsContent>
-        ))}
-      </Tabs>
+          {tabs.map((tab) => (
+            <TabsContent
+              key={tab.uid}
+              value={tab.uid}
+              forceMount
+              className="mt-0 data-[state=inactive]:hidden"
+            >
+              {tab.filename && (
+                <div className="code-frame__title">{tab.filename}</div>
+              )}
+              <div dangerouslySetInnerHTML={{ __html: tab.html }} />
+            </TabsContent>
+          ))}
+        </Tabs>
+      </div>
     </CodeBlockEnhancer>
   );
 }

@@ -163,4 +163,88 @@ describe('Markdown Component', () => {
       expect(richtextDiv).toHaveProperty('innerHTML');
     });
   });
+
+  describe('Astro-style code fence filename header', () => {
+    const lastHtml = (fn: unknown) => {
+      const calls = (fn as ReturnType<typeof vi.fn>).mock.calls;
+      return calls[calls.length - 1][0] as string;
+    };
+
+    it('wraps a titled fence in a code-frame figure with the filename', async () => {
+      const { processRichtext } = await import('@/lib/richtext-pipeline');
+      const blok: MarkdownBlok = {
+        _uid: 'test-md-code-1',
+        component: 'markdown',
+        content: '```ts title="src/foo.ts"\nconst a = 1;\n```',
+      };
+
+      await Markdown({ blok });
+      const html = lastHtml(processRichtext);
+      expect(html).toContain('class="code-frame"');
+      expect(html).toContain('class="code-frame__title"');
+      expect(html).toContain('src/foo.ts');
+      expect(html).toContain('class="language-ts"');
+    });
+
+    it('frames a title-less fence, using the language as the header label', async () => {
+      const { processRichtext } = await import('@/lib/richtext-pipeline');
+      const blok: MarkdownBlok = {
+        _uid: 'test-md-code-2',
+        component: 'markdown',
+        content: '```ts\nconst a = 1;\n```',
+      };
+
+      await Markdown({ blok });
+      const html = lastHtml(processRichtext);
+      expect(html).toContain('class="code-frame"');
+      expect(html).toContain('class="code-frame__title"');
+      expect(html).toContain('class="language-ts"');
+      // no filename → language shown as the header label
+      expect(html).toContain('>ts</figcaption>');
+    });
+
+    it('frames a fence with no language, with an empty header label', async () => {
+      const { processRichtext } = await import('@/lib/richtext-pipeline');
+      const blok: MarkdownBlok = {
+        _uid: 'test-md-code-2b',
+        component: 'markdown',
+        content: '```\nplain text\n```',
+      };
+
+      await Markdown({ blok });
+      const html = lastHtml(processRichtext);
+      expect(html).toContain('class="code-frame"');
+      // empty header label when there's no filename and no language
+      expect(html).toContain('code-frame__title"></figcaption>');
+    });
+
+    it('HTML-escapes the filename', async () => {
+      const { processRichtext } = await import('@/lib/richtext-pipeline');
+      const blok: MarkdownBlok = {
+        _uid: 'test-md-code-3',
+        component: 'markdown',
+        content: '```ts title="a<b>"\nx\n```',
+      };
+
+      await Markdown({ blok });
+      const html = lastHtml(processRichtext);
+      expect(html).toContain('a&lt;b&gt;');
+      expect(html).not.toContain('<b>');
+    });
+
+    it('supports single-quoted titles', async () => {
+      const { processRichtext } = await import('@/lib/richtext-pipeline');
+      const blok: MarkdownBlok = {
+        _uid: 'test-md-code-4',
+        component: 'markdown',
+        content: "```bash title='deploy.sh'\necho hi\n```",
+      };
+
+      await Markdown({ blok });
+      const html = lastHtml(processRichtext);
+      expect(html).toContain('class="code-frame__title"');
+      expect(html).toContain('deploy.sh');
+      expect(html).toContain('class="language-bash"');
+    });
+  });
 });

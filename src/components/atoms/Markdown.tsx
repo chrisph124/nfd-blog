@@ -1,7 +1,8 @@
-import { marked } from 'marked';
+import { marked, type Tokens } from 'marked';
 import type { MarkdownBlok } from '@/types/storyblok';
 import { processRichtext } from '@/lib/richtext-pipeline';
 import { RICHTEXT_PROSE_CLASSES } from '@/lib/richtext-prose';
+import { escapeHtml } from '@/lib/html-escape';
 import RichtextReveal from '@/components/atoms/RichtextReveal';
 import CodeBlockEnhancer from '@/components/atoms/CodeBlockEnhancer';
 
@@ -9,7 +10,32 @@ interface MarkdownProps {
   blok: MarkdownBlok;
 }
 
-marked.use({ gfm: true, breaks: false });
+/** Matches an Astro-style `title="…"` (or single-quoted) in a fence infostring. */
+const CODE_TITLE_META = /\btitle=(?:"([^"]*)"|'([^']*)')/;
+
+/**
+ * Render a fenced code block, adding an Astro-style filename header when the
+ * fence carries a `title="…"` meta (e.g. ```ts title="src/foo.ts"). Shiki
+ * highlighting runs later in the rehype pipeline; here we only emit escaped
+ * HTML + the `language-*` class Shiki reads. Title-less fences render exactly
+ * as before, so untitled blocks stay unchanged.
+ */
+function renderCode({ text, lang }: Tokens.Code): string {
+  const language = (lang ?? '').split(/\s+/)[0] ?? '';
+  const langClass = language ? ` class="language-${escapeHtml(language)}"` : '';
+  const body = `<pre><code${langClass}>${escapeHtml(text)}</code></pre>`;
+
+  const match = lang ? CODE_TITLE_META.exec(lang) : null;
+  const title = match?.[1] ?? match?.[2];
+  // Every code block gets a header bar so the copy button always sits up top.
+  // Show the filename when given, else the language as a fallback label.
+  const isBareLang = language === '' || language === 'plaintext' || language === 'text';
+  const label = title ?? (isBareLang ? '' : language);
+
+  return `<figure class="code-frame"><figcaption class="code-frame__title">${escapeHtml(label)}</figcaption>${body}</figure>`;
+}
+
+marked.use({ gfm: true, breaks: false, renderer: { code: renderCode } });
 
 export default async function Markdown({ blok }: Readonly<MarkdownProps>) {
   if (!blok.content) return null;

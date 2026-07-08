@@ -19,12 +19,19 @@ vi.mock('@storyblok/react/rsc', () => ({
   storyblokEditable: vi.fn(() => ({ 'data-testid': 'sb-editable' })),
 }));
 
-const makeTab = (uid: string, label: string, code: string, language = 'bash'): CodeTabBlok => ({
+const makeTab = (
+  uid: string,
+  label: string,
+  code: string,
+  language = 'bash',
+  filename?: string
+): CodeTabBlok => ({
   _uid: uid,
   component: 'code_tab',
   label,
   language,
   code,
+  ...(filename !== undefined && { filename }),
 });
 
 const makeBlok = (tabs: CodeTabBlok[]): CodeTabsBlok => ({
@@ -69,6 +76,33 @@ describe('CodeTabs (server component)', () => {
     const { container } = render(ui);
     // language falls back to bash, code falls back to '' → mocked "bash:"
     expect(container.querySelector('pre.shiki')).toHaveTextContent('bash:');
+  });
+
+  it('wraps all tabs in a single unified code-tabs frame', async () => {
+    const ui = await CodeTabs({
+      blok: makeBlok([makeTab('t1', 'npm', 'npm i'), makeTab('t2', 'pnpm', 'pnpm add')]),
+    });
+    const { container } = render(ui);
+    // One frame around the whole thing (not a separate frame per tab), with
+    // both tabs' code present (forceMounted).
+    expect(container.querySelectorAll('.code-tabs').length).toBe(1);
+    expect(container.querySelectorAll('pre.shiki').length).toBe(2);
+  });
+
+  it('renders a filename header bar for a tab that has a filename', async () => {
+    const ui = await CodeTabs({
+      blok: makeBlok([makeTab('t1', 'npm', 'npm i', 'bash', 'package.json')]),
+    });
+    const { container } = render(ui);
+    const title = container.querySelector('.code-frame__title');
+    expect(title).toBeInTheDocument();
+    expect(title).toHaveTextContent('package.json');
+  });
+
+  it('renders no filename header when a tab has no filename', async () => {
+    const ui = await CodeTabs({ blok: makeBlok([makeTab('t1', 'npm', 'npm i')]) });
+    const { container } = render(ui);
+    expect(container.querySelector('.code-frame__title')).not.toBeInTheDocument();
   });
 
   it('spreads makeStoryblokEditable onto the wrapper', async () => {

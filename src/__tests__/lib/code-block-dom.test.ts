@@ -181,6 +181,21 @@ describe('enhancePre', () => {
 
     expect(pre.querySelectorAll('[data-copy-btn]')).toHaveLength(1);
   });
+
+  it('adds the copy button to the frame title bar when one exists', () => {
+    const figure = document.createElement('figure');
+    figure.className = 'code-frame';
+    const title = document.createElement('figcaption');
+    title.className = 'code-frame__title';
+    figure.appendChild(title);
+    const pre = makePre(100);
+    figure.appendChild(pre); // moves pre from body into the figure
+
+    enhancePre(pre);
+
+    expect(title.querySelector('[data-copy-btn]')).not.toBeNull();
+    expect(pre.querySelector('[data-copy-btn]')).toBeNull();
+  });
 });
 
 // ============================================================================
@@ -291,5 +306,30 @@ describe('copyPreContent', () => {
 
     const result = await copyPreContent(btn);
     expect(result).toBe('error');
+  });
+
+  it('resolves the pre from a copy button in the frame title bar', async () => {
+    const figure = document.createElement('figure');
+    figure.className = 'code-frame';
+    const title = document.createElement('figcaption');
+    title.className = 'code-frame__title';
+    const btn = document.createElement('button');
+    btn.dataset.copyBtn = '';
+    title.appendChild(btn);
+    figure.appendChild(title);
+    const pre = makePre(100, true); // has <code>const x = 1;</code>
+    figure.appendChild(pre);
+    document.body.appendChild(figure);
+
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      configurable: true,
+      writable: true,
+    });
+
+    const result = await copyPreContent(btn);
+    expect(result).toBe('success');
+    expect(writeText).toHaveBeenCalledWith('const x = 1;');
   });
 });

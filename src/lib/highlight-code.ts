@@ -5,6 +5,7 @@ import rehypeSanitize from 'rehype-sanitize';
 import rehypeShiki from '@shikijs/rehype';
 import { richtextSanitizeSchema } from './richtext-sanitize-schema';
 import { shikiRehypeOptions } from './shiki-theme';
+import { escapeHtml } from './html-escape';
 
 /**
  * Allow-list of Shiki language ids accepted for CMS-authored `code_tabs`.
@@ -24,16 +25,6 @@ const ALLOWED_LANGUAGES = new Set<string>([
   'c', 'cpp', 'csharp', 'cs', 'php', 'ruby', 'rb', 'sql', 'graphql', 'gql',
   'vue', 'svelte', 'astro', 'prisma', 'nginx', 'http',
 ]);
-
-/** Escape HTML metacharacters so `code` embeds safely in the constructed fragment. */
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
 
 async function runPipeline(code: string, lang: string): Promise<string> {
   // Mirrors the richtext pipeline's order: parse → sanitize (shared schema) →

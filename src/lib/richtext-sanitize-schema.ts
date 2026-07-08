@@ -9,7 +9,7 @@ import { defaultSchema } from 'rehype-sanitize';
  * Shiki adds its own attributes AFTER sanitize, so only `class` needs allowing
  * on `pre`/`code` here (to preserve the `language-*` hint sanitize would drop).
  */
-export const richtextSanitizeSchema = {
+export const richtextSanitizeSchema: typeof defaultSchema = {
   ...defaultSchema,
   protocols: {
     href: ['http', 'https', 'mailto'],
@@ -17,11 +17,17 @@ export const richtextSanitizeSchema = {
   },
   attributes: {
     ...defaultSchema.attributes,
-    img: [...(defaultSchema.attributes?.img || []), 'loading', 'srcset', 'sizes'],
+    img: [...(defaultSchema.attributes?.img || []), 'loading', 'srcset', 'sizes', 'title'],
     iframe: [...(defaultSchema.attributes?.iframe || []), 'loading', 'src', 'allowfullscreen'],
     video: [...(defaultSchema.attributes?.video || []), 'preload', 'src', 'controls'],
     code: [...(defaultSchema.attributes?.code || []), 'class'],
     pre: [...(defaultSchema.attributes?.pre || []), 'class'],
+    // Astro-style code frame: allow ONLY the wrapper/header class values emitted
+    // by the markdown renderer so `.code-frame` / `.code-frame__title` survive
+    // sanitize. hast-util-sanitize keys on the `className` property; the tuple
+    // form restricts allowed values (tighter than allowing arbitrary classes).
+    figure: [...(defaultSchema.attributes?.figure || []), ['className', 'code-frame']],
+    figcaption: [...(defaultSchema.attributes?.figcaption || []), ['className', 'code-frame__title']],
   },
   tagNames: [
     ...(defaultSchema.tagNames || []),

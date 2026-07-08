@@ -164,6 +164,8 @@ export interface CodeTabBlok extends StoryblokBlok {
   label: string;
   language?: string;
   code: string;
+  /** Optional Astro-style filename shown in a header bar above the tab's code. */
+  filename?: string;
 }
 
 /**
