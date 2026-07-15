@@ -1,4 +1,5 @@
 import type {
+  AlertBlok,
   CodeTabsBlok,
   MarkdownBlok,
   MediaBlok,
@@ -18,7 +19,7 @@ import { AUTHOR_NAME } from '@/lib/seo/author';
 import { stripEntities } from '@/lib/seo/strip-entities';
 import { isYouTubeUrl } from '@/lib/youtube';
 
-type PostBodyBlok = RichtextBlok | MarkdownBlok | MediaBlok | CodeTabsBlok;
+type PostBodyBlok = RichtextBlok | MarkdownBlok | MediaBlok | CodeTabsBlok | AlertBlok;
 
 const VIDEO_EXTENSIONS = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv'];
 const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.avif', '.bmp'];
@@ -93,6 +94,14 @@ function serializeBlok(blok: PostBodyBlok): string {
       return mediaToMarkdown(blok);
     case 'code_tabs':
       return codeTabsToMarkdown(blok);
+    case 'alert': {
+      // TL;DR/callout: body is a richtext field (typed string, object at runtime).
+      // Emit its prose as markdown, led by the authored title when present.
+      const bodyMd = richtextToMarkdown(blok.body as unknown as RichtextNode).trim();
+      if (!bodyMd) return '';
+      const title = (blok.title ?? '').trim();
+      return title ? `**${title}:** ${bodyMd}` : bodyMd;
+    }
     default: {
       // Compile-time guard: a new body blok type forces a case above. At runtime
       // an unknown component (schema drift) is skipped, never thrown (RT#5).
@@ -170,6 +179,14 @@ export function extractPostContent(
       case 'code_tabs':
         codeSamples.push(...codeTabsToCodeSamples(blok));
         break;
+      case 'alert': {
+        // TL;DR prose counts toward articleBody/wordCount; a summary carries no
+        // code samples (those live in the body bloks).
+        const node = blok.body as unknown as RichtextNode;
+        const text = richtextToPlainText(node).trim();
+        if (text) proseParts.push(text);
+        break;
+      }
       case 'media':
         break;
       default:

@@ -75,6 +75,18 @@
   --neon-cyan-800: #00B3B2;
   --neon-cyan-900: #009A99;
 
+  /* Emerald (brand-inverting green — palette had none) */
+  --emerald-50:  #ecfdf5;
+  --emerald-100: #d1fae5;
+  --emerald-200: #a7f3d0;
+  --emerald-300: #6ee7b7;
+  --emerald-400: #34d399;
+  --emerald-500: #10b981;
+  --emerald-600: #059669;
+  --emerald-700: #047857;
+  --emerald-800: #065f46;
+  --emerald-900: #064e3b;
+
   /* ContentCards gradient backgrounds */
   --content-card-primary-from: #B8C4FF;
   --content-card-primary-to: #9BA8F5;
@@ -175,6 +187,18 @@
   --neon-cyan-800: #CCFEFD;
   --neon-cyan-900: #F0FFFE;
 
+  /* Emerald scale inverted */
+  --emerald-50:  #064e3b;
+  --emerald-100: #065f46;
+  --emerald-200: #047857;
+  --emerald-300: #059669;
+  --emerald-400: #10b981;
+  --emerald-500: #34d399;
+  --emerald-600: #6ee7b7;
+  --emerald-700: #a7f3d0;
+  --emerald-800: #d1fae5;
+  --emerald-900: #ecfdf5;
+
   /* ContentCards gradient backgrounds */
   --content-card-primary-from: #2A3563;
   --content-card-primary-to: #3B4B8B;
@@ -254,6 +278,18 @@
   --color-neon-cyan-700: var(--neon-cyan-700);
   --color-neon-cyan-800: var(--neon-cyan-800);
   --color-neon-cyan-900: var(--neon-cyan-900);
+
+  /* Emerald */
+  --color-emerald-50: var(--emerald-50);
+  --color-emerald-100: var(--emerald-100);
+  --color-emerald-200: var(--emerald-200);
+  --color-emerald-300: var(--emerald-300);
+  --color-emerald-400: var(--emerald-400);
+  --color-emerald-500: var(--emerald-500);
+  --color-emerald-600: var(--emerald-600);
+  --color-emerald-700: var(--emerald-700);
+  --color-emerald-800: var(--emerald-800);
+  --color-emerald-900: var(--emerald-900);
 
   /* Semantic surface tokens */
   --color-surface-inverted: var(--surface-inverted);
@@ -378,6 +414,13 @@ h2, .h2 {
   line-height: var(--line-height-h2);
   font-weight: var(--font-weight-h2);
   font-family: var(--font-nunito), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  color: var(--primary-900);
+}
+
+/* Dark theme h2 uses lighter primary (mirrors h3) */
+[data-theme="dark"] h2,
+[data-theme="dark"] .h2 {
+  color: var(--primary-400);
 }
 
 h3, .h3 {

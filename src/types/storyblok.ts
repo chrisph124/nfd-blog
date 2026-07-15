@@ -52,6 +52,17 @@ export interface StoryblokLink {
 // ============================================================================
 
 /**
+ * alert component
+ */
+export interface AlertBlok extends StoryblokBlok {
+  component: 'alert';
+  icon?: 'information' | 'attention' | 'checked';
+  color?: 'emerald' | 'primary' | 'secondary' | 'cyan' | 'magenta';
+  title?: string;
+  body?: string;
+}
+
+/**
  * card_item component
  */
 export interface CardItemBlok extends StoryblokBlok {
@@ -221,7 +232,7 @@ export interface PostBlok extends StoryblokBlok {
   title?: string;
   featured_image?: StoryblokAsset;
   excerpt?: string;
-  body?: (RichtextBlok | MarkdownBlok | MediaBlok | CodeTabsBlok)[];
+  body?: (RichtextBlok | MarkdownBlok | MediaBlok | CodeTabsBlok | AlertBlok)[];
   SEO?: Record<string, unknown>;
   og_title?: string;
   og_description?: string;
@@ -311,6 +322,7 @@ export interface StoryblokComponentProps<T extends StoryblokBlok = StoryblokBlok
  * Union of all blok types
  */
 export type AnyBlok =
+  | AlertBlok
   | CardItemBlok
   | CodeTabBlok
   | CodeTabsBlok

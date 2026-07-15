@@ -257,3 +257,47 @@ describe('post-to-markdown — fallback branches (coverage)', () => {
     expect(codeSamples).toEqual([{ name: '', language: '', code: 'x' }]);
   });
 });
+
+describe('post-to-markdown — alert blok (TL;DR)', () => {
+  const alertBlok = (title: string | undefined, text?: string) =>
+    ({
+      _uid: 'a',
+      component: 'alert',
+      icon: 'information',
+      color: 'emerald',
+      title,
+      body:
+        text === undefined
+          ? undefined
+          : (richtextNode({ type: 'paragraph', content: [{ type: 'text', text }] }) as unknown as string),
+    }) as unknown as PostBody[number];
+
+  it('serializes an alert as its TL;DR prose led by the title', () => {
+    const out = postToMarkdown(createStory([alertBlok('TL;DR', 'The whole point.')]), {
+      siteUrl: 'https://example.com',
+    });
+    expect(out).toContain('**TL;DR:** The whole point.');
+  });
+
+  it('serializes an alert with no title as bare body prose', () => {
+    const out = postToMarkdown(createStory([alertBlok(undefined, 'Just the gist.')]), {
+      siteUrl: 'https://example.com',
+    });
+    expect(out).toContain('Just the gist.');
+    expect(out).not.toContain('**:');
+  });
+
+  it('skips an alert with an empty body', () => {
+    const out = postToMarkdown(createStory([alertBlok('TL;DR', undefined)]), {
+      siteUrl: 'https://example.com',
+    });
+    expect(out).toContain('# My Post');
+    expect(out).not.toContain('TL;DR');
+  });
+
+  it('extractPostContent counts alert TL;DR prose toward articleBody', () => {
+    const { prose, codeSamples } = extractPostContent([alertBlok('TL;DR', 'Summary sentence.')]);
+    expect(prose).toContain('Summary sentence.');
+    expect(codeSamples).toEqual([]);
+  });
+});
