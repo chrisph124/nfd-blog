@@ -21,12 +21,28 @@ const CODE_TITLE_META = /\btitle=(?:"([^"]*)"|'([^']*)')/;
  * as before, so untitled blocks stay unchanged.
  */
 function renderCode({ text, lang }: Tokens.Code): string {
-  const language = (lang ?? '').split(/\s+/)[0] ?? '';
+  // Opt-in macOS-terminal chrome via a `terminal` flag word anywhere in the
+  // fence infostring (e.g. ```text terminal or ```ts title="x" terminal).
+  const isTerminal = lang ? /(?:^|\s)terminal(?:\s|$)/.test(lang) : false;
+
+  const rawLanguage = (lang ?? '').split(/\s+/)[0] ?? '';
+  // A bare ```terminal fence has no real language — drop the flag word so Shiki
+  // renders the body as plain text (never a `language-terminal` class).
+  const language = isTerminal && rawLanguage === 'terminal' ? '' : rawLanguage;
   const langClass = language ? ` class="language-${escapeHtml(language)}"` : '';
   const body = `<pre><code${langClass}>${escapeHtml(text)}</code></pre>`;
 
   const match = lang ? CODE_TITLE_META.exec(lang) : null;
   const title = match?.[1] ?? match?.[2];
+
+  if (isTerminal) {
+    // Header = dots (col 1) · label (col 2, centered) · copy button (col 3,
+    // appended downstream by enhancePre). Always show a label — filename, else
+    // uppercased language, else TEXT — so a bare ```text terminal still reads.
+    const termLabel = title ?? (language ? language.toUpperCase() : 'TEXT');
+    return `<figure class="code-frame code-frame--terminal"><figcaption class="code-frame__title"><span class="code-frame__dots" aria-hidden="true"></span><span class="code-frame__label">${escapeHtml(termLabel)}</span></figcaption>${body}</figure>`;
+  }
+
   // Every code block gets a header bar so the copy button always sits up top.
   // Show the filename when given, else the language as a fallback label.
   const isBareLang = language === '' || language === 'plaintext' || language === 'text';

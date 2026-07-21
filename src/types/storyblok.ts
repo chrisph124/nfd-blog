@@ -90,6 +90,26 @@ export interface CodeTabsBlok extends StoryblokBlok {
 }
 
 /**
+ * comparison_card component (child of comparison; rendered only via its parent)
+ */
+export interface ComparisonCardBlok extends StoryblokBlok {
+  component: 'comparison_card';
+  tone?: 'positive' | 'negative' | 'neutral';
+  heading?: string;
+  // richtext at runtime; typed `string` per generate-types' richtext→string map.
+  body?: string;
+}
+
+/**
+ * comparison component
+ */
+export interface ComparisonBlok extends StoryblokBlok {
+  component: 'comparison';
+  title?: string;
+  columns?: (ComparisonCardBlok)[];
+}
+
+/**
  * content_card_block component
  */
 export interface ContentCardBlockBlok extends StoryblokBlok {
@@ -232,7 +252,7 @@ export interface PostBlok extends StoryblokBlok {
   title?: string;
   featured_image?: StoryblokAsset;
   excerpt?: string;
-  body?: (RichtextBlok | MarkdownBlok | MediaBlok | CodeTabsBlok | AlertBlok)[];
+  body?: (RichtextBlok | MarkdownBlok | MediaBlok | CodeTabsBlok | AlertBlok | ComparisonBlok)[];
   SEO?: Record<string, unknown>;
   og_title?: string;
   og_description?: string;
@@ -326,6 +346,8 @@ export type AnyBlok =
   | CardItemBlok
   | CodeTabBlok
   | CodeTabsBlok
+  | ComparisonBlok
+  | ComparisonCardBlok
   | ContentCardBlockBlok
   | ContentCardsBlok
   | CtaBlok

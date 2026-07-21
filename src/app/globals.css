@@ -87,6 +87,11 @@
   --emerald-800: #065f46;
   --emerald-900: #064e3b;
 
+  /* Rose accent for true section <h2>. Theme-agnostic constants — defined once
+     here (no dark override); each h2 rule picks the light/dark shade itself. */
+  --rose-700: #c70036;
+  --rose-500: #ff2056;
+
   /* ContentCards gradient backgrounds */
   --content-card-primary-from: #B8C4FF;
   --content-card-primary-to: #9BA8F5;
@@ -422,6 +427,13 @@ h2, .h2 {
 [data-theme="dark"] .h2 {
   color: var(--primary-400);
 }
+
+/* True section-level <h2> — rose accent. The :not() chain (specificity 0,5,1)
+   beats the base h2 rule and Tailwind prose's :where() heading color without
+   !important. Excludes <h2 class="h1|h3|h4|h5|h6"> so a class-downgraded heading
+   keeps its own color; the .h2 class is unaffected. */
+h2:not(.h1):not(.h3):not(.h4):not(.h5):not(.h6) { color: var(--rose-700); }
+[data-theme="dark"] h2:not(.h1):not(.h3):not(.h4):not(.h5):not(.h6) { color: var(--rose-500); }
 
 h3, .h3 {
   font-size: var(--font-size-h3);
@@ -890,6 +902,38 @@ pre.shiki[data-collapsed="false"] [data-toggle-btn]:focus-visible {
   color: #abb2bf;
   background: #282c34;
   border-bottom: 1px solid rgb(255 255 255 / 0.12);
+}
+
+/* Opt-in macOS-terminal chrome (```… terminal). Three columns: dots · centered
+   label · copy button. All rules scoped under .code-frame--terminal so normal
+   frames are untouched. */
+.code-frame--terminal .code-frame__title {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
+.code-frame--terminal .code-frame__label {
+  justify-self: center;
+  font-family: var(--font-nunito), monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+/* Three traffic lights drawn from one node via box-shadow (KISS, one element). */
+.code-frame__dots {
+  justify-self: start;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 9999px;
+  background: #ff5f56;
+  box-shadow: 1.15rem 0 0 #ffbd2e, 2.3rem 0 0 #27c93f;
+}
+/* Higher specificity (3 classes) than the base .code-frame__title [data-copy-btn]
+   (2), so this wins regardless of source order — no margin-left:auto here. */
+.code-frame--terminal .code-frame__title [data-copy-btn] {
+  justify-self: end;
+  margin: 0;
 }
 
 /* code_tabs — file-folder tabs: rounded-top tabs whose ACTIVE one flares into

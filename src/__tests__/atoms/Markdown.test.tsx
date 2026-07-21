@@ -247,4 +247,71 @@ describe('Markdown Component', () => {
       expect(html).toContain('class="language-bash"');
     });
   });
+
+  describe('Terminal code-frame chrome', () => {
+    const lastHtml = (fn: unknown) => {
+      const calls = (fn as ReturnType<typeof vi.fn>).mock.calls;
+      return calls[calls.length - 1][0] as string;
+    };
+
+    it('adds the terminal modifier, dots span, and centered label for ```text terminal', async () => {
+      const { processRichtext } = await import('@/lib/richtext-pipeline');
+      const blok: MarkdownBlok = {
+        _uid: 'test-md-term-1',
+        component: 'markdown',
+        content: '```text terminal\n[ a ] --> [ b ]\n```',
+      };
+
+      await Markdown({ blok });
+      const html = lastHtml(processRichtext);
+      expect(html).toContain('class="code-frame code-frame--terminal"');
+      expect(html).toContain('class="code-frame__dots" aria-hidden="true"');
+      expect(html).toContain('<span class="code-frame__label">TEXT</span>');
+    });
+
+    it('uses the fence title as the centered label when given', async () => {
+      const { processRichtext } = await import('@/lib/richtext-pipeline');
+      const blok: MarkdownBlok = {
+        _uid: 'test-md-term-2',
+        component: 'markdown',
+        content: '```ts title="src/flow.ts" terminal\nconst a = 1;\n```',
+      };
+
+      await Markdown({ blok });
+      const html = lastHtml(processRichtext);
+      expect(html).toContain('code-frame--terminal');
+      expect(html).toContain('<span class="code-frame__label">src/flow.ts</span>');
+      expect(html).toContain('class="language-ts"');
+    });
+
+    it('treats a bare ```terminal fence as plain text (no language-terminal class)', async () => {
+      const { processRichtext } = await import('@/lib/richtext-pipeline');
+      const blok: MarkdownBlok = {
+        _uid: 'test-md-term-3',
+        component: 'markdown',
+        content: '```terminal\nhello\n```',
+      };
+
+      await Markdown({ blok });
+      const html = lastHtml(processRichtext);
+      expect(html).toContain('code-frame--terminal');
+      expect(html).toContain('<span class="code-frame__label">TEXT</span>');
+      expect(html).not.toContain('language-terminal');
+    });
+
+    it('leaves a normal fence without terminal chrome', async () => {
+      const { processRichtext } = await import('@/lib/richtext-pipeline');
+      const blok: MarkdownBlok = {
+        _uid: 'test-md-term-4',
+        component: 'markdown',
+        content: '```ts\nconst a = 1;\n```',
+      };
+
+      await Markdown({ blok });
+      const html = lastHtml(processRichtext);
+      expect(html).not.toContain('code-frame--terminal');
+      expect(html).not.toContain('code-frame__dots');
+      expect(html).toContain('>ts</figcaption>');
+    });
+  });
 });
