@@ -1,7 +1,10 @@
 /**
  * Provision CMS-authored `comparison` cards in a Storyblok space:
- *   1. create the `comparison_card` and `comparison` component schemas, and
- *   2. add `comparison` to the `post` body field so editors can insert it
+ *   1. create the `comparison_card` and `comparison` component schemas,
+ *   2. file them under their atomic block-library folders (parent `comparison`
+ *      → molecules, child `comparison_card` → atoms, mirroring code_tabs/code_tab),
+ *      and
+ *   3. add `comparison` to the `post` body field so editors can insert it
  *      alongside markdown/richtext/code_tabs/alert.
  *
  * One-time, LOCAL operation. Run by a human with a Management API token. The
@@ -54,6 +57,7 @@ interface StoryblokComponent {
   id: number;
   name: string;
   schema?: Record<string, SchemaField>;
+  component_group_uuid?: string | null;
   [key: string]: unknown;
 }
 
@@ -213,6 +217,90 @@ async function ensurePostAllowsComparison(
   console.log(`✔ added "${COMPARISON_NAME}" to "${POST_COMPONENT}.body" whitelist [${whitelist.join(', ')}]`);
 }
 
+// Atomic block-library folder each component belongs in. Mirrors the space's
+// convention (parent container → molecules, child item → atoms, exactly like
+// code_tabs → molecules / code_tab → atoms). Resolved to a group UUID at runtime
+// since UUIDs are space-specific.
+const COMPONENT_GROUPS: Record<string, string> = {
+  comparison: 'molecules',
+  comparison_card: 'atoms',
+};
+
+interface StoryblokComponentGroup {
+  id: number;
+  name: string;
+  uuid: string;
+}
+
+async function listComponentGroups(
+  token: string,
+  spaceId: string
+): Promise<StoryblokComponentGroup[]> {
+  const res = await fetch(`${API_BASE}/spaces/${spaceId}/component_groups`, {
+    headers: { Authorization: token },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to list component groups: ${res.status} ${res.statusText}`);
+  }
+  const data = (await res.json()) as { component_groups?: StoryblokComponentGroup[] };
+  return data.component_groups ?? [];
+}
+
+async function createComponentGroup(
+  token: string,
+  spaceId: string,
+  name: string
+): Promise<StoryblokComponentGroup> {
+  const res = await fetch(`${API_BASE}/spaces/${spaceId}/component_groups`, {
+    method: 'POST',
+    headers: { Authorization: token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ component_group: { name } }),
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Failed to create group "${name}": ${res.status} ${res.statusText} — ${body}`);
+  }
+  const data = (await res.json()) as { component_group: StoryblokComponentGroup };
+  return data.component_group;
+}
+
+/**
+ * File each component under its atomic block-library folder (see COMPONENT_GROUPS).
+ * Resolves the group by name — creating it if the space lacks it — then PUTs the
+ * component only when its component_group_uuid is not already the target, so
+ * re-runs are no-ops.
+ */
+async function ensureComponentGroups(
+  token: string,
+  spaceId: string,
+  components: StoryblokComponent[]
+): Promise<void> {
+  const groups = await listComponentGroups(token, spaceId);
+  const groupByName = new Map(groups.map((g) => [g.name.toLowerCase(), g]));
+
+  for (const [componentName, groupName] of Object.entries(COMPONENT_GROUPS)) {
+    const component = components.find((c) => c.name === componentName);
+    if (!component) {
+      console.warn(`⚠ "${componentName}" not found — skipped folder assignment.`);
+      continue;
+    }
+
+    let group = groupByName.get(groupName.toLowerCase());
+    if (!group) {
+      group = await createComponentGroup(token, spaceId, groupName);
+      groupByName.set(groupName.toLowerCase(), group);
+      console.log(`✔ created folder "${groupName}"`);
+    }
+
+    if (component.component_group_uuid === group.uuid) {
+      console.log(`↷ "${componentName}" already in "${groupName}" folder.`);
+      continue;
+    }
+    await updateComponent(token, spaceId, { ...component, component_group_uuid: group.uuid });
+    console.log(`✔ filed "${componentName}" under "${groupName}" folder`);
+  }
+}
+
 async function main(): Promise<void> {
   const { token, spaceId } = requireEnv();
   const components = await listComponents(token, spaceId);
@@ -228,8 +316,15 @@ async function main(): Promise<void> {
     console.log(`✔ created "${component.name}"`);
   }
 
+  // Re-fetch so just-created components (with ids + group uuids) are current for
+  // folder assignment and the body whitelist patch.
+  const current = await listComponents(token, spaceId);
+
+  // File comparison/comparison_card under their atomic folders (idempotent).
+  await ensureComponentGroups(token, spaceId, current);
+
   // Make comparison insertable in the post body (additive, idempotent).
-  await ensurePostAllowsComparison(token, spaceId, components);
+  await ensurePostAllowsComparison(token, spaceId, current);
 
   console.log('Done.');
 }
