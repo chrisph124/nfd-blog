@@ -163,4 +163,156 @@ describe('Markdown Component', () => {
       expect(richtextDiv).toHaveProperty('innerHTML');
     });
   });
+
+  describe('Astro-style code fence filename header', () => {
+    const lastHtml = (fn: unknown) => {
+      const calls = (fn as ReturnType<typeof vi.fn>).mock.calls;
+      return calls[calls.length - 1][0] as string;
+    };
+
+    it('wraps a titled fence in a code-frame figure with the filename', async () => {
+      const { processRichtext } = await import('@/lib/richtext-pipeline');
+      const blok: MarkdownBlok = {
+        _uid: 'test-md-code-1',
+        component: 'markdown',
+        content: '```ts title="src/foo.ts"\nconst a = 1;\n```',
+      };
+
+      await Markdown({ blok });
+      const html = lastHtml(processRichtext);
+      expect(html).toContain('class="code-frame"');
+      expect(html).toContain('class="code-frame__title"');
+      // filename + language → "filename(language)" centered label
+      expect(html).toContain('<span class="code-frame__label">src/foo.ts(ts)</span>');
+      expect(html).toContain('class="language-ts"');
+    });
+
+    it('frames a title-less fence, using the language as the header label', async () => {
+      const { processRichtext } = await import('@/lib/richtext-pipeline');
+      const blok: MarkdownBlok = {
+        _uid: 'test-md-code-2',
+        component: 'markdown',
+        content: '```ts\nconst a = 1;\n```',
+      };
+
+      await Markdown({ blok });
+      const html = lastHtml(processRichtext);
+      expect(html).toContain('class="code-frame"');
+      expect(html).toContain('class="code-frame__title"');
+      expect(html).toContain('class="language-ts"');
+      // no filename → language shown as the centered label
+      expect(html).toContain('<span class="code-frame__label">ts</span>');
+    });
+
+    it('frames a fence with no language, labelling it "text"', async () => {
+      const { processRichtext } = await import('@/lib/richtext-pipeline');
+      const blok: MarkdownBlok = {
+        _uid: 'test-md-code-2b',
+        component: 'markdown',
+        content: '```\nplain text\n```',
+      };
+
+      await Markdown({ blok });
+      const html = lastHtml(processRichtext);
+      expect(html).toContain('class="code-frame"');
+      // no filename and no language → "text" fallback label
+      expect(html).toContain('<span class="code-frame__label">text</span>');
+    });
+
+    it('HTML-escapes the filename', async () => {
+      const { processRichtext } = await import('@/lib/richtext-pipeline');
+      const blok: MarkdownBlok = {
+        _uid: 'test-md-code-3',
+        component: 'markdown',
+        content: '```ts title="a<b>"\nx\n```',
+      };
+
+      await Markdown({ blok });
+      const html = lastHtml(processRichtext);
+      expect(html).toContain('a&lt;b&gt;');
+      expect(html).not.toContain('<b>');
+    });
+
+    it('supports single-quoted titles', async () => {
+      const { processRichtext } = await import('@/lib/richtext-pipeline');
+      const blok: MarkdownBlok = {
+        _uid: 'test-md-code-4',
+        component: 'markdown',
+        content: "```bash title='deploy.sh'\necho hi\n```",
+      };
+
+      await Markdown({ blok });
+      const html = lastHtml(processRichtext);
+      expect(html).toContain('class="code-frame__title"');
+      expect(html).toContain('deploy.sh');
+      expect(html).toContain('class="language-bash"');
+    });
+  });
+
+  describe('macOS code-frame chrome (default for every fence)', () => {
+    const lastHtml = (fn: unknown) => {
+      const calls = (fn as ReturnType<typeof vi.fn>).mock.calls;
+      return calls[calls.length - 1][0] as string;
+    };
+
+    it('shows the language as the centered label for a bare fence', async () => {
+      const { processRichtext } = await import('@/lib/richtext-pipeline');
+      const blok: MarkdownBlok = {
+        _uid: 'test-md-chrome-1',
+        component: 'markdown',
+        content: '```markdown\n### hi\n```',
+      };
+
+      await Markdown({ blok });
+      const html = lastHtml(processRichtext);
+      expect(html).toContain('class="code-frame"');
+      expect(html).toContain('<span class="code-frame__label">markdown</span>');
+    });
+
+    it('shows "filename(language)" when a fence title is given', async () => {
+      const { processRichtext } = await import('@/lib/richtext-pipeline');
+      const blok: MarkdownBlok = {
+        _uid: 'test-md-chrome-2',
+        component: 'markdown',
+        content: '```js title="hello-world.js"\nconst a = 1;\n```',
+      };
+
+      await Markdown({ blok });
+      const html = lastHtml(processRichtext);
+      expect(html).toContain('<span class="code-frame__label">hello-world.js(js)</span>');
+      expect(html).toContain('class="language-js"');
+    });
+
+    it('emits no dots markup (drawn in CSS) and no terminal modifier class', async () => {
+      const { processRichtext } = await import('@/lib/richtext-pipeline');
+      const blok: MarkdownBlok = {
+        _uid: 'test-md-chrome-3',
+        component: 'markdown',
+        content: '```ts\nconst a = 1;\n```',
+      };
+
+      await Markdown({ blok });
+      const html = lastHtml(processRichtext);
+      expect(html).not.toContain('code-frame__dots');
+      expect(html).not.toContain('code-frame--terminal');
+    });
+
+    it('frames an indented code block (no fence lang → "text" label)', async () => {
+      // A 4-space-indented block is a code token with `lang` undefined, exercising
+      // the `lang ?? ''` fallback in renderCode (fenced blocks pass an empty string).
+      const { processRichtext } = await import('@/lib/richtext-pipeline');
+      const blok: MarkdownBlok = {
+        _uid: 'test-md-chrome-4',
+        component: 'markdown',
+        content: '    const a = 1;',
+      };
+
+      await Markdown({ blok });
+      const html = lastHtml(processRichtext);
+      expect(html).toContain('class="code-frame"');
+      expect(html).toContain('<span class="code-frame__label">text</span>');
+      // no language → no language-* class on <code>
+      expect(html).not.toContain('language-');
+    });
+  });
 });

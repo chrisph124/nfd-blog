@@ -47,7 +47,7 @@ describe('buildLlmsIndex', () => {
       posts: [base],
     });
 
-    expect(out).toContain('- [Hello](https://example.com/hello): A post about hello.');
+    expect(out).toContain('- [Hello](https://example.com/hello) ([md](https://example.com/hello.md)): A post about hello.');
   });
 
   it('omits description tail when blank', () => {
@@ -58,8 +58,8 @@ describe('buildLlmsIndex', () => {
       posts: [{ ...base, description: '   ' }],
     });
 
-    expect(out).toContain('- [Hello](https://example.com/hello)\n');
-    expect(out).not.toContain('hello):');
+    expect(out).toContain('- [Hello](https://example.com/hello) ([md](https://example.com/hello.md))\n');
+    expect(out).not.toContain('hello.md)):');
   });
 
   it('strips HTML entities in title and description', () => {
@@ -70,7 +70,18 @@ describe('buildLlmsIndex', () => {
       posts: [{ ...base, title: 'Don&#39;t', description: 'a&nbsp;b' }],
     });
 
-    expect(out).toContain("- [Don't](https://example.com/hello): a b");
+    expect(out).toContain("- [Don't](https://example.com/hello) ([md](https://example.com/hello.md)): a b");
+  });
+
+  it('links the machine-readable .md variant beside each post', () => {
+    const out = buildLlmsIndex({
+      siteName: 'Notes',
+      siteUrl: 'https://example.com',
+      description: '',
+      posts: [base],
+    });
+
+    expect(out).toContain('([md](https://example.com/hello.md))');
   });
 
   it('truncates long descriptions with ellipsis', () => {
@@ -118,7 +129,7 @@ describe('buildLlmsIndex', () => {
     });
 
     // No colon suffix when description is empty
-    expect(out).toContain('- [Hello](https://example.com/hello)\n');
+    expect(out).toContain('- [Hello](https://example.com/hello) ([md](https://example.com/hello.md))\n');
   });
 
   it('sorts posts without publishedAt to bottom (uses 0 as sort key — both branches)', () => {

@@ -131,6 +131,23 @@ describe('CodeBlockEnhancer', () => {
       expect(label.textContent).toBe('Copy');
     });
 
+    it('debounces rapid copy clicks (clears the pending reset timer)', async () => {
+      vi.useFakeTimers();
+      const { container } = renderWithCode(SHIKI_HTML, 100);
+      const btn = container.querySelector('[data-copy-btn]') as HTMLButtonElement;
+
+      await act(async () => {
+        btn.click();
+        await Promise.resolve();
+      });
+      await act(async () => {
+        btn.click();
+        await Promise.resolve();
+      });
+
+      expect(btn.dataset.state).toBe('success');
+    });
+
     it('shows "Copy failed" when writeText rejects', async () => {
       writeTextMock.mockRejectedValueOnce(new Error('denied'));
       const { container } = renderWithCode(SHIKI_HTML, 100);
@@ -349,6 +366,79 @@ describe('CodeBlockEnhancer', () => {
       } finally {
         global.ResizeObserver = original;
       }
+    });
+  });
+
+  describe('Copy-all (code_tabs group)', () => {
+    const TABS_HTML =
+      '<figure class="code-tabs">' +
+      '<div data-slot="tabs-content" data-file="app.ts" data-lang="ts">' +
+      '<figure class="code-tabs__panel"><figcaption class="code-frame__title">app.ts</figcaption>' +
+      '<pre class="shiki"><code>const a = 1;</code></pre></figure></div>' +
+      '<div data-slot="tabs-content" data-file="app.py" data-lang="python">' +
+      '<figure class="code-tabs__panel"><figcaption class="code-frame__title">app.py</figcaption>' +
+      '<pre class="shiki"><code>a = 1</code></pre></figure></div>' +
+      '</figure>';
+
+    it('injects exactly one copy-all button for a code_tabs group', () => {
+      const { container } = renderWithCode(TABS_HTML, 100);
+      expect(container.querySelectorAll('[data-copy-all-btn]')).toHaveLength(1);
+      // Per-tab copy buttons are preserved.
+      expect(container.querySelectorAll('[data-copy-btn]')).toHaveLength(2);
+    });
+
+    it('does not inject a copy-all button for a bare markdown block', () => {
+      const { container } = renderWithCode(SHIKI_HTML, 100);
+      expect(container.querySelector('[data-copy-all-btn]')).toBeNull();
+    });
+
+    it('copies every file with language-aware headers on click', async () => {
+      const { container } = renderWithCode(TABS_HTML, 100);
+      const btn = container.querySelector('[data-copy-all-btn]') as HTMLButtonElement;
+      await act(async () => {
+        btn.click();
+        await Promise.resolve();
+      });
+      expect(writeTextMock).toHaveBeenCalledWith('// app.ts\nconst a = 1;\n\n# app.py\na = 1');
+    });
+
+    it('debounces rapid copy-all clicks (clears the pending reset timer)', async () => {
+      vi.useFakeTimers();
+      const { container } = renderWithCode(TABS_HTML, 100);
+      const btn = container.querySelector('[data-copy-all-btn]') as HTMLButtonElement;
+
+      await act(async () => {
+        btn.click();
+        await Promise.resolve();
+      });
+      await act(async () => {
+        btn.click();
+        await Promise.resolve();
+      });
+
+      expect(btn.dataset.state).toBe('success');
+    });
+
+    it('ignores a copy-all click outside any code_tabs group', async () => {
+      const { container } = renderWithCode('<button data-copy-all-btn type="button"></button>', 100);
+      const btn = container.querySelector('[data-copy-all-btn]') as HTMLButtonElement;
+      await act(async () => {
+        btn.click();
+        await Promise.resolve();
+      });
+      expect(writeTextMock).not.toHaveBeenCalled();
+    });
+
+    it('injects exactly one copy-all button under StrictMode (RT#15)', () => {
+      stubScrollHeight(100);
+      const { container } = render(
+        <StrictMode>
+          <CodeBlockEnhancer>
+            <div dangerouslySetInnerHTML={{ __html: TABS_HTML }} />
+          </CodeBlockEnhancer>
+        </StrictMode>
+      );
+      expect(container.querySelectorAll('[data-copy-all-btn]')).toHaveLength(1);
     });
   });
 });

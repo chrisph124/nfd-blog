@@ -1,32 +1,73 @@
 import { unified } from 'unified';
 import rehypeParse from 'rehype-parse';
 import rehypeStringify from 'rehype-stringify';
-import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
+import rehypeSanitize from 'rehype-sanitize';
 import rehypeShiki from '@shikijs/rehype';
 import { visit } from 'unist-util-visit';
 import type { Root, Element, Text, Parent } from 'hast';
+import { richtextSanitizeSchema } from './richtext-sanitize-schema';
+import { shikiRehypeOptions } from './shiki-theme';
+import { buildCodeLabel } from './code-frame';
+import { getYouTubeId, isYouTubeUrl } from './youtube';
 
-// Custom sanitize schema — allow Storyblok content tags with strict XSS protection
-const sanitizeSchema = {
-  ...defaultSchema,
-  protocols: {
-    href: ['http', 'https', 'mailto'],
-    src: ['http', 'https'],
-  },
-  attributes: {
-    ...defaultSchema.attributes,
-    img: [...(defaultSchema.attributes?.img || []), 'loading', 'srcset', 'sizes'],
-    iframe: [...(defaultSchema.attributes?.iframe || []), 'loading', 'src', 'allowfullscreen'],
-    video: [...(defaultSchema.attributes?.video || []), 'preload', 'src', 'controls'],
-    // Shiki will add its own attributes AFTER sanitize, so no need to allow here
-    code: [...(defaultSchema.attributes?.code || []), 'class'],
-    pre: [...(defaultSchema.attributes?.pre || []), 'class'],
-  },
-  tagNames: [
-    ...(defaultSchema.tagNames || []),
-    'iframe', 'video', 'source', 'figure', 'figcaption',
-  ],
-};
+/** Normalize a HAST node's className (array | string | absent) to string[]. */
+function classList(node: Element): string[] {
+  const cls = node.properties?.className;
+  if (Array.isArray(cls)) return cls.map(String);
+  if (typeof cls === 'string') return cls.split(/\s+/).filter(Boolean);
+  return [];
+}
+
+/**
+ * Wrap each highlighted `pre.shiki` in the macOS code-frame (a header carrying
+ * traffic-light dots via CSS + the language label). Skips a `pre` already inside
+ * a `.code-frame` figure — those are Markdown fences, framed with their filename
+ * by `renderCode`. Runs AFTER rehypeShiki so `pre.shiki` and its `language-*`
+ * class (from `addLanguageClass`) exist; the second visit of the now-nested pre
+ * is a no-op because its parent is then a `.code-frame` figure.
+ */
+function rehypeCodeFrame() {
+  return (tree: Root) => {
+    visit(tree, 'element', (node: Element, index, parent: Parent | undefined) => {
+      if (node.tagName !== 'pre' || parent === undefined || index === undefined) return;
+      if (!classList(node).includes('shiki')) return;
+      if (
+        parent.type === 'element' &&
+        (parent as Element).tagName === 'figure' &&
+        classList(parent as Element).includes('code-frame')
+      ) {
+        return;
+      }
+
+      const langClass = classList(node).find((c) => c.startsWith('language-'));
+      const language = langClass ? langClass.slice('language-'.length) : '';
+      const label = buildCodeLabel(undefined, language);
+
+      const figure: Element = {
+        type: 'element',
+        tagName: 'figure',
+        properties: { className: ['code-frame'] },
+        children: [
+          {
+            type: 'element',
+            tagName: 'figcaption',
+            properties: { className: ['code-frame__title'] },
+            children: [
+              {
+                type: 'element',
+                tagName: 'span',
+                properties: { className: ['code-frame__label'] },
+                children: [{ type: 'text', value: label }],
+              },
+            ],
+          },
+          node,
+        ],
+      };
+      parent.children.splice(index, 1, figure);
+    });
+  };
+}
 
 /**
  * Rehype plugin to add lazy loading attributes to media elements
@@ -54,13 +95,11 @@ function rehypeLazyLoading() {
  */
 function getTextContent(node: Element | Text): string {
   if (node.type === 'text') return node.value;
-  if ('children' in node) {
-    return node.children
-      .filter((child): child is Text | Element => child.type === 'text' || child.type === 'element')
-      .map(child => getTextContent(child))
-      .join('');
-  }
-  return '';
+  // Narrowed to Element here, which always carries a `children` array.
+  return node.children
+    .filter((child): child is Text | Element => child.type === 'text' || child.type === 'element')
+    .map(child => getTextContent(child))
+    .join('');
 }
 
 /**
@@ -139,6 +178,109 @@ function rehypeMarkdownDetect() {
 }
 
 /**
+ * Return true when a <p> holds exactly one element child and no other
+ * (non-whitespace) text — i.e. a standalone image or link on its own line.
+ */
+function soleElementChild(node: Element): Element | null {
+  const elements = node.children.filter(
+    (child): child is Element => child.type === 'element'
+  );
+  const hasText = node.children.some(
+    (child) => child.type === 'text' && child.value.trim() !== ''
+  );
+  return elements.length === 1 && !hasText ? elements[0] : null;
+}
+
+/**
+ * Wrap a standalone markdown image (an <img> alone in a <p>) in
+ * <figure class="image-figure">, moving the image's `title` into a
+ * <figcaption>. Runs AFTER sanitize so the injected figure is trusted.
+ * Bare images (not inside a <p>) are left untouched.
+ */
+function rehypeImageFigure() {
+  return (tree: Root) => {
+    visit(tree, 'element', (node: Element, index, parent: Parent | undefined) => {
+      if (node.tagName !== 'p' || parent === undefined || index === undefined) return;
+
+      const img = soleElementChild(node);
+      if (!img || img.tagName !== 'img') return;
+
+      const properties = { ...(img.properties ?? {}) };
+      const rawTitle = properties.title;
+      const caption =
+        typeof rawTitle === 'string' && rawTitle.trim() !== '' ? rawTitle : undefined;
+
+      // The title now lives in the caption; drop it to avoid a duplicate tooltip.
+      delete properties.title;
+      img.properties = properties;
+
+      const figureChildren: Element[] = [img];
+      if (caption) {
+        figureChildren.push({
+          type: 'element',
+          tagName: 'figcaption',
+          properties: { className: ['image-figure__caption'] },
+          children: [{ type: 'text', value: caption }],
+        });
+      }
+
+      const figure: Element = {
+        type: 'element',
+        tagName: 'figure',
+        properties: { className: ['image-figure'] },
+        children: figureChildren,
+      };
+      parent.children.splice(index, 1, figure);
+    });
+  };
+}
+
+/**
+ * Replace a paragraph whose only content is a lone YouTube link with a
+ * responsive <figure class="video-embed"> iframe. Links mixed with other text
+ * stay as-is. Runs AFTER sanitize (the injected iframe is trusted and points
+ * only at youtube.com/embed).
+ */
+function rehypeYouTubeEmbed() {
+  return (tree: Root) => {
+    visit(tree, 'element', (node: Element, index, parent: Parent | undefined) => {
+      if (node.tagName !== 'p' || parent === undefined || index === undefined) return;
+
+      const anchor = soleElementChild(node);
+      if (!anchor || anchor.tagName !== 'a') return;
+
+      const href = anchor.properties?.href;
+      if (typeof href !== 'string' || !isYouTubeUrl(href)) return;
+
+      const videoId = getYouTubeId(href);
+      if (!videoId) return;
+
+      const iframe: Element = {
+        type: 'element',
+        tagName: 'iframe',
+        properties: {
+          src: `https://www.youtube.com/embed/${videoId}`,
+          title: 'YouTube video player',
+          loading: 'lazy',
+          allow:
+            'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture',
+          allowFullScreen: true,
+        },
+        children: [],
+      };
+
+      const figure: Element = {
+        type: 'element',
+        tagName: 'figure',
+        properties: { className: ['video-embed'] },
+        children: [iframe],
+      };
+      parent.children.splice(index, 1, figure);
+    });
+  };
+}
+
+/**
  * Process richtext HTML with unified/rehype pipeline
  * 1. Parse HTML to HAST
  * 2. Sanitize XSS
@@ -149,15 +291,12 @@ function rehypeMarkdownDetect() {
 export async function processRichtext(html: string): Promise<string> {
   const result = await unified()
     .use(rehypeParse, { fragment: true })
-    .use(rehypeSanitize, sanitizeSchema) // sanitize XSS BEFORE markdown detection
+    .use(rehypeSanitize, richtextSanitizeSchema) // sanitize XSS BEFORE markdown detection
     .use(rehypeMarkdownDetect) // detect markdown patterns after sanitize
-    .use(rehypeShiki, {
-      themes: {
-        light: 'one-dark-pro',
-        dark: 'one-dark-pro',
-      },
-      defaultColor: false, // CSS variables mode for light/dark switching
-    })
+    .use(rehypeShiki, shikiRehypeOptions)
+    .use(rehypeCodeFrame) // wrap richtext code blocks in the macOS code-frame
+    .use(rehypeImageFigure) // wrap standalone images in a captioned figure
+    .use(rehypeYouTubeEmbed) // embed a lone YouTube URL as a responsive iframe
     .use(rehypeLazyLoading)
     .use(rehypeStringify)
     .process(html);

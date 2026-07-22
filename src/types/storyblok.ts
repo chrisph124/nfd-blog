@@ -1,4 +1,4 @@
-import { SbBlokData } from "@storyblok/react/rsc";
+import { SbBlokData, type StoryblokRichTextNode } from "@storyblok/react/rsc";
 
 // ============================================================================
 // Base Storyblok Types
@@ -52,11 +52,61 @@ export interface StoryblokLink {
 // ============================================================================
 
 /**
+ * alert component
+ */
+export interface AlertBlok extends StoryblokBlok {
+  component: 'alert';
+  icon?: 'information' | 'attention' | 'checked';
+  color?: 'emerald' | 'primary' | 'secondary' | 'cyan' | 'magenta';
+  title?: string;
+  body?: string;
+}
+
+/**
  * card_item component
  */
 export interface CardItemBlok extends StoryblokBlok {
   component: 'card_item';
   post_reference?: string;
+}
+
+/**
+ * code_tab component
+ */
+export interface CodeTabBlok extends StoryblokBlok {
+  component: 'code_tab';
+  label: string;
+  language?: string;
+  code: string;
+  filename?: string;
+}
+
+/**
+ * code_tabs component
+ */
+export interface CodeTabsBlok extends StoryblokBlok {
+  component: 'code_tabs';
+  tabs?: (CodeTabBlok)[];
+}
+
+/**
+ * comparison_card component (child of comparison; rendered only via its parent)
+ */
+export interface ComparisonCardBlok extends StoryblokBlok {
+  component: 'comparison_card';
+  tone?: 'positive' | 'negative' | 'neutral';
+  heading?: string;
+  // richtext at runtime; typed `string` per generate-types' richtext→string map.
+  body?: string;
+}
+
+/**
+ * comparison component
+ */
+export interface ComparisonBlok extends StoryblokBlok {
+  component: 'comparison';
+  title?: string;
+  columns?: (ComparisonCardBlok)[];
 }
 
 /**
@@ -202,7 +252,7 @@ export interface PostBlok extends StoryblokBlok {
   title?: string;
   featured_image?: StoryblokAsset;
   excerpt?: string;
-  body?: (RichtextBlok | MarkdownBlok | MediaBlok)[];
+  body?: (RichtextBlok | MarkdownBlok | MediaBlok | CodeTabsBlok | AlertBlok | ComparisonBlok)[];
   SEO?: Record<string, unknown>;
   og_title?: string;
   og_description?: string;
@@ -222,7 +272,10 @@ export interface PostListBlok extends StoryblokBlok {
  */
 export interface RichtextBlok extends StoryblokBlok {
   component: 'richtext';
-  content?: string;
+  // Storyblok delivers richtext as a ProseMirror JSON document (node tree), not a
+  // string. Typed as the same node shape `Richtext.tsx` feeds to `renderRichText`
+  // so the markdown serializer can walk it without falling back to `any`.
+  content?: StoryblokRichTextNode<string>;
 }
 
 /**
@@ -289,7 +342,12 @@ export interface StoryblokComponentProps<T extends StoryblokBlok = StoryblokBlok
  * Union of all blok types
  */
 export type AnyBlok =
+  | AlertBlok
   | CardItemBlok
+  | CodeTabBlok
+  | CodeTabsBlok
+  | ComparisonBlok
+  | ComparisonCardBlok
   | ContentCardBlockBlok
   | ContentCardsBlok
   | CtaBlok

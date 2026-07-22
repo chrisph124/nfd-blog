@@ -14,11 +14,14 @@ import TabItem from "@/components/molecules/TabItem";
 import Cta from "@/components/atoms/Cta";
 import Richtext from "@/components/atoms/Richtext";
 import Markdown from "@/components/atoms/Markdown";
+import CodeTabs from "@/components/molecules/CodeTabs";
 import Media from "@/components/atoms/Media";
 import CardItem from "@/components/molecules/CardItem";
 import PostList from "@/components/organisms/PostList";
 import ContentCards from "@/components/organisms/ContentCards";
 import ContentCardBlock from "@/components/molecules/ContentCardBlock";
+import Alert from "@/components/molecules/Alert";
+import Comparison from "@/components/molecules/Comparison";
 
 import { apiPlugin, storyblokInit } from '@storyblok/react/rsc';
 import type { PostBlok, PageBlok, StoryblokStory } from '@/types/storyblok';
@@ -46,11 +49,14 @@ const components = {
   cta: Cta,
   richtext: Richtext,
   markdown: Markdown,
+  code_tabs: CodeTabs,
   media: Media,
   card_item: CardItem,
   post_list: PostList,
   content_cards: ContentCards,
   content_card_block: ContentCardBlock,
+  alert: Alert,
+  comparison: Comparison,
 } as const;
 
 // Server-side initialization with access token
@@ -103,6 +109,29 @@ export const fetchStoryBySlug = cache(async (slug: string) => {
   ]);
 
   // Prefer post match over page match
+  if (postsResult.status === 'fulfilled') {
+    return { story: postsResult.value.data.story as StoryblokStory<PostBlok>, source: 'posts' as const };
+  }
+  if (pagesResult.status === 'fulfilled') {
+    return { story: pagesResult.value.data.story as StoryblokStory<PostBlok>, source: 'pages' as const };
+  }
+  return null;
+});
+
+/**
+ * Fetch a story by slug forcing `version: 'published'`, regardless of the
+ * env-derived `storyblokVersion`. Used by the machine-readable `.md` surface so
+ * drafts never leak — even in dev/preview where the default version is 'draft'
+ * (RT#1). Mirrors `fetchStoryBySlug`'s posts-before-pages resolution.
+ */
+export const fetchPublishedStoryBySlug = cache(async (slug: string) => {
+  const storyblokApi = getStoryblokApi();
+
+  const [postsResult, pagesResult] = await Promise.allSettled([
+    storyblokApi.get(`cdn/stories/posts/${slug}`, { version: 'published' }),
+    storyblokApi.get(`cdn/stories/${slug}`, { version: 'published' }),
+  ]);
+
   if (postsResult.status === 'fulfilled') {
     return { story: postsResult.value.data.story as StoryblokStory<PostBlok>, source: 'posts' as const };
   }

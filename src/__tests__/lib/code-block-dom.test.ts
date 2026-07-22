@@ -5,6 +5,12 @@ import {
   enhancePre,
   toggleCollapsed,
   copyPreContent,
+  commentPrefixFor,
+  copyAllTabs,
+  createCopyAllButton,
+  setCopyAllButtonState,
+  COPY_ALL_LABELS,
+  COPY_ALL_TOOLTIPS,
   LABELS,
   TOOLTIPS,
   ICONS,
@@ -181,6 +187,21 @@ describe('enhancePre', () => {
 
     expect(pre.querySelectorAll('[data-copy-btn]')).toHaveLength(1);
   });
+
+  it('adds the copy button to the frame title bar when one exists', () => {
+    const figure = document.createElement('figure');
+    figure.className = 'code-frame';
+    const title = document.createElement('figcaption');
+    title.className = 'code-frame__title';
+    figure.appendChild(title);
+    const pre = makePre(100);
+    figure.appendChild(pre); // moves pre from body into the figure
+
+    enhancePre(pre);
+
+    expect(title.querySelector('[data-copy-btn]')).not.toBeNull();
+    expect(pre.querySelector('[data-copy-btn]')).toBeNull();
+  });
 });
 
 // ============================================================================
@@ -291,5 +312,139 @@ describe('copyPreContent', () => {
 
     const result = await copyPreContent(btn);
     expect(result).toBe('error');
+  });
+
+  it('resolves the pre from a copy button in the frame title bar', async () => {
+    const figure = document.createElement('figure');
+    figure.className = 'code-frame';
+    const title = document.createElement('figcaption');
+    title.className = 'code-frame__title';
+    const btn = document.createElement('button');
+    btn.dataset.copyBtn = '';
+    title.appendChild(btn);
+    figure.appendChild(title);
+    const pre = makePre(100, true); // has <code>const x = 1;</code>
+    figure.appendChild(pre);
+    document.body.appendChild(figure);
+
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      configurable: true,
+      writable: true,
+    });
+
+    const result = await copyPreContent(btn);
+    expect(result).toBe('success');
+    expect(writeText).toHaveBeenCalledWith('const x = 1;');
+  });
+});
+
+// ============================================================================
+// Copy-all-files (code_tabs)
+// ============================================================================
+
+function makeTabsGroup(
+  panels: Array<{ file?: string; lang?: string; code: string }>,
+): HTMLElement {
+  const group = document.createElement('figure');
+  group.className = 'code-tabs';
+  for (const panel of panels) {
+    const content = document.createElement('div');
+    content.setAttribute('data-slot', 'tabs-content');
+    if (panel.file !== undefined) content.dataset.file = panel.file;
+    if (panel.lang !== undefined) content.dataset.lang = panel.lang;
+    const pre = document.createElement('pre');
+    pre.className = 'shiki';
+    const code = document.createElement('code');
+    code.textContent = panel.code;
+    pre.appendChild(code);
+    content.appendChild(pre);
+    group.appendChild(content);
+  }
+  document.body.appendChild(group);
+  return group;
+}
+
+describe('commentPrefixFor', () => {
+  it('uses # for hash-comment languages and // otherwise', () => {
+    expect(commentPrefixFor('python')).toBe('#');
+    expect(commentPrefixFor('YAML')).toBe('#');
+    expect(commentPrefixFor('ts')).toBe('//');
+    expect(commentPrefixFor('unknownlang')).toBe('//');
+    expect(commentPrefixFor(undefined)).toBe('//');
+  });
+});
+
+describe('createCopyAllButton', () => {
+  it('builds an idle, accessible copy-all button', () => {
+    const btn = createCopyAllButton();
+    expect(btn.getAttribute('type')).toBe('button');
+    expect(btn.dataset.copyAllBtn).toBe('');
+    expect(btn.dataset.state).toBe('idle');
+    expect(btn.getAttribute('aria-label')).toBe(COPY_ALL_TOOLTIPS.idle);
+    expect(btn.querySelector('[data-copy-label]')?.textContent).toBe(COPY_ALL_LABELS.idle);
+    expect(btn.querySelector('[data-copy-icon] svg')).not.toBeNull();
+  });
+});
+
+describe('setCopyAllButtonState', () => {
+  it('updates label/icon/tooltip for each state', () => {
+    const btn = createCopyAllButton();
+    setCopyAllButtonState(btn, 'success');
+    expect(btn.dataset.state).toBe('success');
+    expect(btn.querySelector('[data-copy-label]')?.textContent).toBe(COPY_ALL_LABELS.success);
+    setCopyAllButtonState(btn, 'error');
+    expect(btn.querySelector('[data-copy-label]')?.textContent).toBe(COPY_ALL_LABELS.error);
+    setCopyAllButtonState(btn, 'idle');
+    expect(btn.querySelector('[data-copy-label]')?.textContent).toBe(COPY_ALL_LABELS.idle);
+  });
+
+  it('returns early when inner slots are missing', () => {
+    const btn = document.createElement('button');
+    expect(() => setCopyAllButtonState(btn, 'success')).not.toThrow();
+    expect(btn.dataset.state).toBeUndefined();
+  });
+});
+
+describe('copyAllTabs', () => {
+  it('concatenates every panel with a language-aware header, in DOM order', async () => {
+    const group = makeTabsGroup([
+      { file: 'app.ts', lang: 'ts', code: 'const a = 1;' },
+      { file: 'app.py', lang: 'python', code: 'a = 1' },
+    ]);
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true, writable: true });
+
+    const result = await copyAllTabs(group);
+
+    expect(result).toBe('success');
+    expect(writeText).toHaveBeenCalledWith('// app.ts\nconst a = 1;\n\n# app.py\na = 1');
+  });
+
+  it('reads hidden (forceMounted) panels and falls back when filename is missing', async () => {
+    const group = makeTabsGroup([{ lang: 'ts', code: 'x' }]);
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true, writable: true });
+
+    await copyAllTabs(group);
+    expect(writeText).toHaveBeenCalledWith('// file-1\nx');
+  });
+
+  it('returns idle for a group with no panels', async () => {
+    const group = document.createElement('figure');
+    group.className = 'code-tabs';
+    document.body.appendChild(group);
+    expect(await copyAllTabs(group)).toBe('idle');
+  });
+
+  it('returns error when the clipboard write rejects', async () => {
+    const group = makeTabsGroup([{ file: 'a.ts', lang: 'ts', code: 'x' }]);
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText: vi.fn().mockRejectedValue(new Error('denied')) },
+      configurable: true,
+      writable: true,
+    });
+    expect(await copyAllTabs(group)).toBe('error');
   });
 });

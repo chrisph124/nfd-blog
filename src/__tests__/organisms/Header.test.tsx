@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import Header from '@/components/organisms/Header';
 import type { HeaderBlok, NavItemBlok, SubNavItemBlok, StoryblokLink } from '@/types/storyblok';
 
@@ -9,34 +10,22 @@ vi.mock('next/navigation', () => ({
   usePathname: () => mockPathname(),
 }));
 
+// storyblokEditable emits attributes only in the Visual Editor; mock a stable
+// marker so we can assert makeStoryblokEditable's output lands on the <header>.
 vi.mock('@storyblok/react/rsc', () => ({
-  storyblokEditable: vi.fn(() => ({ 'data-testid': 'storyblok-editable' })),
+  storyblokEditable: vi.fn(() => ({ 'data-blok-uid': 'test-uid', className: 'storyblok__outline' })),
 }));
 
-vi.mock('next/image', () => ({
-  default: ({ src, alt, ...props }: { src: string; alt: string; [key: string]: unknown }) => (
-    <div
-      data-testid="next-image"
-      src={src}
-      alt={alt}
-      role="img"
-      aria-label={alt}
-      {...props as any}
-    />
-  ),
+// Keep NavBar (desktop) opaque — Header tests exercise the mobile Sheet.
+vi.mock('@/components/organisms/NavBar', () => ({
+  default: () => <nav data-testid="navbar" />,
 }));
 
-vi.mock('@react-icons/hi2/HiChevronDown', () => ({
-  HiChevronDown: ({ className }: { className?: string }) => (
-    <svg data-testid="chevron-down-icon" className={className} />
-  ),
-}));
-
-// Mock child components
 vi.mock('@/components/atoms/ThemeToggle', () => ({
   default: () => <button role="switch" aria-checked="false" aria-label="Switch to dark theme">Theme</button>,
 }));
 
+// Keep MenuToggle's tested API (onClick + isOpen); render a simple trigger.
 vi.mock('@/components/atoms/MenuToggle', () => ({
   default: ({ onClick, isOpen }: { onClick: () => void; isOpen: boolean }) => (
     <button data-testid="menu-toggle" onClick={onClick}>
@@ -45,39 +34,18 @@ vi.mock('@/components/atoms/MenuToggle', () => ({
   ),
 }));
 
-vi.mock('@/components/organisms/NavBar', () => ({
-  default: ({ navItems }: { navItems: NavItemBlok[] }) => (
-    <nav data-testid="navbar">
-      {navItems.map(item => (
-        <span key={item._uid}>{item.label}</span>
-      ))}
-    </nav>
-  ),
-}));
-
-const createMockSubNavItem = (
-  uid: string,
-  label: string,
-  url?: string
-): SubNavItemBlok => ({
+const createMockSubNavItem = (uid: string, label: string, url?: string): SubNavItemBlok => ({
   _uid: uid,
-  component: 'sub_nav_item' as const,
+  component: 'sub_nav_item',
   label,
-  link: {
-    cached_url: url || `/${label.toLowerCase()}`,
-    linktype: 'story' as const
-  } as StoryblokLink,
+  link: { cached_url: url ?? `/${label.toLowerCase()}`, linktype: 'story' } as StoryblokLink,
 });
 
-const createMockNavItem = (
-  uid: string,
-  label: string,
-  subItems?: SubNavItemBlok[]
-): NavItemBlok => ({
+const createMockNavItem = (uid: string, label: string, subItems?: SubNavItemBlok[]): NavItemBlok => ({
   _uid: uid,
   component: 'nav_item',
   label,
-  link: { cached_url: `/${label.toLowerCase()}`, linktype: 'story' as const },
+  link: { cached_url: `/${label.toLowerCase()}`, linktype: 'story' },
   sub_items: subItems,
 });
 
@@ -85,602 +53,289 @@ const createMockBlok = (overrides: Partial<HeaderBlok> = {}): HeaderBlok => ({
   _uid: 'test-uid',
   component: 'header',
   title: 'Test Site',
-  logo: {
-    id: 1,
-    filename: '/logo.svg',
-    alt: 'Test Logo',
-  },
+  logo: { id: 1, filename: '/logo.svg', alt: 'Test Logo' },
   nav_items: [],
   enableTheme: false,
   ...overrides,
 });
 
+/** Open the mobile Sheet and wait for the dialog to mount. */
+async function openMenu(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByTestId('menu-toggle'));
+  await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+}
+
 describe('Header', () => {
   beforeEach(() => {
     mockPathname.mockReturnValue('/');
-    document.body.style.overflow = '';
   });
 
   describe('Rendering', () => {
-    it('renders without crashing', () => {
-      const blok = createMockBlok();
-      render(<Header blok={blok} />);
-
+    it('renders a banner landmark', () => {
+      render(<Header blok={createMockBlok()} />);
       expect(screen.getByRole('banner')).toBeInTheDocument();
     });
 
-    it('renders site title', () => {
-      const blok = createMockBlok({ title: 'My Blog' });
-      render(<Header blok={blok} />);
-
-      expect(screen.getByText('My Blog')).toBeInTheDocument();
+    it('renders the site title as gradient logo text', () => {
+      render(<Header blok={createMockBlok({ title: 'My Blog' })} />);
+      const logo = screen.getByText('My Blog');
+      expect(logo).toHaveClass('logo-font', 'text-transparent', 'bg-clip-text');
     });
 
-    it('renders logo as text with gradient', () => {
-      const blok = createMockBlok({ title: 'Test Site' });
-      render(<Header blok={blok} />);
-
-      const logoText = screen.getByText('Test Site');
-      expect(logoText).toBeInTheDocument();
-      expect(logoText).toHaveClass('logo-font', 'text-transparent', 'bg-clip-text');
+    it('falls back to the default title when none provided', () => {
+      render(<Header blok={createMockBlok({ title: undefined, logo: undefined })} />);
+      expect(screen.getByText('The Folio')).toBeInTheDocument();
     });
 
-    it('renders default title when not provided', () => {
-      const blok = createMockBlok({ title: undefined, logo: undefined });
-      render(<Header blok={blok} />);
-
-      // Default title is 'The Folio' per Header.tsx:19
-      const defaultTitle = screen.getByText('The Folio');
-      expect(defaultTitle).toBeInTheDocument();
-      expect(defaultTitle).toHaveClass('logo-font', 'text-transparent', 'bg-clip-text');
-    });
-  });
-
-  describe('Fallback values', () => {
-    it('defaults nav_items to [] when undefined (covers line 16 ?? branch)', () => {
-      const blok = createMockBlok({ nav_items: undefined });
-      render(<Header blok={blok} />);
-
-      // Should render without error and show NavBar with no items
+    it('renders the NavBar (desktop nav)', () => {
+      render(<Header blok={createMockBlok({ nav_items: [createMockNavItem('n1', 'Home')] })} />);
       expect(screen.getByTestId('navbar')).toBeInTheDocument();
     });
 
-    it('uses item.link.url when cached_url is absent in mobile menu (line 169 ?? branch)', () => {
-      const blok = createMockBlok({
-        nav_items: [{
-          _uid: 'nav-url',
-          component: 'nav_item',
-          label: 'External',
-          link: {
-            cached_url: undefined as unknown as string,
-            url: 'https://example.com',
-            linktype: 'url' as const,
-          },
-        }],
-      });
-      render(<Header blok={blok} />);
-
-      // Open mobile menu
-      const menuToggle = screen.getByTestId('menu-toggle');
-      fireEvent.click(menuToggle);
-
-      expect(screen.getAllByText('External').length).toBeGreaterThan(0);
-    });
-
-    it('uses # fallback when nav item has no link urls (line 169 ?? "#" branch)', () => {
-      const blok = createMockBlok({
-        nav_items: [{
-          _uid: 'nav-no-link',
-          component: 'nav_item',
-          label: 'No Link Item',
-          link: {
-            cached_url: undefined as unknown as string,
-            url: undefined as unknown as string,
-            linktype: 'story' as const,
-          },
-        }],
-      });
-      render(<Header blok={blok} />);
-
-      const menuToggle = screen.getByTestId('menu-toggle');
-      fireEvent.click(menuToggle);
-
-      // Item should still render
-      expect(screen.getAllByText('No Link Item').length).toBeGreaterThan(0);
-    });
-
-    it('uses sub_item.link.url when cached_url is absent (line 213 ?? branch)', () => {
-      const blok = createMockBlok({
-        nav_items: [{
-          _uid: 'nav-1',
-          component: 'nav_item',
-          label: 'Services',
-          link: { cached_url: '/services', linktype: 'story' as const },
-          sub_items: [{
-            _uid: 'sub-1',
-            component: 'sub_nav_item' as const,
-            label: 'Sub Service',
-            link: {
-              cached_url: undefined as unknown as string,
-              url: '/sub-service',
-              linktype: 'url' as const,
-            },
-          }],
-        }],
-      });
-      const { getByTestId, container } = render(<Header blok={blok} />);
-
-      // Open mobile menu
-      const menuToggle = getByTestId('menu-toggle');
-      fireEvent.click(menuToggle);
-
-      // Expand the dropdown to reveal sub-items
-      const aside = container.querySelector('aside');
-      const dropdownButton = aside?.querySelector('button');
-      if (dropdownButton) fireEvent.click(dropdownButton);
-
-      // Sub-item link should use url fallback
-      const subLinks = container.querySelectorAll('aside a');
-      const subService = Array.from(subLinks).find(el => el.textContent?.includes('Sub Service'));
-      expect(subService).toBeInTheDocument();
-    });
-
-    it('uses # fallback for sub-item with no link urls (line 213 ?? "#" branch)', () => {
-      const blok = createMockBlok({
-        nav_items: [{
-          _uid: 'nav-1',
-          component: 'nav_item',
-          label: 'Parent',
-          link: { cached_url: '/parent', linktype: 'story' as const },
-          sub_items: [{
-            _uid: 'sub-no-url',
-            component: 'sub_nav_item' as const,
-            label: 'No URL Sub',
-            link: {
-              cached_url: undefined as unknown as string,
-              url: undefined as unknown as string,
-              linktype: 'story' as const,
-            },
-          }],
-        }],
-      });
-      const { getByTestId, container } = render(<Header blok={blok} />);
-
-      const menuToggle = getByTestId('menu-toggle');
-      fireEvent.click(menuToggle);
-
-      const aside = container.querySelector('aside');
-      const dropdownButton = aside?.querySelector('button');
-      if (dropdownButton) fireEvent.click(dropdownButton);
-
-      const subLinks = container.querySelectorAll('aside a');
-      const noUrlSub = Array.from(subLinks).find(el => el.textContent?.includes('No URL Sub'));
-      expect(noUrlSub).toBeInTheDocument();
-    });
-  });
-
-  describe('Navigation', () => {
-    it('renders NavBar component', () => {
-      const blok = createMockBlok({
-        nav_items: [createMockNavItem('nav-1', 'Home')],
-      });
-      const { getByTestId } = render(<Header blok={blok} />);
-
-      expect(getByTestId('navbar')).toBeInTheDocument();
-    });
-
-    it('passes nav items to NavBar', () => {
-      const blok = createMockBlok({
-        nav_items: [
-          createMockNavItem('nav-1', 'Home'),
-          createMockNavItem('nav-2', 'About'),
-        ],
-      });
-      render(<Header blok={blok} />);
-
-      // Use getAllByText since items appear in both NavBar and mobile menu
-      expect(screen.getAllByText('Home').length).toBeGreaterThan(0);
-      expect(screen.getAllByText('About').length).toBeGreaterThan(0);
-    });
-  });
-
-  describe('Theme Toggle', () => {
-    it('always renders theme toggle', () => {
-      const blok = createMockBlok();
-      render(<Header blok={blok} />);
-
+    it('always renders the theme toggle', () => {
+      render(<Header blok={createMockBlok()} />);
       expect(screen.getAllByRole('switch').length).toBeGreaterThanOrEqual(1);
     });
-  });
 
-  describe('Mobile Menu', () => {
-    it('renders menu toggle button', () => {
-      const blok = createMockBlok();
-      const { getByTestId } = render(<Header blok={blok} />);
-
-      expect(getByTestId('menu-toggle')).toBeInTheDocument();
-    });
-
-    it('opens mobile menu when toggle clicked', () => {
-      const blok = createMockBlok();
-      const { getByTestId } = render(<Header blok={blok} />);
-
-      const menuToggle = getByTestId('menu-toggle');
-      fireEvent.click(menuToggle);
-
-      expect(menuToggle).toHaveTextContent('Close');
-    });
-
-    it('closes mobile menu when toggle clicked again', () => {
-      const blok = createMockBlok();
-      const { getByTestId } = render(<Header blok={blok} />);
-
-      const menuToggle = getByTestId('menu-toggle');
-      fireEvent.click(menuToggle);
-      fireEvent.click(menuToggle);
-
-      expect(menuToggle).toHaveTextContent('Menu');
-    });
-
-    it('prevents body scroll when menu is open', () => {
-      const blok = createMockBlok();
-      const { getByTestId } = render(<Header blok={blok} />);
-
-      const menuToggle = getByTestId('menu-toggle');
-      fireEvent.click(menuToggle);
-
-      expect(document.body.style.overflow).toBe('hidden');
-    });
-
-    it('restores body scroll when menu is closed', () => {
-      const blok = createMockBlok();
-      const { getByTestId } = render(<Header blok={blok} />);
-
-      const menuToggle = getByTestId('menu-toggle');
-      fireEvent.click(menuToggle);
-      fireEvent.click(menuToggle);
-
-      expect(document.body.style.overflow).toBe('');
+    it('defaults nav_items to [] when undefined', () => {
+      render(<Header blok={createMockBlok({ nav_items: undefined })} />);
+      expect(screen.getByTestId('navbar')).toBeInTheDocument();
     });
   });
 
-  describe('Mobile Menu Content', () => {
-    it('renders nav items in mobile menu', () => {
-      const blok = createMockBlok({
-        nav_items: [
-          createMockNavItem('nav-1', 'Home'),
-          createMockNavItem('nav-2', 'About'),
-        ],
-      });
-      const { getByTestId, container } = render(<Header blok={blok} />);
-
-      const menuToggle = getByTestId('menu-toggle');
-      fireEvent.click(menuToggle);
-
-      // Mobile menu should show nav items
-      const mobileMenu = container.querySelector('.fixed');
-      expect(mobileMenu).toBeInTheDocument();
+  describe('Storyblok Visual Editor', () => {
+    it('spreads makeStoryblokEditable attributes onto the <header> wrapper', () => {
+      render(<Header blok={createMockBlok()} />);
+      // The editable attribute must live on the in-DOM banner, not on portalled
+      // Sheet content, or the Visual Editor cannot bind click-to-edit.
+      expect(screen.getByRole('banner')).toHaveAttribute('data-blok-uid', 'test-uid');
     });
   });
 
-  describe('Logo Link', () => {
-    it('logo links to home page', () => {
-      const blok = createMockBlok();
+  describe('Mobile Sheet — open / close', () => {
+    it('opens the Sheet (role="dialog") when the toggle is clicked', async () => {
+      const user = userEvent.setup();
+      render(<Header blok={createMockBlok()} />);
+      await openMenu(user);
+      expect(screen.getByTestId('menu-toggle')).toHaveTextContent('Close');
+    });
+
+    it('closes the Sheet when the backdrop is clicked', async () => {
+      const user = userEvent.setup();
+      const { baseElement } = render(<Header blok={createMockBlok()} />);
+      await openMenu(user);
+      // The burger/logo are behind the modal overlay while open; closing happens
+      // via backdrop, Escape, or a nav link — not by re-clicking the toggle.
+      const overlay = baseElement.querySelector('[data-slot="sheet-overlay"]') as HTMLElement;
+      expect(overlay).toBeInTheDocument();
+      await user.click(overlay);
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    });
+
+    it('closes the Sheet on Escape', async () => {
+      const user = userEvent.setup();
+      render(<Header blok={createMockBlok()} />);
+      await openMenu(user);
+      await user.keyboard('{Escape}');
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    });
+
+    it('closes the Sheet when a nav link is clicked (SheetClose)', async () => {
+      const user = userEvent.setup();
+      render(<Header blok={createMockBlok({ nav_items: [createMockNavItem('n1', 'About')] })} />);
+      await openMenu(user);
+      await user.click(screen.getByRole('link', { name: 'About' }));
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    });
+  });
+
+  describe('Mobile Sheet — body scroll lock (Radix marker)', () => {
+    it('locks body scroll while open and releases it on close', async () => {
+      const user = userEvent.setup();
+      render(<Header blok={createMockBlok()} />);
+
+      await openMenu(user);
+      // Radix (react-remove-scroll) marks <body> with data-scroll-locked, NOT
+      // an inline overflow style. Asserting this proves scroll-lock survived the
+      // migration off the manual useEffect (guards a mobile scroll-stuck regression).
+      expect(document.body).toHaveAttribute('data-scroll-locked');
+
+      await user.keyboard('{Escape}');
+      await waitFor(() => expect(document.body).not.toHaveAttribute('data-scroll-locked'));
+    });
+
+    it('releases the body scroll lock on unmount', async () => {
+      const user = userEvent.setup();
+      const { unmount } = render(<Header blok={createMockBlok()} />);
+
+      await openMenu(user);
+      expect(document.body).toHaveAttribute('data-scroll-locked');
+
+      unmount();
+      await waitFor(() => expect(document.body).not.toHaveAttribute('data-scroll-locked'));
+    });
+  });
+
+  describe('Mobile menu content', () => {
+    it('renders nav items inside the open Sheet', async () => {
+      const user = userEvent.setup();
+      render(
+        <Header
+          blok={createMockBlok({
+            nav_items: [createMockNavItem('n1', 'Home'), createMockNavItem('n2', 'About')],
+          })}
+        />
+      );
+      await openMenu(user);
+      expect(screen.getByText('Home')).toBeInTheDocument();
+      expect(screen.getByText('About')).toBeInTheDocument();
+    });
+
+    it('renders an item with sub-items as an accordion that toggles open', async () => {
+      const user = userEvent.setup();
+      render(
+        <Header
+          blok={createMockBlok({
+            nav_items: [
+              createMockNavItem('n1', 'Services', [
+                createMockSubNavItem('s1', 'Service 1', '/service-1'),
+              ]),
+            ],
+          })}
+        />
+      );
+      await openMenu(user);
+
+      // Sub-item hidden until the accordion trigger is activated.
+      expect(screen.queryByRole('link', { name: 'Service 1' })).not.toBeInTheDocument();
+      await user.click(screen.getByRole('button', { name: /Services/ }));
+      await waitFor(() =>
+        expect(screen.getByRole('link', { name: 'Service 1' })).toBeInTheDocument()
+      );
+      expect(screen.getByRole('link', { name: 'Service 1' })).toHaveAttribute('href', '/service-1');
+    });
+
+    it('marks the active nav item in the mobile menu', async () => {
+      mockPathname.mockReturnValue('/about');
+      const user = userEvent.setup();
+      const blok = createMockBlok({ nav_items: [createMockNavItem('n1', 'About')] });
+      blok.nav_items![0].link = { cached_url: 'about', linktype: 'story' };
+
       render(<Header blok={blok} />);
-
-      const logoLink = screen.getByRole('link');
-      expect(logoLink).toHaveAttribute('href', '/');
+      await openMenu(user);
+      expect(screen.getByText('About')).toHaveClass('text-primary-800');
     });
 
-    it('clicking logo closes mobile menu', () => {
-      const blok = createMockBlok();
-      const { getByTestId } = render(<Header blok={blok} />);
+    it('marks an active dropdown (sub-items) nav item as active', async () => {
+      mockPathname.mockReturnValue('/services');
+      const user = userEvent.setup();
+      const blok = createMockBlok({
+        nav_items: [createMockNavItem('n1', 'Services', [createMockSubNavItem('s1', 'Service 1')])],
+      });
+      blok.nav_items![0].link = { cached_url: 'services', linktype: 'story' };
 
-      // Open mobile menu
-      const menuToggle = getByTestId('menu-toggle');
-      fireEvent.click(menuToggle);
-      expect(menuToggle).toHaveTextContent('Close');
+      render(<Header blok={blok} />);
+      await openMenu(user);
+      expect(screen.getByText('Services')).toHaveClass('text-primary-800');
+    });
 
-      // Click logo
-      const logoLink = screen.getByRole('link');
-      fireEvent.click(logoLink);
+    it('renders a divider between items but not after the last', async () => {
+      const user = userEvent.setup();
+      const { baseElement } = render(
+        <Header
+          blok={createMockBlok({
+            nav_items: [createMockNavItem('n1', 'Home'), createMockNavItem('n2', 'About')],
+          })}
+        />
+      );
+      await openMenu(user);
+      // Two items → exactly one divider.
+      expect(baseElement.querySelectorAll('.bg-gray-300.h-\\[1px\\]')).toHaveLength(1);
+    });
+  });
 
-      expect(menuToggle).toHaveTextContent('Menu');
+  describe('Mobile menu URL fallbacks', () => {
+    it('uses item.link.url when cached_url is absent', async () => {
+      const user = userEvent.setup();
+      render(
+        <Header
+          blok={createMockBlok({
+            nav_items: [{
+              _uid: 'n1', component: 'nav_item', label: 'External',
+              link: { cached_url: undefined as unknown as string, url: 'https://example.com', linktype: 'url' },
+            }],
+          })}
+        />
+      );
+      await openMenu(user);
+      expect(screen.getByRole('link', { name: 'External' })).toHaveAttribute('href', 'https://example.com');
+    });
+
+    it('uses the "#" fallback when a nav item has no link urls', async () => {
+      const user = userEvent.setup();
+      render(
+        <Header
+          blok={createMockBlok({
+            nav_items: [{
+              _uid: 'n1', component: 'nav_item', label: 'No Link',
+              link: { cached_url: undefined as unknown as string, url: undefined as unknown as string, linktype: 'story' },
+            }],
+          })}
+        />
+      );
+      await openMenu(user);
+      expect(screen.getByRole('link', { name: 'No Link' })).toHaveAttribute('href', '#');
+    });
+
+    it('uses sub_item.link.url when cached_url is absent', async () => {
+      const user = userEvent.setup();
+      render(
+        <Header
+          blok={createMockBlok({
+            nav_items: [createMockNavItem('n1', 'Services', [{
+              _uid: 's1', component: 'sub_nav_item', label: 'Sub Service',
+              link: { cached_url: undefined as unknown as string, url: '/sub-service', linktype: 'url' },
+            }])],
+          })}
+        />
+      );
+      await openMenu(user);
+      await user.click(screen.getByRole('button', { name: /Services/ }));
+      await waitFor(() => expect(screen.getByRole('link', { name: 'Sub Service' })).toBeInTheDocument());
+      expect(screen.getByRole('link', { name: 'Sub Service' })).toHaveAttribute('href', '/sub-service');
+    });
+
+    it('uses the "#" fallback for a sub-item with no link urls', async () => {
+      const user = userEvent.setup();
+      render(
+        <Header
+          blok={createMockBlok({
+            nav_items: [createMockNavItem('n1', 'Services', [{
+              _uid: 's1', component: 'sub_nav_item', label: 'No URL Sub',
+              link: { cached_url: undefined as unknown as string, url: undefined as unknown as string, linktype: 'story' },
+            }])],
+          })}
+        />
+      );
+      await openMenu(user);
+      await user.click(screen.getByRole('button', { name: /Services/ }));
+      await waitFor(() => expect(screen.getByRole('link', { name: 'No URL Sub' })).toBeInTheDocument());
+      expect(screen.getByRole('link', { name: 'No URL Sub' })).toHaveAttribute('href', '#');
+    });
+  });
+
+  describe('Logo link', () => {
+    it('links to the home page', () => {
+      render(<Header blok={createMockBlok()} />);
+      expect(screen.getByRole('link', { name: 'Test Site' })).toHaveAttribute('href', '/');
     });
   });
 
   describe('Styles', () => {
-    it('has sticky positioning', () => {
-      const blok = createMockBlok();
-      render(<Header blok={blok} />);
-
+    it('is sticky and elevated above content', () => {
+      render(<Header blok={createMockBlok()} />);
       const header = screen.getByRole('banner');
-      expect(header).toHaveClass('sticky', 'top-0');
-    });
-
-    it('has correct z-index', () => {
-      const blok = createMockBlok();
-      render(<Header blok={blok} />);
-
-      const header = screen.getByRole('banner');
-      expect(header).toHaveClass('z-50');
-    });
-
-    it('has responsive height', () => {
-      const blok = createMockBlok();
-      const { container } = render(<Header blok={blok} />);
-
-      const innerContainer = container.querySelector(String.raw`.h-\[70px\]`);
-      expect(innerContainer).toHaveClass('lg:h-[90px]');
-    });
-  });
-
-  describe('Mobile Menu Dropdown Items', () => {
-    it('renders nav items with sub-items in mobile menu', () => {
-      const blok = createMockBlok({
-        nav_items: [
-          createMockNavItem('nav-1', 'Services', [
-            createMockSubNavItem('sub-1', 'Service 1', '/service-1'),
-            createMockSubNavItem('sub-2', 'Service 2', '/service-2'),
-          ]),
-        ],
-      });
-      const { getByTestId, container } = render(<Header blok={blok} />);
-
-      // Open mobile menu
-      const menuToggle = getByTestId('menu-toggle');
-      fireEvent.click(menuToggle);
-
-      // Check that nav item with sub-items is rendered
-      const mobileMenu = container.querySelector('.fixed');
-      expect(mobileMenu).toBeInTheDocument();
-    });
-
-    it('toggles dropdown in mobile menu when clicking item with sub-items', async () => {
-      const blok = createMockBlok({
-        nav_items: [
-          createMockNavItem('nav-1', 'Services', [
-            createMockSubNavItem('sub-1', 'Service 1', '/service-1'),
-          ]),
-        ],
-      });
-      const { getByTestId, container } = render(<Header blok={blok} />);
-
-      // Open mobile menu
-      const menuToggle = getByTestId('menu-toggle');
-      fireEvent.click(menuToggle);
-
-      // Find and click the dropdown button in mobile menu
-      const dropdownButtons = container.querySelectorAll('button');
-      const servicesButton = Array.from(dropdownButtons).find(btn =>
-        btn.textContent?.includes('Services')
-      );
-
-      if (servicesButton) {
-        fireEvent.click(servicesButton);
-      }
-    });
-
-    it('closes mobile menu when clicking overlay', () => {
-      const blok = createMockBlok({
-        nav_items: [createMockNavItem('nav-1', 'Home')],
-      });
-      const { getByTestId, getByLabelText } = render(<Header blok={blok} />);
-
-      // Open mobile menu
-      const menuToggle = getByTestId('menu-toggle');
-      fireEvent.click(menuToggle);
-      expect(menuToggle).toHaveTextContent('Close');
-
-      // Click backdrop button to close
-      const backdropButton = getByLabelText('Close mobile menu');
-      fireEvent.click(backdropButton);
-
-      expect(menuToggle).toHaveTextContent('Menu');
-    });
-
-    it('closes mobile menu when Escape key pressed on backdrop', () => {
-      const blok = createMockBlok({
-        nav_items: [createMockNavItem('nav-1', 'Home')],
-      });
-      const { getByTestId, getByLabelText } = render(<Header blok={blok} />);
-
-      // Open mobile menu
-      const menuToggle = getByTestId('menu-toggle');
-      fireEvent.click(menuToggle);
-      expect(menuToggle).toHaveTextContent('Close');
-
-      // Press Escape on backdrop button
-      const backdropButton = getByLabelText('Close mobile menu');
-      fireEvent.keyDown(backdropButton, { key: 'Escape' });
-
-      expect(menuToggle).toHaveTextContent('Menu');
-    });
-
-    it('closes mobile menu when clicking nav link', () => {
-      const blok = createMockBlok({
-        nav_items: [createMockNavItem('nav-1', 'About')],
-      });
-      const { getByTestId, container } = render(<Header blok={blok} />);
-
-      // Open mobile menu
-      const menuToggle = getByTestId('menu-toggle');
-      fireEvent.click(menuToggle);
-
-      // Find nav link in mobile menu and click it
-      const mobileLinks = container.querySelectorAll('.fixed a');
-      if (mobileLinks.length > 0) {
-        fireEvent.click(mobileLinks[0]);
-      }
-    });
-
-    it('marks active nav item in mobile menu', () => {
-      mockPathname.mockReturnValue('/about');
-      const blok = createMockBlok({
-        nav_items: [createMockNavItem('nav-1', 'About')],
-      });
-      // Set link to match active pattern
-      blok.nav_items![0].link = { cached_url: 'about', linktype: 'story' as const };
-
-      const { getByTestId } = render(<Header blok={blok} />);
-
-      // Open mobile menu
-      const menuToggle = getByTestId('menu-toggle');
-      fireEvent.click(menuToggle);
-    });
-
-    it('applies active styles to dropdown item with sub-items in mobile menu', () => {
-      mockPathname.mockReturnValue('/services');
-      const blok = createMockBlok({
-        nav_items: [
-          createMockNavItem('nav-1', 'Services', [
-            createMockSubNavItem('sub-1', 'Service 1', '/service-1'),
-          ]),
-        ],
-      });
-      blok.nav_items![0].link = { cached_url: 'services', linktype: 'story' as const };
-
-      const { getByTestId, container } = render(<Header blok={blok} />);
-
-      // Open mobile menu
-      const menuToggle = getByTestId('menu-toggle');
-      fireEvent.click(menuToggle);
-
-      // Find the dropdown button in aside element
-      const aside = container.querySelector('aside');
-      const dropdownButton = aside?.querySelector('button');
-      const buttonText = dropdownButton?.querySelector('p');
-      expect(buttonText).toHaveClass('text-primary-800');
-
-      // Check chevron also has active color
-      const chevron = dropdownButton?.querySelector('svg');
-      expect(chevron).toHaveClass('text-primary-800');
-    });
-
-    it('uses fallback href for sub-items with undefined link properties', () => {
-      const blok = createMockBlok({
-        nav_items: [
-          createMockNavItem('nav-1', 'Services', [
-            createMockSubNavItem('sub-1', 'Service 1'),
-          ]),
-        ],
-      });
-
-      const { getByTestId, container } = render(<Header blok={blok} />);
-
-      // Open mobile menu
-      const menuToggle = getByTestId('menu-toggle');
-      fireEvent.click(menuToggle);
-
-      // Click to expand dropdown
-      const dropdownButtons = container.querySelectorAll('.fixed button');
-      const servicesButton = Array.from(dropdownButtons).find(btn =>
-        btn.textContent?.includes('Services')
-      );
-
-      if (servicesButton) {
-        fireEvent.click(servicesButton);
-
-        // Check that subitem link uses fallback #
-        const subItemLinks = container.querySelectorAll('.fixed a');
-        const serviceLink = Array.from(subItemLinks).find(link =>
-          link.textContent?.includes('Service 1')
-        );
-        expect(serviceLink).toHaveAttribute('href', '/service 1');
-      }
-    });
-  });
-
-  describe('Cleanup', () => {
-    it('restores body overflow on unmount', () => {
-      const blok = createMockBlok();
-      const { getByTestId, unmount } = render(<Header blok={blok} />);
-
-      // Open menu
-      const menuToggle = getByTestId('menu-toggle');
-      fireEvent.click(menuToggle);
-      expect(document.body.style.overflow).toBe('hidden');
-
-      // Unmount
-      unmount();
-      expect(document.body.style.overflow).toBe('');
-    });
-  });
-
-  describe('Dropdown Animation', () => {
-    beforeEach(() => {
-      vi.useFakeTimers();
-    });
-
-    afterEach(() => {
-      vi.useRealTimers();
-    });
-
-    it('collapses dropdown with animation delay', () => {
-      const blok = createMockBlok({
-        nav_items: [
-          createMockNavItem('nav-1', 'Services', [
-            createMockSubNavItem('sub-1', 'Service 1', '/service-1'),
-          ]),
-        ],
-      });
-      const { getByTestId, container } = render(<Header blok={blok} />);
-
-      // Open mobile menu
-      const menuToggle = getByTestId('menu-toggle');
-      fireEvent.click(menuToggle);
-
-      // Find and click the dropdown button to expand
-      const dropdownButtons = container.querySelectorAll('button');
-      const servicesButton = Array.from(dropdownButtons).find(btn =>
-        btn.textContent?.includes('Services')
-      );
-
-      if (servicesButton) {
-        // Expand dropdown
-        fireEvent.click(servicesButton);
-        act(() => {
-          vi.advanceTimersByTime(10);
-        });
-
-        // Now collapse dropdown
-        fireEvent.click(servicesButton);
-
-        // After 300ms, the render items should be removed
-        act(() => {
-          vi.advanceTimersByTime(300);
-        });
-      }
-    });
-
-    it('expands dropdown with animation delay', () => {
-      const blok = createMockBlok({
-        nav_items: [
-          createMockNavItem('nav-1', 'Services', [
-            createMockSubNavItem('sub-1', 'Service 1', '/service-1'),
-          ]),
-        ],
-      });
-      const { getByTestId, container } = render(<Header blok={blok} />);
-
-      // Open mobile menu
-      const menuToggle = getByTestId('menu-toggle');
-      fireEvent.click(menuToggle);
-
-      // Find and click the dropdown button
-      const dropdownButtons = container.querySelectorAll('button');
-      const servicesButton = Array.from(dropdownButtons).find(btn =>
-        btn.textContent?.includes('Services')
-      );
-
-      if (servicesButton) {
-        fireEvent.click(servicesButton);
-
-        // After 10ms delay, the expanded state should be set
-        act(() => {
-          vi.advanceTimersByTime(10);
-        });
-      }
+      expect(header).toHaveClass('sticky', 'top-0', 'z-50');
     });
   });
 });

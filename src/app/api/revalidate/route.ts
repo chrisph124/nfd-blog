@@ -20,10 +20,11 @@ export async function POST(request: NextRequest) {
     // Revalidate homepage
     revalidatePath('/');
 
-    // Revalidate SEO surfaces (sitemap, RSS, llms.txt) — affected by every publish/unpublish
+    // Revalidate SEO surfaces (sitemap, RSS, llms.txt/llms-full.txt) — affected by every publish/unpublish
     revalidatePath('/sitemap.xml');
     revalidatePath('/rss.xml');
     revalidatePath('/llms.txt');
+    revalidatePath('/llms-full.txt');
 
     // Revalidate specific story path if provided
     if (story?.full_slug) {
@@ -38,6 +39,10 @@ export async function POST(request: NextRequest) {
       if (slug.startsWith('posts/')) {
         const strippedSlug = slug.replace(/^posts\//, '');
         revalidatePath(`/${strippedSlug}`);
+
+        // The `/{slug}.md` surface is served by the /api/md/[slug] handler (the
+        // middleware rewrite destination = the real cache key) (RT#2).
+        revalidatePath(`/api/md/${strippedSlug}`);
       }
 
       // Revalidate catch-all route

@@ -58,3 +58,5 @@ docs/*
 repomix-output.xml
 
 CHANGELOG.md
+
+.playwright-mcp/

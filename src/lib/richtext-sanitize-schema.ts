@@ -1,0 +1,40 @@
+import { defaultSchema } from 'rehype-sanitize';
+
+/**
+ * Shared rehype-sanitize schema — allows the Storyblok content tags the blog
+ * uses while keeping strict XSS protection. Both the richtext pipeline and the
+ * code_tabs highlighter run CMS-authored HTML through this SAME schema so they
+ * share one XSS guarantee (both outputs feed dangerouslySetInnerHTML).
+ *
+ * Shiki adds its own attributes AFTER sanitize, so only `class` needs allowing
+ * on `pre`/`code` here (to preserve the `language-*` hint sanitize would drop).
+ */
+export const richtextSanitizeSchema: typeof defaultSchema = {
+  ...defaultSchema,
+  protocols: {
+    href: ['http', 'https', 'mailto'],
+    src: ['http', 'https'],
+  },
+  attributes: {
+    ...defaultSchema.attributes,
+    img: [...(defaultSchema.attributes?.img || []), 'loading', 'srcset', 'sizes', 'title'],
+    iframe: [...(defaultSchema.attributes?.iframe || []), 'loading', 'src', 'allowfullscreen'],
+    video: [...(defaultSchema.attributes?.video || []), 'preload', 'src', 'controls'],
+    code: [...(defaultSchema.attributes?.code || []), 'class'],
+    pre: [...(defaultSchema.attributes?.pre || []), 'class'],
+    // Astro-style code frame: allow ONLY the wrapper/header class values emitted
+    // by the markdown renderer so `.code-frame` / `.code-frame__title` survive
+    // sanitize. hast-util-sanitize keys on the `className` property; the tuple
+    // form restricts allowed values (tighter than allowing arbitrary classes).
+    figure: [...(defaultSchema.attributes?.figure || []), ['className', 'code-frame']],
+    figcaption: [...(defaultSchema.attributes?.figcaption || []), ['className', 'code-frame__title']],
+    // The macOS code-frame header wraps its centered label in a <span>; allow
+    // ONLY that class value so the fence renderer's label survives sanitize
+    // (the richtext plugin injects its span AFTER sanitize, so this is for fences).
+    span: [...(defaultSchema.attributes?.span || []), ['className', 'code-frame__label']],
+  },
+  tagNames: [
+    ...(defaultSchema.tagNames || []),
+    'iframe', 'video', 'source', 'figure', 'figcaption',
+  ],
+};

@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { MediaBlok, StoryblokLink } from '@/types/storyblok';
 import { makeStoryblokEditable } from '@/lib/storyblok-utils';
+import { getYouTubeId, isYouTubeUrl } from '@/lib/youtube';
 
 // ============================================================================
 // Constants
@@ -20,9 +21,6 @@ const ASPECT_RATIO_CLASSES = {
 
 type AspectRatio = keyof typeof ASPECT_RATIO_CLASSES;
 
-const YOUTUBE_REGEX = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-const YOUTUBE_ID_LENGTH = 11;
-
 // ============================================================================
 // Utility Functions
 // ============================================================================
@@ -32,28 +30,6 @@ const isVideoFile = (filename: string): boolean =>
 
 const isImageFile = (filename: string): boolean =>
   IMAGE_EXTENSIONS.some(ext => filename.toLowerCase().endsWith(ext));
-
-const getYouTubeId = (url: string): string | null => {
-  const match = YOUTUBE_REGEX.exec(url);
-  return match?.[2]?.length === YOUTUBE_ID_LENGTH ? match[2] : null;
-};
-
-const YOUTUBE_HOSTS = new Set([
-  'youtube.com',
-  'www.youtube.com',
-  'm.youtube.com',
-  'youtube-nocookie.com',
-  'www.youtube-nocookie.com',
-  'youtu.be',
-]);
-
-const isYouTubeUrl = (url: string): boolean => {
-  try {
-    return YOUTUBE_HOSTS.has(new URL(url).hostname);
-  } catch {
-    return false;
-  }
-};
 
 const getAspectRatioClass = (aspectRatio: string, defaultClass = ''): string => {
   // Safe object access with type validation

@@ -41,6 +41,16 @@ export function buildOrganizationJsonLd({
   };
 }
 
+/** A code unit surfaced as a `SoftwareSourceCode` node; `code` is intentionally
+ *  not emitted (RT#11) — it lives losslessly at the post's `/{slug}.md`. */
+interface CodeSampleInput {
+  name: string;
+  language: string;
+}
+
+/** Cap on inline `articleBody` — enough for rich results, avoids page bloat (RT#11). */
+const ARTICLE_BODY_MAX_CHARS = 5000;
+
 interface BlogPostingJsonLdParams {
   siteUrl: string;
   slug: string;
@@ -52,6 +62,8 @@ interface BlogPostingJsonLdParams {
   authorName: string;
   authorUrl?: string;
   wordCount?: number;
+  articleBody?: string;
+  codeSamples?: CodeSampleInput[];
   organizationName?: string;
   organizationLogoUrl?: string;
 }
@@ -67,11 +79,23 @@ export function buildBlogPostingJsonLd({
   authorName,
   authorUrl,
   wordCount,
+  articleBody,
+  codeSamples,
   organizationName = 'Notes of Dev',
   organizationLogoUrl,
 }: BlogPostingJsonLdParams) {
   const canonicalUrl = `${siteUrl}/${slug}`;
   const publisherLogo = organizationLogoUrl ?? `${siteUrl}/og-default.jpg`;
+  const trimmedBody = articleBody?.trim();
+
+  // Each code unit points at the lossless `/{slug}.md`; `text` is omitted so the
+  // inline <script> never carries a duplicate copy of every code block (RT#11).
+  const hasPart = codeSamples?.map((sample) => ({
+    '@type': 'SoftwareSourceCode',
+    ...(sample.name && { name: sample.name }),
+    ...(sample.language && { programmingLanguage: sample.language }),
+    url: `${canonicalUrl}.md`,
+  }));
 
   return {
     '@context': 'https://schema.org',
@@ -87,6 +111,8 @@ export function buildBlogPostingJsonLd({
     ...(dateModified && { dateModified }),
     ...(imageUrl && { image: imageUrl }),
     ...(typeof wordCount === 'number' && wordCount > 0 && { wordCount }),
+    ...(trimmedBody && { articleBody: trimmedBody.slice(0, ARTICLE_BODY_MAX_CHARS) }),
+    ...(hasPart && hasPart.length > 0 && { hasPart }),
     author: {
       '@type': 'Person',
       name: authorName,
