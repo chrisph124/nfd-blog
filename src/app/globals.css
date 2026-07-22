@@ -893,13 +893,16 @@ pre.shiki[data-collapsed="false"] [data-toggle-btn]:focus-visible {
   overflow: hidden;
 }
 
-/* Post-body code frames narrow to 80% and center from tablet up; mobile keeps
-   them full-width. `.code-frame` is only ever emitted inside post content
-   (Markdown/richtext bloks) — Comparison/Alert bodies also carry `.richtext` but
-   render via renderRichText and never produce a `.code-frame`, so they're
-   unaffected. 768px = Tailwind md, matching the other px breakpoints in this file. */
+/* Post-body code (single frames + code_tabs groups) narrows to 80% and centers
+   from tablet up; mobile keeps them full-width. `.code-frame` is scoped to
+   `.richtext` (Comparison/Alert bodies also carry `.richtext` but render via
+   renderRichText and never produce a `.code-frame`, so they're unaffected);
+   `.code-tabs` is its own body-level blok, targeted directly. `margin-inline:
+   auto` centers while preserving each element's block margins. 768px = Tailwind
+   md, matching the other px breakpoints in this file. */
 @media (min-width: 768px) {
-  .richtext .code-frame {
+  .richtext .code-frame,
+  .code-tabs {
     width: 80%;
     margin-inline: auto;
   }
