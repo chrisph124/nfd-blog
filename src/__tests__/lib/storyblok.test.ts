@@ -24,7 +24,7 @@ vi.mock('react', async (importOriginal) => {
   };
 });
 
-import { getSiteUrl, fetchHomeStory, fetchStoryBySlug, fetchStory, fetchAllPosts } from '@/lib/storyblok';
+import { getSiteUrl, fetchHomeStory, fetchStoryBySlug, fetchPublishedStoryBySlug, fetchStory, fetchAllPosts } from '@/lib/storyblok';
 
 const createMockPageStory = (slug = 'home'): StoryblokStory<PageBlok> => ({
   id: 1,
@@ -220,6 +220,49 @@ describe('fetchStoryBySlug', () => {
       .mockRejectedValueOnce(new Error('Not found'));
 
     const result = await fetchStoryBySlug('non-existent');
+
+    expect(result).toBeNull();
+  });
+});
+
+// ============================================================================
+// fetchPublishedStoryBySlug
+// ============================================================================
+
+describe('fetchPublishedStoryBySlug', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('returns post with source="posts" when found, forcing version="published"', async () => {
+    const mockPost = createMockPostStory('my-post');
+    mockGet.mockResolvedValue({ data: { story: mockPost } });
+
+    const result = await fetchPublishedStoryBySlug('my-post');
+
+    expect(result).toEqual({ story: mockPost, source: 'posts' });
+    expect(mockGet).toHaveBeenCalledWith('cdn/stories/posts/my-post', { version: 'published' });
+  });
+
+  it('falls back to page with source="pages" when post not found', async () => {
+    const mockPage = createMockPageStory('about');
+    mockGet
+      .mockRejectedValueOnce(new Error('Not found'))
+      .mockResolvedValueOnce({ data: { story: mockPage } });
+
+    const result = await fetchPublishedStoryBySlug('about');
+
+    expect(result).toEqual({ story: mockPage, source: 'pages' });
+    expect(mockGet).toHaveBeenCalledTimes(2);
+    expect(mockGet).toHaveBeenCalledWith('cdn/stories/about', { version: 'published' });
+  });
+
+  it('returns null when both post and page fail', async () => {
+    mockGet
+      .mockRejectedValueOnce(new Error('Not found'))
+      .mockRejectedValueOnce(new Error('Not found'));
+
+    const result = await fetchPublishedStoryBySlug('non-existent');
 
     expect(result).toBeNull();
   });

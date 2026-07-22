@@ -296,5 +296,23 @@ describe('Markdown Component', () => {
       expect(html).not.toContain('code-frame__dots');
       expect(html).not.toContain('code-frame--terminal');
     });
+
+    it('frames an indented code block (no fence lang → "text" label)', async () => {
+      // A 4-space-indented block is a code token with `lang` undefined, exercising
+      // the `lang ?? ''` fallback in renderCode (fenced blocks pass an empty string).
+      const { processRichtext } = await import('@/lib/richtext-pipeline');
+      const blok: MarkdownBlok = {
+        _uid: 'test-md-chrome-4',
+        component: 'markdown',
+        content: '    const a = 1;',
+      };
+
+      await Markdown({ blok });
+      const html = lastHtml(processRichtext);
+      expect(html).toContain('class="code-frame"');
+      expect(html).toContain('<span class="code-frame__label">text</span>');
+      // no language → no language-* class on <code>
+      expect(html).not.toContain('language-');
+    });
   });
 });
