@@ -28,6 +28,10 @@ export const richtextSanitizeSchema: typeof defaultSchema = {
     // form restricts allowed values (tighter than allowing arbitrary classes).
     figure: [...(defaultSchema.attributes?.figure || []), ['className', 'code-frame']],
     figcaption: [...(defaultSchema.attributes?.figcaption || []), ['className', 'code-frame__title']],
+    // The macOS code-frame header wraps its centered label in a <span>; allow
+    // ONLY that class value so the fence renderer's label survives sanitize
+    // (the richtext plugin injects its span AFTER sanitize, so this is for fences).
+    span: [...(defaultSchema.attributes?.span || []), ['className', 'code-frame__label']],
   },
   tagNames: [
     ...(defaultSchema.tagNames || []),

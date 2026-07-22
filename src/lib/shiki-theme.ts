@@ -5,6 +5,9 @@
  *
  * `defaultColor: false` enables CSS-variable mode (`--shiki-light`/`--shiki-dark`)
  * so the existing globals.css light/dark rules apply to both surfaces.
+ *
+ * `addLanguageClass: true` keeps a `language-*` class on the highlighted `<pre>`
+ * so `rehypeCodeFrame` can read the language for the code-frame header label.
  */
 export const shikiRehypeOptions = {
   themes: {
@@ -12,4 +15,5 @@ export const shikiRehypeOptions = {
     dark: 'one-dark-pro' as const,
   },
   defaultColor: false as const,
+  addLanguageClass: true as const,
 };
