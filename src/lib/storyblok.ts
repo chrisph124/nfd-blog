@@ -20,6 +20,8 @@ import CardItem from "@/components/molecules/CardItem";
 import PostList from "@/components/organisms/PostList";
 import ContentCards from "@/components/organisms/ContentCards";
 import ContentCardBlock from "@/components/molecules/ContentCardBlock";
+import Alert from "@/components/molecules/Alert";
+import Comparison from "@/components/molecules/Comparison";
 
 import { apiPlugin, storyblokInit } from '@storyblok/react/rsc';
 import type { PostBlok, PageBlok, StoryblokStory } from '@/types/storyblok';
@@ -53,6 +55,8 @@ const components = {
   post_list: PostList,
   content_cards: ContentCards,
   content_card_block: ContentCardBlock,
+  alert: Alert,
+  comparison: Comparison,
 } as const;
 
 // Server-side initialization with access token

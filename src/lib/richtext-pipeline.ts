@@ -7,7 +7,67 @@ import { visit } from 'unist-util-visit';
 import type { Root, Element, Text, Parent } from 'hast';
 import { richtextSanitizeSchema } from './richtext-sanitize-schema';
 import { shikiRehypeOptions } from './shiki-theme';
+import { buildCodeLabel } from './code-frame';
 import { getYouTubeId, isYouTubeUrl } from './youtube';
+
+/** Normalize a HAST node's className (array | string | absent) to string[]. */
+function classList(node: Element): string[] {
+  const cls = node.properties?.className;
+  if (Array.isArray(cls)) return cls.map(String);
+  if (typeof cls === 'string') return cls.split(/\s+/).filter(Boolean);
+  return [];
+}
+
+/**
+ * Wrap each highlighted `pre.shiki` in the macOS code-frame (a header carrying
+ * traffic-light dots via CSS + the language label). Skips a `pre` already inside
+ * a `.code-frame` figure — those are Markdown fences, framed with their filename
+ * by `renderCode`. Runs AFTER rehypeShiki so `pre.shiki` and its `language-*`
+ * class (from `addLanguageClass`) exist; the second visit of the now-nested pre
+ * is a no-op because its parent is then a `.code-frame` figure.
+ */
+function rehypeCodeFrame() {
+  return (tree: Root) => {
+    visit(tree, 'element', (node: Element, index, parent: Parent | undefined) => {
+      if (node.tagName !== 'pre' || parent === undefined || index === undefined) return;
+      if (!classList(node).includes('shiki')) return;
+      if (
+        parent.type === 'element' &&
+        (parent as Element).tagName === 'figure' &&
+        classList(parent as Element).includes('code-frame')
+      ) {
+        return;
+      }
+
+      const langClass = classList(node).find((c) => c.startsWith('language-'));
+      const language = langClass ? langClass.slice('language-'.length) : '';
+      const label = buildCodeLabel(undefined, language);
+
+      const figure: Element = {
+        type: 'element',
+        tagName: 'figure',
+        properties: { className: ['code-frame'] },
+        children: [
+          {
+            type: 'element',
+            tagName: 'figcaption',
+            properties: { className: ['code-frame__title'] },
+            children: [
+              {
+                type: 'element',
+                tagName: 'span',
+                properties: { className: ['code-frame__label'] },
+                children: [{ type: 'text', value: label }],
+              },
+            ],
+          },
+          node,
+        ],
+      };
+      parent.children.splice(index, 1, figure);
+    });
+  };
+}
 
 /**
  * Rehype plugin to add lazy loading attributes to media elements
@@ -236,6 +296,7 @@ export async function processRichtext(html: string): Promise<string> {
     .use(rehypeSanitize, richtextSanitizeSchema) // sanitize XSS BEFORE markdown detection
     .use(rehypeMarkdownDetect) // detect markdown patterns after sanitize
     .use(rehypeShiki, shikiRehypeOptions)
+    .use(rehypeCodeFrame) // wrap richtext code blocks in the macOS code-frame
     .use(rehypeImageFigure) // wrap standalone images in a captioned figure
     .use(rehypeYouTubeEmbed) // embed a lone YouTube URL as a responsive iframe
     .use(rehypeLazyLoading)

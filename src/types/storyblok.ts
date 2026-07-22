@@ -52,6 +52,17 @@ export interface StoryblokLink {
 // ============================================================================
 
 /**
+ * alert component
+ */
+export interface AlertBlok extends StoryblokBlok {
+  component: 'alert';
+  icon?: 'information' | 'attention' | 'checked';
+  color?: 'emerald' | 'primary' | 'secondary' | 'cyan' | 'magenta';
+  title?: string;
+  body?: string;
+}
+
+/**
  * card_item component
  */
 export interface CardItemBlok extends StoryblokBlok {
@@ -76,6 +87,26 @@ export interface CodeTabBlok extends StoryblokBlok {
 export interface CodeTabsBlok extends StoryblokBlok {
   component: 'code_tabs';
   tabs?: (CodeTabBlok)[];
+}
+
+/**
+ * comparison_card component (child of comparison; rendered only via its parent)
+ */
+export interface ComparisonCardBlok extends StoryblokBlok {
+  component: 'comparison_card';
+  tone?: 'positive' | 'negative' | 'neutral';
+  heading?: string;
+  // richtext at runtime; typed `string` per generate-types' richtext→string map.
+  body?: string;
+}
+
+/**
+ * comparison component
+ */
+export interface ComparisonBlok extends StoryblokBlok {
+  component: 'comparison';
+  title?: string;
+  columns?: (ComparisonCardBlok)[];
 }
 
 /**
@@ -221,7 +252,7 @@ export interface PostBlok extends StoryblokBlok {
   title?: string;
   featured_image?: StoryblokAsset;
   excerpt?: string;
-  body?: (RichtextBlok | MarkdownBlok | MediaBlok | CodeTabsBlok)[];
+  body?: (RichtextBlok | MarkdownBlok | MediaBlok | CodeTabsBlok | AlertBlok | ComparisonBlok)[];
   SEO?: Record<string, unknown>;
   og_title?: string;
   og_description?: string;
@@ -311,9 +342,12 @@ export interface StoryblokComponentProps<T extends StoryblokBlok = StoryblokBlok
  * Union of all blok types
  */
 export type AnyBlok =
+  | AlertBlok
   | CardItemBlok
   | CodeTabBlok
   | CodeTabsBlok
+  | ComparisonBlok
+  | ComparisonCardBlok
   | ContentCardBlockBlok
   | ContentCardsBlok
   | CtaBlok

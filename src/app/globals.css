@@ -75,6 +75,23 @@
   --neon-cyan-800: #00B3B2;
   --neon-cyan-900: #009A99;
 
+  /* Emerald (brand-inverting green — palette had none) */
+  --emerald-50:  #ecfdf5;
+  --emerald-100: #d1fae5;
+  --emerald-200: #a7f3d0;
+  --emerald-300: #6ee7b7;
+  --emerald-400: #34d399;
+  --emerald-500: #10b981;
+  --emerald-600: #059669;
+  --emerald-700: #047857;
+  --emerald-800: #065f46;
+  --emerald-900: #064e3b;
+
+  /* Rose accent for true section <h2>. Theme-agnostic constants — defined once
+     here (no dark override); each h2 rule picks the light/dark shade itself. */
+  --rose-700: #c70036;
+  --rose-500: #ff2056;
+
   /* ContentCards gradient backgrounds */
   --content-card-primary-from: #B8C4FF;
   --content-card-primary-to: #9BA8F5;
@@ -175,6 +192,18 @@
   --neon-cyan-800: #CCFEFD;
   --neon-cyan-900: #F0FFFE;
 
+  /* Emerald scale inverted */
+  --emerald-50:  #064e3b;
+  --emerald-100: #065f46;
+  --emerald-200: #047857;
+  --emerald-300: #059669;
+  --emerald-400: #10b981;
+  --emerald-500: #34d399;
+  --emerald-600: #6ee7b7;
+  --emerald-700: #a7f3d0;
+  --emerald-800: #d1fae5;
+  --emerald-900: #ecfdf5;
+
   /* ContentCards gradient backgrounds */
   --content-card-primary-from: #2A3563;
   --content-card-primary-to: #3B4B8B;
@@ -254,6 +283,18 @@
   --color-neon-cyan-700: var(--neon-cyan-700);
   --color-neon-cyan-800: var(--neon-cyan-800);
   --color-neon-cyan-900: var(--neon-cyan-900);
+
+  /* Emerald */
+  --color-emerald-50: var(--emerald-50);
+  --color-emerald-100: var(--emerald-100);
+  --color-emerald-200: var(--emerald-200);
+  --color-emerald-300: var(--emerald-300);
+  --color-emerald-400: var(--emerald-400);
+  --color-emerald-500: var(--emerald-500);
+  --color-emerald-600: var(--emerald-600);
+  --color-emerald-700: var(--emerald-700);
+  --color-emerald-800: var(--emerald-800);
+  --color-emerald-900: var(--emerald-900);
 
   /* Semantic surface tokens */
   --color-surface-inverted: var(--surface-inverted);
@@ -378,7 +419,21 @@ h2, .h2 {
   line-height: var(--line-height-h2);
   font-weight: var(--font-weight-h2);
   font-family: var(--font-nunito), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  color: var(--primary-900);
 }
+
+/* Dark theme h2 uses lighter primary (mirrors h3) */
+[data-theme="dark"] h2,
+[data-theme="dark"] .h2 {
+  color: var(--primary-400);
+}
+
+/* True section-level <h2> — rose accent. The :not() chain (specificity 0,5,1)
+   beats the base h2 rule and Tailwind prose's :where() heading color without
+   !important. Excludes <h2 class="h1|h3|h4|h5|h6"> so a class-downgraded heading
+   keeps its own color; the .h2 class is unaffected. */
+h2:not(.h1):not(.h3):not(.h4):not(.h5):not(.h6) { color: var(--rose-700); }
+[data-theme="dark"] h2:not(.h1):not(.h3):not(.h4):not(.h5):not(.h6) { color: var(--rose-500); }
 
 h3, .h3 {
   font-size: var(--font-size-h3);
@@ -682,10 +737,15 @@ pre.shiki code {
   display: block;
 }
 
-/* In a title bar: push to the right edge, in flow with the filename. */
+/* Flat title bar (code_tabs per-file caption): push copy to the right edge. */
 .code-frame__title [data-copy-btn] {
   margin-left: auto;
   margin-right: -0.4rem;
+}
+/* Real code frame: the header is a 3-col grid — pin copy to the right column. */
+.code-frame > .code-frame__title [data-copy-btn] {
+  justify-self: end;
+  margin: 0 -0.4rem 0 0;
 }
 
 /* Bare code block (no title bar): overlay at the top-right of the code. */
@@ -833,13 +893,31 @@ pre.shiki[data-collapsed="false"] [data-toggle-btn]:focus-visible {
   overflow: hidden;
 }
 
+/* Post-body code (single frames + code_tabs groups) narrows to 80% and centers
+   from tablet up; mobile keeps them full-width. `.code-frame` is scoped to
+   `.richtext` (Comparison/Alert bodies also carry `.richtext` but render via
+   renderRichText and never produce a `.code-frame`, so they're unaffected);
+   `.code-tabs` is its own body-level blok, targeted directly. `margin-inline:
+   auto` centers while preserving each element's block margins. 768px = Tailwind
+   md, matching the other px breakpoints in this file. */
+@media (min-width: 768px) {
+  .richtext .code-frame,
+  .code-tabs {
+    width: 80%;
+    margin-inline: auto;
+  }
+}
+
+/* Shared header bar — used by real code frames (Markdown fences + richtext) AND
+   by each code_tabs panel's per-file filename caption. Base is a plain flex bar;
+   padding matches the code body (1.25rem) so it lines up; split from the code by
+   a white hairline. The macOS chrome (grid + dots + centered label) is layered
+   on below ONLY for a figcaption that is a direct child of figure.code-frame. */
 .code-frame__title {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   margin: 0;
-  /* Horizontal padding matches the code body (1.25rem) so the filename lines up
-     with the code; split from the code by a white hairline. */
   padding: 0.7rem 1.25rem;
   font-family: var(--font-nunito), -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 0.8rem;
@@ -847,6 +925,39 @@ pre.shiki[data-collapsed="false"] [data-toggle-btn]:focus-visible {
   color: #abb2bf;
   background: #282c34;
   border-bottom: 1px solid rgb(255 255 255 / 0.12);
+}
+
+/* macOS-terminal chrome — the default look for every real code frame. Three
+   columns: traffic-light dots (::before) · centered label · copy button. Scoped
+   with `>` so it never leaks into code_tabs' per-file `.code-frame__title`
+   captions (those live inside `.code-tabs__panel`, not `.code-frame`). */
+.code-frame > .code-frame__title {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+}
+/* Three traffic lights drawn from one pseudo-element — no dot markup anywhere. */
+.code-frame > .code-frame__title::before {
+  content: "";
+  justify-self: start;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 9999px;
+  background: #ff5f56;
+  box-shadow: 1.15rem 0 0 #ffbd2e, 2.3rem 0 0 #27c93f;
+}
+/* Centered filename/language label, authored case; truncates when it gets long
+   so the dots and copy button never get pushed off the bar. */
+.code-frame > .code-frame__title .code-frame__label {
+  justify-self: center;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-nunito), monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  opacity: 0.85;
 }
 
 /* code_tabs — file-folder tabs: rounded-top tabs whose ACTIVE one flares into
@@ -872,6 +983,22 @@ pre.shiki[data-collapsed="false"] [data-toggle-btn]:focus-visible {
   border-radius: 0;
   position: relative;
   z-index: 1;
+}
+
+/* macOS traffic-light dots on the tab bar, left of the first file tab — shares
+   the frame's chrome vocabulary. Drawn from one pseudo-element (box-shadow adds
+   the amber + green); the wide margin-right reserves room for those two shadow
+   dots (which take no layout width) before the first tab. */
+.code-tabs__list::before {
+  content: "";
+  align-self: center;
+  flex: none;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 9999px;
+  background: #ff5f56;
+  box-shadow: 1.05rem 0 0 #ffbd2e, 2.1rem 0 0 #27c93f;
+  margin: 0 2.6rem 0.35rem 0.4rem;
 }
 
 .code-tabs__trigger {
@@ -973,7 +1100,9 @@ pre.shiki[data-collapsed="false"] [data-toggle-btn]:focus-visible {
 .code-frame pre.shiki,
 .code-tabs pre.shiki {
   margin: 0;
-  padding: 1.75rem 1.25rem;
+  /* Extra bottom padding (2.5rem = 40px) gives the code room to breathe above
+     the frame edge / collapse affordance. */
+  padding: 1.75rem 1.25rem 2.5rem;
   border-radius: 0;
   box-shadow: none;
 }

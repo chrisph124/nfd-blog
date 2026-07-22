@@ -1,5 +1,7 @@
 import type {
+  AlertBlok,
   CodeTabsBlok,
+  ComparisonBlok,
   MarkdownBlok,
   MediaBlok,
   PostBlok,
@@ -18,7 +20,13 @@ import { AUTHOR_NAME } from '@/lib/seo/author';
 import { stripEntities } from '@/lib/seo/strip-entities';
 import { isYouTubeUrl } from '@/lib/youtube';
 
-type PostBodyBlok = RichtextBlok | MarkdownBlok | MediaBlok | CodeTabsBlok;
+type PostBodyBlok =
+  | RichtextBlok
+  | MarkdownBlok
+  | MediaBlok
+  | CodeTabsBlok
+  | AlertBlok
+  | ComparisonBlok;
 
 const VIDEO_EXTENSIONS = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv'];
 const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.avif', '.bmp'];
@@ -93,6 +101,30 @@ function serializeBlok(blok: PostBodyBlok): string {
       return mediaToMarkdown(blok);
     case 'code_tabs':
       return codeTabsToMarkdown(blok);
+    case 'alert': {
+      // TL;DR/callout: body is a richtext field (typed string, object at runtime).
+      // Emit its prose as markdown, led by the authored title when present.
+      const bodyMd = richtextToMarkdown(blok.body as unknown as RichtextNode).trim();
+      if (!bodyMd) return '';
+      const title = (blok.title ?? '').trim();
+      return title ? `**${title}:** ${bodyMd}` : bodyMd;
+    }
+    case 'comparison': {
+      // Side-by-side cards flatten to sequential prose blocks — each led by its
+      // heading — so the comparison reads intact on the AI-legible surface.
+      const parts = (blok.columns ?? [])
+        .map((card) => {
+          const bodyMd = richtextToMarkdown(card.body as unknown as RichtextNode).trim();
+          const heading = (card.heading ?? '').trim();
+          if (heading && bodyMd) return `**${heading}:** ${bodyMd}`;
+          return heading ? `**${heading}**` : bodyMd;
+        })
+        .filter((part) => part.length > 0);
+      if (parts.length === 0) return '';
+      const title = (blok.title ?? '').trim();
+      const joined = parts.join('\n\n');
+      return title ? `**${title}**\n\n${joined}` : joined;
+    }
     default: {
       // Compile-time guard: a new body blok type forces a case above. At runtime
       // an unknown component (schema drift) is skipped, never thrown (RT#5).
@@ -170,6 +202,27 @@ export function extractPostContent(
       case 'code_tabs':
         codeSamples.push(...codeTabsToCodeSamples(blok));
         break;
+      case 'alert': {
+        // TL;DR prose counts toward articleBody/wordCount; a summary carries no
+        // code samples (those live in the body bloks).
+        const node = blok.body as unknown as RichtextNode;
+        const text = richtextToPlainText(node).trim();
+        if (text) proseParts.push(text);
+        break;
+      }
+      case 'comparison': {
+        // Card headings + prose bodies count toward articleBody/wordCount; like
+        // alert, a comparison carries no code samples (those live in body bloks).
+        const title = (blok.title ?? '').trim();
+        if (title) proseParts.push(title);
+        for (const card of blok.columns ?? []) {
+          const heading = (card.heading ?? '').trim();
+          if (heading) proseParts.push(heading);
+          const text = richtextToPlainText(card.body as unknown as RichtextNode).trim();
+          if (text) proseParts.push(text);
+        }
+        break;
+      }
       case 'media':
         break;
       default:

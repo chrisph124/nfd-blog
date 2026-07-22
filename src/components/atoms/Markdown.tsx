@@ -3,6 +3,7 @@ import type { MarkdownBlok } from '@/types/storyblok';
 import { processRichtext } from '@/lib/richtext-pipeline';
 import { RICHTEXT_PROSE_CLASSES } from '@/lib/richtext-prose';
 import { escapeHtml } from '@/lib/html-escape';
+import { buildCodeLabel } from '@/lib/code-frame';
 import RichtextReveal from '@/components/atoms/RichtextReveal';
 import CodeBlockEnhancer from '@/components/atoms/CodeBlockEnhancer';
 
@@ -14,11 +15,13 @@ interface MarkdownProps {
 const CODE_TITLE_META = /\btitle=(?:"([^"]*)"|'([^']*)')/;
 
 /**
- * Render a fenced code block, adding an Astro-style filename header when the
- * fence carries a `title="…"` meta (e.g. ```ts title="src/foo.ts"). Shiki
- * highlighting runs later in the rehype pipeline; here we only emit escaped
- * HTML + the `language-*` class Shiki reads. Title-less fences render exactly
- * as before, so untitled blocks stay unchanged.
+ * Render a fenced code block inside the macOS-terminal chrome (traffic-light
+ * dots · centered label · copy button). Every fence gets the frame — the label
+ * is `filename(language)` when a `title="…"` meta is present (e.g.
+ * ```ts title="src/foo.ts" → `src/foo.ts(ts)`), else the language, else `text`.
+ * Shiki highlighting runs later in the rehype pipeline; here we only emit
+ * escaped HTML + the `language-*` class Shiki reads. Dots are drawn in CSS
+ * (`.code-frame__title::before`), so no dot markup is emitted.
  */
 function renderCode({ text, lang }: Tokens.Code): string {
   const language = (lang ?? '').split(/\s+/)[0] ?? '';
@@ -27,12 +30,9 @@ function renderCode({ text, lang }: Tokens.Code): string {
 
   const match = lang ? CODE_TITLE_META.exec(lang) : null;
   const title = match?.[1] ?? match?.[2];
-  // Every code block gets a header bar so the copy button always sits up top.
-  // Show the filename when given, else the language as a fallback label.
-  const isBareLang = language === '' || language === 'plaintext' || language === 'text';
-  const label = title ?? (isBareLang ? '' : language);
+  const label = buildCodeLabel(title, language);
 
-  return `<figure class="code-frame"><figcaption class="code-frame__title">${escapeHtml(label)}</figcaption>${body}</figure>`;
+  return `<figure class="code-frame"><figcaption class="code-frame__title"><span class="code-frame__label">${escapeHtml(label)}</span></figcaption>${body}</figure>`;
 }
 
 marked.use({ gfm: true, breaks: false, renderer: { code: renderCode } });
