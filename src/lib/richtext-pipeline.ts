@@ -95,13 +95,11 @@ function rehypeLazyLoading() {
  */
 function getTextContent(node: Element | Text): string {
   if (node.type === 'text') return node.value;
-  if ('children' in node) {
-    return node.children
-      .filter((child): child is Text | Element => child.type === 'text' || child.type === 'element')
-      .map(child => getTextContent(child))
-      .join('');
-  }
-  return '';
+  // Narrowed to Element here, which always carries a `children` array.
+  return node.children
+    .filter((child): child is Text | Element => child.type === 'text' || child.type === 'element')
+    .map(child => getTextContent(child))
+    .join('');
 }
 
 /**

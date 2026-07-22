@@ -24,7 +24,7 @@ const CODE_TITLE_META = /\btitle=(?:"([^"]*)"|'([^']*)')/;
  * (`.code-frame__title::before`), so no dot markup is emitted.
  */
 function renderCode({ text, lang }: Tokens.Code): string {
-  const language = (lang ?? '').split(/\s+/)[0] ?? '';
+  const language = (lang ?? '').match(/\S+/)?.[0] ?? '';
   const langClass = language ? ` class="language-${escapeHtml(language)}"` : '';
   const body = `<pre><code${langClass}>${escapeHtml(text)}</code></pre>`;
 
