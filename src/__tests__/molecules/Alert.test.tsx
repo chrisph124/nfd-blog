@@ -42,20 +42,21 @@ describe('Alert (molecule blok wrapper)', () => {
     expect(el).toHaveAttribute('role', 'note');
     expect(container.querySelector('[data-slot="alert-title"]')).toHaveTextContent('TL;DR');
     expect(el).toHaveClass(
-      'border-emerald-400',
-      'text-emerald-400',
-      'dark:border-emerald-500',
-      'dark:text-emerald-500'
+      'border-emerald-600',
+      'text-white',
+      'bg-emerald-600',
+      'dark:bg-emerald-200',
+      'dark:border-emerald-200'
     );
     expect(getByTestId('icon-information')).toBeInTheDocument();
   });
 
   it.each([
-    ['emerald', ['border-emerald-400', 'text-emerald-400', 'dark:border-emerald-500', 'dark:text-emerald-500']],
-    ['primary', ['border-primary-400', 'text-primary-400', 'dark:border-primary-500', 'dark:text-primary-500']],
-    ['secondary', ['border-secondary-400', 'text-secondary-400', 'dark:border-secondary-500', 'dark:text-secondary-500']],
-    ['cyan', ['border-neon-cyan-400', 'text-neon-cyan-400', 'dark:border-neon-cyan-500', 'dark:text-neon-cyan-500']],
-    ['magenta', ['border-viva-magenta-400', 'text-viva-magenta-400', 'dark:border-viva-magenta-500', 'dark:text-viva-magenta-500']],
+    ['emerald', ['border-emerald-600', 'text-white', 'bg-emerald-600', 'dark:bg-emerald-200', 'dark:border-emerald-200']],
+    ['primary', ['border-primary-600', 'text-white', 'bg-primary-600', 'dark:bg-primary-200', 'dark:border-primary-200']],
+    ['secondary', ['border-secondary-600', 'text-white', 'bg-secondary-600', 'dark:bg-secondary-200', 'dark:border-secondary-200']],
+    ['cyan', ['border-cyan-800', 'text-white', 'bg-cyan-800', 'dark:bg-cyan-800', 'dark:border-cyan-800']],
+    ['magenta', ['border-viva-magenta-600', 'text-white', 'bg-viva-magenta-600', 'dark:bg-viva-magenta-200', 'dark:border-viva-magenta-200']],
   ] as const)('applies the %s accent classes', (color, classes) => {
     const { container } = render(<Alert blok={makeBlok({ color })} />);
     expect(root(container)).toHaveClass(...classes);
@@ -70,7 +71,7 @@ describe('Alert (molecule blok wrapper)', () => {
     const svg = getByTestId(testId);
     expect(svg).toBeInTheDocument();
     expect(svg).toHaveAttribute('aria-hidden', 'true');
-    expect(svg).toHaveClass('size-5', 'shrink-0');
+    expect(svg).toHaveClass('size-6', 'shrink-0');
   });
 
   it('renders a custom title', () => {
@@ -78,11 +79,11 @@ describe('Alert (molecule blok wrapper)', () => {
     expect(container.querySelector('[data-slot="alert-title"]')).toHaveTextContent('Heads up');
   });
 
-  it('renders the richtext body inside AlertDescription at text-foreground', () => {
+  it('renders the richtext body inside AlertDescription at text-white', () => {
     const { container } = render(<Alert blok={makeBlok({ body: 'a-doc' })} />);
     const desc = container.querySelector('[data-slot="alert-description"]');
     expect(desc).toBeInTheDocument();
-    expect(desc).toHaveClass('richtext', 'text-foreground');
+    expect(desc).toHaveClass('richtext', 'text-white');
     expect(desc).toContainHTML('<p>rich body</p>');
   });
 

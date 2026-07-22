@@ -4,23 +4,23 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const alertVariants = cva(
-  "relative w-full rounded-lg border bg-transparent px-4 py-3 flex items-start gap-3",
+  "relative w-3/4 rounded-xl border border-2 px-4 py-3 flex items-start gap-3 m-auto",
   {
     variants: {
-      // Accent colors drive the border, icon and title (via currentColor). The
-      // description opts out to text-foreground for WCAG-AA body contrast. Each
-      // *-400/dark:*-500 pair resolves to the same hex across themes (brand
-      // scales invert), so the accent looks identical in light and dark.
+      // Filled accent card: a colored fill + matching border, with white
+      // text/icon/title on top. The brand scale inverts across themes, so the
+      // *-600 (light theme) / dark:*-200 (dark theme) fill stays a dark-enough
+      // surface for white text to keep contrast in both modes.
       color: {
         emerald:
-          "border-emerald-400 text-emerald-400 dark:border-emerald-500 dark:text-emerald-500",
+          "border-emerald-600 text-white bg-emerald-600 dark:bg-emerald-200 dark:border-emerald-200",
         primary:
-          "border-primary-400 text-primary-400 dark:border-primary-500 dark:text-primary-500",
+          "border-primary-600 text-white bg-primary-600 dark:bg-primary-200 dark:border-primary-200",
         secondary:
-          "border-secondary-400 text-secondary-400 dark:border-secondary-500 dark:text-secondary-500",
-        cyan: "border-neon-cyan-400 text-neon-cyan-400 dark:border-neon-cyan-500 dark:text-neon-cyan-500",
+          "border-secondary-600 text-white bg-secondary-600 dark:bg-secondary-200 dark:border-secondary-200",
+        cyan: "border-cyan-800 text-white bg-cyan-800 dark:bg-cyan-800 dark:border-cyan-800",
         magenta:
-          "border-viva-magenta-400 text-viva-magenta-400 dark:border-viva-magenta-500 dark:text-viva-magenta-500",
+          "border-viva-magenta-600 text-white bg-viva-magenta-600 dark:bg-viva-magenta-200 dark:border-viva-magenta-200",
       },
     },
     defaultVariants: {
