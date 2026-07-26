@@ -692,6 +692,16 @@ pre.shiki {
 pre.shiki code {
   background-color: transparent;
   line-height: var(--line-height-subtitle-2);
+  /* Code content size: 17px on mobile/tablet, 18px on desktop (>=1280px, see
+     the @media below). Scoped to `code` so injected copy/toggle buttons keep
+     their own sizes. Covers single frames and code_tabs (both render pre.shiki). */
+  font-size: 1.0625rem;
+}
+
+@media (min-width: 1280px) {
+  pre.shiki code {
+    font-size: 1.125rem; /* 18px — desktop (1280px = Tailwind xl) */
+  }
 }
 
 /* Copy button — lives in the code-frame / tab title bar when there is one, else
