@@ -705,7 +705,7 @@ pre.shiki code {
   min-height: 26px;
   padding: 0.25rem 0.5rem;
   font-family: var(--font-nunito), -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 500;
   color: #7d8590;
   background: transparent;
@@ -920,7 +920,7 @@ pre.shiki[data-collapsed="false"] [data-toggle-btn]:focus-visible {
   margin: 0;
   padding: 0.7rem 1.25rem;
   font-family: var(--font-nunito), -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   font-weight: 500;
   color: #abb2bf;
   background: #282c34;
@@ -939,11 +939,11 @@ pre.shiki[data-collapsed="false"] [data-toggle-btn]:focus-visible {
 .code-frame > .code-frame__title::before {
   content: "";
   justify-self: start;
-  width: 0.75rem;
-  height: 0.75rem;
+  width: 0.6rem;
+  height: 0.6rem;
   border-radius: 9999px;
   background: #ff5f56;
-  box-shadow: 1.15rem 0 0 #ffbd2e, 2.3rem 0 0 #27c93f;
+  box-shadow: 0.9rem 0 0 #ffbd2e, 1.8rem 0 0 #27c93f;
 }
 /* Centered filename/language label, authored case; truncates when it gets long
    so the dots and copy button never get pushed off the bar. */
@@ -955,7 +955,7 @@ pre.shiki[data-collapsed="false"] [data-toggle-btn]:focus-visible {
   text-overflow: ellipsis;
   white-space: nowrap;
   font-family: var(--font-nunito), monospace;
-  font-size: 0.78rem;
+  font-size: 0.875rem;
   letter-spacing: 0.02em;
   opacity: 0.85;
 }
@@ -966,7 +966,10 @@ pre.shiki[data-collapsed="false"] [data-toggle-btn]:focus-visible {
    rules here override shadcn's layered Tab utilities. */
 .code-tabs {
   position: relative;
-  margin: 1.5rem 0;
+  /* Only set block margins — the @media(min-width:768px) rule above centers the
+     whole block with `margin-inline: auto`; a `margin: 1.5rem 0` shorthand here
+     (later in source) would reset the inline margins and break that centering. */
+  margin-block: 1.5rem;
 }
 
 .code-tabs__list {
@@ -1001,20 +1004,20 @@ pre.shiki[data-collapsed="false"] [data-toggle-btn]:focus-visible {
   border-radius: 9999px;
   background: #ff5f56;
   box-shadow: 0.9rem 0 0 #ffbd2e, 1.8rem 0 0 #27c93f;
-  margin: 0 2.3rem 0 0.4rem;
+  margin: 0 2.8125rem 0 1.25rem; /* left 20px · right 45px */
 }
 
 .code-tabs__trigger {
   position: relative;
   flex: none;
   height: auto;
-  padding: 0.45rem 1.1rem;
+  padding: 0.625rem 1.1rem; /* 10px top/bottom */
   border: 0;
   border-radius: 0;
   background: #1a1d23; /* inactive tab — same color as the list strip */
   box-shadow: none;
   font-family: var(--font-nunito), -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   font-weight: 500;
   color: #7d8590;
   transition: color 0.15s ease, background 0.15s ease;
@@ -1058,9 +1061,9 @@ pre.shiki[data-collapsed="false"] [data-toggle-btn]:focus-visible {
 .code-frame pre.shiki,
 .code-tabs pre.shiki {
   margin: 0;
-  /* Extra bottom padding (2.5rem = 40px) gives the code room to breathe above
-     the frame edge / collapse affordance. */
-  padding: 1.75rem 1.25rem 2.5rem;
+  /* Top 1.25rem = 20px; extra bottom padding (2.5rem = 40px) gives the code room
+     to breathe above the frame edge / collapse affordance. */
+  padding: 1.25rem 1.25rem 2.5rem;
   border-radius: 0;
   box-shadow: none;
 }
