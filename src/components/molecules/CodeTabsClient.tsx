@@ -8,7 +8,7 @@ export interface RenderedCodeTab {
   label: string;
   /** Optional Astro-style filename shown in a header bar above the code. */
   filename?: string;
-  /** Language id (for the copy-all comment header + `data-lang` machine hint). */
+  /** Language id, surfaced as the `data-lang` machine hint on each panel. */
   language?: string;
   /** Server-highlighted `pre.shiki` HTML for this tab. */
   html: string;
@@ -31,7 +31,7 @@ export default function CodeTabsClient({ tabs }: Readonly<CodeTabsClientProps>) 
     <CodeBlockEnhancer>
       {/* One dark rounded frame around the whole group. `<figure>` + a file-count
           accessible name make the multi-file example self-describing to assistive
-          tech; the "copy all files" control is injected by the enhancer. */}
+          tech. Per-file copy/collapse controls are injected by the enhancer. */}
       <figure
         className="code-tabs my-6"
         aria-label={`Code example, ${fileCount} ${fileCount === 1 ? 'file' : 'files'}`}

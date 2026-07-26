@@ -369,76 +369,44 @@ describe('CodeBlockEnhancer', () => {
     });
   });
 
-  describe('Copy-all (code_tabs group)', () => {
+  describe('Per-file copy in code_tabs', () => {
+    // Mirrors CodeTabsClient output: figure.code-tabs → one panel per file, each
+    // with its own figcaption + pre.shiki. The enhancer appends a copy button to
+    // every panel's title bar; each must copy ONLY that file's code.
     const TABS_HTML =
       '<figure class="code-tabs">' +
       '<div data-slot="tabs-content" data-file="app.ts" data-lang="ts">' +
-      '<figure class="code-tabs__panel"><figcaption class="code-frame__title">app.ts</figcaption>' +
-      '<pre class="shiki"><code>const a = 1;</code></pre></figure></div>' +
+      '<figure class="code-tabs__panel">' +
+      '<figcaption class="code-frame__title">app.ts</figcaption>' +
+      '<div><pre class="shiki"><code>const a = 1;</code></pre></div>' +
+      '</figure></div>' +
       '<div data-slot="tabs-content" data-file="app.py" data-lang="python">' +
-      '<figure class="code-tabs__panel"><figcaption class="code-frame__title">app.py</figcaption>' +
-      '<pre class="shiki"><code>a = 1</code></pre></figure></div>' +
+      '<figure class="code-tabs__panel">' +
+      '<figcaption class="code-frame__title">app.py</figcaption>' +
+      '<div><pre class="shiki"><code>a = 1</code></pre></div>' +
+      '</figure></div>' +
       '</figure>';
 
-    it('injects exactly one copy-all button for a code_tabs group', () => {
+    it('injects one copy button per file panel', () => {
       const { container } = renderWithCode(TABS_HTML, 100);
-      expect(container.querySelectorAll('[data-copy-all-btn]')).toHaveLength(1);
-      // Per-tab copy buttons are preserved.
       expect(container.querySelectorAll('[data-copy-btn]')).toHaveLength(2);
     });
 
-    it('does not inject a copy-all button for a bare markdown block', () => {
-      const { container } = renderWithCode(SHIKI_HTML, 100);
-      expect(container.querySelector('[data-copy-all-btn]')).toBeNull();
-    });
-
-    it('copies every file with language-aware headers on click', async () => {
+    it('copies the correct file for each tab (locks per-tab isolation)', async () => {
       const { container } = renderWithCode(TABS_HTML, 100);
-      const btn = container.querySelector('[data-copy-all-btn]') as HTMLButtonElement;
-      await act(async () => {
-        btn.click();
-        await Promise.resolve();
-      });
-      expect(writeTextMock).toHaveBeenCalledWith('// app.ts\nconst a = 1;\n\n# app.py\na = 1');
-    });
-
-    it('debounces rapid copy-all clicks (clears the pending reset timer)', async () => {
-      vi.useFakeTimers();
-      const { container } = renderWithCode(TABS_HTML, 100);
-      const btn = container.querySelector('[data-copy-all-btn]') as HTMLButtonElement;
+      const buttons = container.querySelectorAll<HTMLButtonElement>('[data-copy-btn]');
 
       await act(async () => {
-        btn.click();
+        buttons[0].click();
         await Promise.resolve();
       });
+      expect(writeTextMock).toHaveBeenLastCalledWith('const a = 1;');
+
       await act(async () => {
-        btn.click();
+        buttons[1].click();
         await Promise.resolve();
       });
-
-      expect(btn.dataset.state).toBe('success');
-    });
-
-    it('ignores a copy-all click outside any code_tabs group', async () => {
-      const { container } = renderWithCode('<button data-copy-all-btn type="button"></button>', 100);
-      const btn = container.querySelector('[data-copy-all-btn]') as HTMLButtonElement;
-      await act(async () => {
-        btn.click();
-        await Promise.resolve();
-      });
-      expect(writeTextMock).not.toHaveBeenCalled();
-    });
-
-    it('injects exactly one copy-all button under StrictMode (RT#15)', () => {
-      stubScrollHeight(100);
-      const { container } = render(
-        <StrictMode>
-          <CodeBlockEnhancer>
-            <div dangerouslySetInnerHTML={{ __html: TABS_HTML }} />
-          </CodeBlockEnhancer>
-        </StrictMode>
-      );
-      expect(container.querySelectorAll('[data-copy-all-btn]')).toHaveLength(1);
+      expect(writeTextMock).toHaveBeenLastCalledWith('a = 1');
     });
   });
 });

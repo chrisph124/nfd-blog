@@ -148,98 +148,44 @@ export function toggleCollapsed(btn: HTMLButtonElement): void {
   if (icon) icon.innerHTML = willCollapse ? ICONS.chevronDown : ICONS.chevronUp;
 }
 
+/**
+ * Copy text to the clipboard with a resilient two-step strategy:
+ *   1. the async Clipboard API (preferred; secure contexts), then
+ *   2. a hidden-`textarea` + `document.execCommand('copy')` fallback, which still
+ *      works on a user gesture inside iframes (the Storyblok visual editor) and on
+ *      non-secure origins, where `navigator.clipboard` is unavailable or blocked.
+ * Returns `'error'` only when both paths fail.
+ */
+async function copyText(text: string): Promise<CopyState> {
+  if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return 'success';
+    } catch {
+      // Fall through to the legacy path (blocked iframe / permission denied).
+    }
+  }
+
+  const ta = document.createElement('textarea');
+  try {
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.top = '-9999px';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    return document.execCommand('copy') ? 'success' : 'error';
+  } catch {
+    return 'error';
+  } finally {
+    ta.remove(); // no-op if never appended; always clears the hidden node
+  }
+}
+
 export async function copyPreContent(btn: HTMLButtonElement): Promise<CopyState> {
   const pre = findPre(btn);
   const code = pre?.querySelector('code');
   if (!pre || !code) return 'idle';
-  try {
-    await navigator.clipboard.writeText(code.textContent ?? '');
-    return 'success';
-  } catch {
-    return 'error';
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Copy-all-files (code_tabs groups)
-// ---------------------------------------------------------------------------
-
-/** Languages whose line comment is `#`; everything else falls back to `//`. */
-const HASH_COMMENT_LANGS = new Set<string>([
-  'python', 'py', 'ruby', 'rb', 'bash', 'sh', 'shell', 'zsh', 'console',
-  'yaml', 'yml', 'toml', 'ini', 'dockerfile', 'makefile', 'nginx', 'perl', 'pl', 'r', 'elixir',
-]);
-
-/** Line-comment prefix used to head each file in the copy-all concatenation. */
-export function commentPrefixFor(language: string | undefined | null): string {
-  const id = (language ?? '').trim().toLowerCase();
-  return HASH_COMMENT_LANGS.has(id) ? '#' : '//';
-}
-
-export const COPY_ALL_LABELS = {
-  idle: 'Copy all files',
-  success: 'Copied!',
-  error: 'Copy failed',
-} as const;
-
-export const COPY_ALL_TOOLTIPS = {
-  idle: 'Copy all files to clipboard',
-  success: 'Copied to clipboard',
-  error: 'Copy failed — try again',
-} as const;
-
-const copyAllConfig = (state: CopyState): { label: string; icon: string; tooltip: string } => {
-  switch (state) {
-    case 'success':
-      return { label: COPY_ALL_LABELS.success, icon: ICONS.check, tooltip: COPY_ALL_TOOLTIPS.success };
-    case 'error':
-      return { label: COPY_ALL_LABELS.error, icon: ICONS.copy, tooltip: COPY_ALL_TOOLTIPS.error };
-    default:
-      return { label: COPY_ALL_LABELS.idle, icon: ICONS.copy, tooltip: COPY_ALL_TOOLTIPS.idle };
-  }
-};
-
-export function setCopyAllButtonState(btn: HTMLButtonElement, state: CopyState): void {
-  const label = btn.querySelector<HTMLElement>('[data-copy-label]');
-  const icon = btn.querySelector<HTMLElement>('[data-copy-icon]');
-  if (!label || !icon) return;
-  const config = copyAllConfig(state);
-  btn.dataset.state = state;
-  btn.dataset.tooltip = config.tooltip;
-  label.textContent = config.label;
-  icon.innerHTML = config.icon;
-}
-
-export function createCopyAllButton(): HTMLButtonElement {
-  const btn = document.createElement('button');
-  btn.type = 'button';
-  btn.dataset.copyAllBtn = '';
-  btn.dataset.state = 'idle';
-  btn.dataset.tooltip = COPY_ALL_TOOLTIPS.idle;
-  btn.setAttribute('aria-label', COPY_ALL_TOOLTIPS.idle);
-  btn.innerHTML = `<span data-copy-icon>${ICONS.copy}</span><span data-copy-label>${COPY_ALL_LABELS.idle}</span>`;
-  return btn;
-}
-
-/**
- * Concatenate every tab panel's code (in authored/DOM order), each preceded by a
- * language-aware comment header (`// app.ts`, `# app.py`), and copy it to the
- * clipboard. Reads `textContent` so hidden (forceMounted) panels are included.
- */
-export async function copyAllTabs(group: HTMLElement): Promise<CopyState> {
-  const panels = Array.from(group.querySelectorAll<HTMLElement>('[data-slot="tabs-content"]'));
-  if (panels.length === 0) return 'idle';
-
-  const blocks = panels.map((panel, index) => {
-    const code = panel.querySelector('code')?.textContent ?? '';
-    const file = panel.dataset.file || `file-${index + 1}`;
-    return `${commentPrefixFor(panel.dataset.lang)} ${file}\n${code}`;
-  });
-
-  try {
-    await navigator.clipboard.writeText(blocks.join('\n\n'));
-    return 'success';
-  } catch {
-    return 'error';
-  }
+  return copyText(code.textContent ?? '');
 }
