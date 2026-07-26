@@ -974,13 +974,16 @@ pre.shiki[data-collapsed="false"] [data-toggle-btn]:focus-visible {
   align-items: flex-end;
   justify-content: flex-start;
   gap: 0;                 /* tabs sit next to each other */
-  width: 100%;
+  width: fit-content;     /* strip hugs the dots + tabs, not the full row */
   height: auto;
   padding: 0;             /* flush to the left edge */
   /* Overlap the panel top by 1px so the active tab merges seamlessly. */
   margin: 0 0 -1px;
-  background: transparent;
-  border-radius: 0;
+  /* The strip + macOS-dots backdrop; the inactive tabs carry the same #1a1d23. */
+  background: #1a1d23;
+  /* Round only the top corners; bottom stays square to sit flush on the panel
+     (shadcn TabsList applies rounded-lg to all four corners — override here). */
+  border-radius: 0.5rem 0.5rem 0 0;
   position: relative;
   z-index: 1;
 }
@@ -993,12 +996,12 @@ pre.shiki[data-collapsed="false"] [data-toggle-btn]:focus-visible {
   content: "";
   align-self: center;
   flex: none;
-  width: 0.7rem;
-  height: 0.7rem;
+  width: 0.6rem;
+  height: 0.6rem;
   border-radius: 9999px;
   background: #ff5f56;
-  box-shadow: 1.05rem 0 0 #ffbd2e, 2.1rem 0 0 #27c93f;
-  margin: 0 2.6rem 0.35rem 0.4rem;
+  box-shadow: 0.9rem 0 0 #ffbd2e, 1.8rem 0 0 #27c93f;
+  margin: 0 2.3rem 0 0.4rem;
 }
 
 .code-tabs__trigger {
@@ -1008,7 +1011,7 @@ pre.shiki[data-collapsed="false"] [data-toggle-btn]:focus-visible {
   padding: 0.45rem 1.1rem;
   border: 0;
   border-radius: 0;
-  background: #1a1d23; /* inactive tab — same in both themes, darker than the panel */
+  background: #1a1d23; /* inactive tab — same color as the list strip */
   box-shadow: none;
   font-family: var(--font-nunito), -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 0.8rem;
@@ -1048,51 +1051,6 @@ pre.shiki[data-collapsed="false"] [data-toggle-btn]:focus-visible {
    + code), so it carries no box of its own. */
 .code-tabs__panel {
   margin: 0;
-}
-
-/* "Copy all files" — one control per code_tabs group, pinned to the top-right of
-   the group (which is position: relative) so it sits opposite the tab strip. */
-[data-copy-all-btn] {
-  position: absolute;
-  top: 0.3rem;
-  right: 0.5rem;
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  min-height: 26px;
-  padding: 0.25rem 0.5rem;
-  font-family: var(--font-nunito), -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: #7d8590;
-  background: transparent;
-  border: none;
-  border-radius: 0.4rem;
-  cursor: pointer;
-  opacity: 0.85;
-  transition: opacity 0.15s ease, color 0.15s ease;
-}
-
-[data-copy-all-btn]:hover,
-[data-copy-all-btn]:focus-visible {
-  color: #e6edf3;
-  opacity: 1;
-  outline: none;
-}
-
-[data-copy-all-btn][data-state="success"] {
-  color: #4ade80;
-  opacity: 1;
-}
-
-[data-copy-all-btn][data-state="error"] {
-  color: #f87171;
-  opacity: 1;
-}
-
-[data-copy-all-btn] svg {
-  display: block;
 }
 
 /* Inside a frame the code block owns no radius/shadow — the frame does — and
