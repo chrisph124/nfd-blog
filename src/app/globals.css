@@ -1130,7 +1130,10 @@ code {
   background-color: var(--shiki-light-bg);
   font-family: var(--font-nunito), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   font-style: var(--shiki-light-font-style);
-  font-size: var(--font-size-subtitle-2);
+  /* Font-size intentionally omitted: code content size is owned by the
+     responsive `pre.shiki code` rule (17px mobile/tablet, 18px >=1280px).
+     Setting it here would re-size token spans directly and override that,
+     and would also re-size the injected copy/toggle button label spans. */
   font-weight: var(--shiki-light-font-weight);
   text-decoration: var(--shiki-light-text-decoration);
 }
