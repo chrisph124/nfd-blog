@@ -25,8 +25,7 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 5
+    # github-actions ecosystem supports only default-days for cooldown
+    # (no semver-level granularity); 1 day keeps 24h parity for actions.
     cooldown:
       default-days: 1
-      semver-patch-days: 1
-      semver-minor-days: 3
-      semver-major-days: 7
