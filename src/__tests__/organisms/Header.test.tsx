@@ -22,13 +22,13 @@ vi.mock('@/components/organisms/NavBar', () => ({
 }));
 
 vi.mock('@/components/atoms/ThemeToggle', () => ({
-  default: () => <button role="switch" aria-checked="false" aria-label="Switch to dark theme">Theme</button>,
+  default: () => <button type="button" role="switch" aria-checked="false" aria-label="Switch to dark theme">Theme</button>,
 }));
 
 // Keep MenuToggle's tested API (onClick + isOpen); render a simple trigger.
 vi.mock('@/components/atoms/MenuToggle', () => ({
   default: ({ onClick, isOpen }: { onClick: () => void; isOpen: boolean }) => (
-    <button data-testid="menu-toggle" onClick={onClick}>
+    <button type="button" data-testid="menu-toggle" onClick={onClick}>
       {isOpen ? 'Close' : 'Menu'}
     </button>
   ),
@@ -62,7 +62,7 @@ const createMockBlok = (overrides: Partial<HeaderBlok> = {}): HeaderBlok => ({
 /** Open the mobile Sheet and wait for the dialog to mount. */
 async function openMenu(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByTestId('menu-toggle'));
-  await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+  expect(await screen.findByRole('dialog')).toBeInTheDocument();
 }
 
 describe('Header', () => {
@@ -209,9 +209,7 @@ describe('Header', () => {
       // Sub-item hidden until the accordion trigger is activated.
       expect(screen.queryByRole('link', { name: 'Service 1' })).not.toBeInTheDocument();
       await user.click(screen.getByRole('button', { name: /Services/ }));
-      await waitFor(() =>
-        expect(screen.getByRole('link', { name: 'Service 1' })).toBeInTheDocument()
-      );
+      expect(await screen.findByRole('link', { name: 'Service 1' })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: 'Service 1' })).toHaveAttribute('href', '/service-1');
     });
 
@@ -250,7 +248,7 @@ describe('Header', () => {
       );
       await openMenu(user);
       // Two items → exactly one divider.
-      expect(baseElement.querySelectorAll('.bg-gray-300.h-\\[1px\\]')).toHaveLength(1);
+      expect(baseElement.querySelectorAll(String.raw`.bg-gray-300.h-\[1px\]`)).toHaveLength(1);
     });
   });
 
@@ -301,7 +299,7 @@ describe('Header', () => {
       );
       await openMenu(user);
       await user.click(screen.getByRole('button', { name: /Services/ }));
-      await waitFor(() => expect(screen.getByRole('link', { name: 'Sub Service' })).toBeInTheDocument());
+      expect(await screen.findByRole('link', { name: 'Sub Service' })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: 'Sub Service' })).toHaveAttribute('href', '/sub-service');
     });
 
@@ -319,7 +317,7 @@ describe('Header', () => {
       );
       await openMenu(user);
       await user.click(screen.getByRole('button', { name: /Services/ }));
-      await waitFor(() => expect(screen.getByRole('link', { name: 'No URL Sub' })).toBeInTheDocument());
+      expect(await screen.findByRole('link', { name: 'No URL Sub' })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: 'No URL Sub' })).toHaveAttribute('href', '#');
     });
   });

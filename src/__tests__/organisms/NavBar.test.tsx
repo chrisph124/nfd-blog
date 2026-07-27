@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import NavBar from '@/components/organisms/NavBar';
 import type { NavItemBlok, SubNavItemBlok } from '@/types/storyblok';
@@ -103,7 +103,7 @@ describe('NavBar', () => {
       const trigger = screen.getByRole('button', { name: /Services/ });
       await user.hover(trigger);
 
-      await waitFor(() => expect(screen.getByText('Service 1')).toBeInTheDocument());
+      expect(await screen.findByText('Service 1')).toBeInTheDocument();
       expect(screen.getByText('Service 2')).toBeInTheDocument();
       expect(trigger).toHaveAttribute('data-state', 'open');
     });
@@ -122,7 +122,7 @@ describe('NavBar', () => {
       trigger.focus();
       await user.keyboard('{Enter}');
 
-      await waitFor(() => expect(screen.getByText('Service 1')).toBeInTheDocument());
+      expect(await screen.findByText('Service 1')).toBeInTheDocument();
     });
 
     it('sub-item links carry the resolved href', async () => {
@@ -136,7 +136,7 @@ describe('NavBar', () => {
       );
 
       await user.hover(screen.getByRole('button', { name: /Services/ }));
-      await waitFor(() => expect(screen.getByRole('link', { name: 'Service 1' })).toBeInTheDocument());
+      expect(await screen.findByRole('link', { name: 'Service 1' })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: 'Service 1' })).toHaveAttribute('href', '/service 1');
     });
   });
@@ -227,7 +227,7 @@ describe('NavBar', () => {
       render(<NavBar navItems={navItems} />);
 
       await user.hover(screen.getByRole('button', { name: /Services/ }));
-      await waitFor(() => expect(screen.getByRole('link', { name: 'Sub Item' })).toBeInTheDocument());
+      expect(await screen.findByRole('link', { name: 'Sub Item' })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: 'Sub Item' })).toHaveAttribute('href', '#');
     });
   });

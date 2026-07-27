@@ -143,46 +143,22 @@ describe('ContentCards', () => {
     });
 
     describe('Layout Variants', () => {
-      it('applies xl:grid-cols-2 for 5/5 layout (default)', () => {
+      it.each([
+        { name: 'applies xl:grid-cols-2 for 5/5 layout (default)', layout: '5/5', expectedClass: 'xl:grid-cols-2' },
+        { name: 'applies xl:grid-cols-[6fr_4fr] for 6/4 layout', layout: '6/4', expectedClass: 'xl:grid-cols-[6fr_4fr]' },
+        { name: 'applies xl:grid-cols-[4fr_6fr] for 4/6 layout', layout: '4/6', expectedClass: 'xl:grid-cols-[4fr_6fr]' },
+      ] as const)('$name', ({ layout, expectedClass }) => {
         const blok = createMockBlok({
           blocks: [
             createMockContentCardBlock('block-1'),
             createMockContentCardBlock('block-2'),
           ],
-          layout: '5/5',
+          layout,
         });
         const { container } = render(<ContentCards blok={blok} />);
 
         const section = container.querySelector('section');
-        expect(section).toHaveClass('xl:grid-cols-2');
-      });
-
-      it('applies xl:grid-cols-[6fr_4fr] for 6/4 layout', () => {
-        const blok = createMockBlok({
-          blocks: [
-            createMockContentCardBlock('block-1'),
-            createMockContentCardBlock('block-2'),
-          ],
-          layout: '6/4',
-        });
-        const { container } = render(<ContentCards blok={blok} />);
-
-        const section = container.querySelector('section');
-        expect(section).toHaveClass('xl:grid-cols-[6fr_4fr]');
-      });
-
-      it('applies xl:grid-cols-[4fr_6fr] for 4/6 layout', () => {
-        const blok = createMockBlok({
-          blocks: [
-            createMockContentCardBlock('block-1'),
-            createMockContentCardBlock('block-2'),
-          ],
-          layout: '4/6',
-        });
-        const { container } = render(<ContentCards blok={blok} />);
-
-        const section = container.querySelector('section');
-        expect(section).toHaveClass('xl:grid-cols-[4fr_6fr]');
+        expect(section).toHaveClass(expectedClass);
       });
 
       it('defaults to 5/5 layout when layout is undefined', () => {

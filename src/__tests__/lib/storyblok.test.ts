@@ -108,19 +108,17 @@ describe('getSiteUrl', () => {
     process.env = originalEnv;
   });
 
-  it('returns NEXT_PUBLIC_SITE_URL with trailing slash stripped', () => {
-    process.env.NEXT_PUBLIC_SITE_URL = 'https://example.com/';
-    expect(getSiteUrl()).toBe('https://example.com');
-  });
-
-  it('strips multiple trailing slashes', () => {
-    process.env.NEXT_PUBLIC_SITE_URL = 'https://example.com///';
-    expect(getSiteUrl()).toBe('https://example.com');
-  });
-
-  it('returns URL unchanged when no trailing slash', () => {
-    process.env.NEXT_PUBLIC_SITE_URL = 'https://example.com';
-    expect(getSiteUrl()).toBe('https://example.com');
+  it.each([
+    { name: 'returns NEXT_PUBLIC_SITE_URL with trailing slash stripped', input: 'https://example.com/', expected: 'https://example.com' },
+    { name: 'strips multiple trailing slashes', input: 'https://example.com///', expected: 'https://example.com' },
+    { name: 'returns URL unchanged when no trailing slash', input: 'https://example.com', expected: 'https://example.com' },
+    { name: 'normalizes apex notesof.dev to www.notesof.dev', input: 'https://notesof.dev', expected: 'https://www.notesof.dev' },
+    { name: 'normalizes apex notesof.dev with trailing slash to www.notesof.dev', input: 'https://notesof.dev/', expected: 'https://www.notesof.dev' },
+    { name: 'leaves www.notesof.dev unchanged', input: 'https://www.notesof.dev', expected: 'https://www.notesof.dev' },
+    { name: 'does not match notesof.dev as a substring of another host', input: 'https://notesof.dev.example.com', expected: 'https://notesof.dev.example.com' },
+  ])('$name', ({ input, expected }) => {
+    process.env.NEXT_PUBLIC_SITE_URL = input;
+    expect(getSiteUrl()).toBe(expected);
   });
 
   it('falls back to VERCEL_URL with https prefix', () => {
@@ -130,26 +128,6 @@ describe('getSiteUrl', () => {
 
   it('falls back to localhost when no env vars set', () => {
     expect(getSiteUrl()).toBe('http://localhost:3000');
-  });
-
-  it('normalizes apex notesof.dev to www.notesof.dev', () => {
-    process.env.NEXT_PUBLIC_SITE_URL = 'https://notesof.dev';
-    expect(getSiteUrl()).toBe('https://www.notesof.dev');
-  });
-
-  it('normalizes apex notesof.dev with trailing slash to www.notesof.dev', () => {
-    process.env.NEXT_PUBLIC_SITE_URL = 'https://notesof.dev/';
-    expect(getSiteUrl()).toBe('https://www.notesof.dev');
-  });
-
-  it('leaves www.notesof.dev unchanged', () => {
-    process.env.NEXT_PUBLIC_SITE_URL = 'https://www.notesof.dev';
-    expect(getSiteUrl()).toBe('https://www.notesof.dev');
-  });
-
-  it('does not match notesof.dev as a substring of another host', () => {
-    process.env.NEXT_PUBLIC_SITE_URL = 'https://notesof.dev.example.com';
-    expect(getSiteUrl()).toBe('https://notesof.dev.example.com');
   });
 });
 

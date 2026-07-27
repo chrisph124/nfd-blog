@@ -6,5 +6,5 @@
  * does not require `<` to be escaped — the JSON parser converts < back to `<` on read.
  */
 export function escapeJsonLd(json: object): string {
-  return JSON.stringify(json).replace(/</g, '\\u003c');
+  return JSON.stringify(json).replaceAll('<', String.raw`\u003c`);
 }

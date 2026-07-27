@@ -132,7 +132,8 @@ function serializeTable(node: RichtextNode): string {
 
   const cellText = (cell: RichtextNode): string =>
     serializeBlocks(cell.content ?? [])
-      .replace(/\s*\n+\s*/g, ' ')
+      // Collapse any whitespace run containing a line break to a single space.
+      .replaceAll(/\s+/g, (ws) => (ws.includes('\n') ? ' ' : ws))
       .trim();
   const renderRow = (row: RichtextNode): string =>
     `| ${(row.content ?? []).map(cellText).join(' | ')} |`;

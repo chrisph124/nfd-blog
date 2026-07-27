@@ -6,10 +6,9 @@ import "./globals.css";
 import StoryblokProvider from "@/components/providers/StoryblokProvider";
 import ThemeProvider from "@/components/providers/ThemeProvider";
 import MotionProvider from "@/components/providers/MotionProvider";
-import { getStoryblokApi, storyblokVersion } from "@/lib/storyblok";
+import { getSiteUrl, getStoryblokApi, storyblokVersion } from "@/lib/storyblok";
 import Header from "@/components/organisms/Header";
 import Footer from "@/components/organisms/Footer";
-import { getSiteUrl } from "@/lib/storyblok";
 
 const nunito = Nunito({
   variable: "--font-nunito",

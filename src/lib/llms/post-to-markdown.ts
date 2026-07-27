@@ -41,10 +41,10 @@ const hasExtension = (filename: string, extensions: string[]): boolean =>
 /** Emit a YAML double-quoted scalar: backslashes, quotes and newlines escaped. */
 function yamlScalar(value: string): string {
   const escaped = value
-    .replace(/\\/g, '\\\\')
-    .replace(/"/g, '\\"')
+    .replaceAll('\\', '\\\\')
+    .replaceAll('"', String.raw`\"`)
     // Collapse every line-break variant — CRLF, bare CR, LF — to an escaped \n.
-    .replace(/\r\n|\r|\n/g, '\\n');
+    .replaceAll(/\r\n|\r|\n/g, String.raw`\n`);
   return `"${escaped}"`;
 }
 
@@ -56,6 +56,7 @@ export function buildFrontMatter(story: StoryblokStory<PostBlok>, siteUrl: strin
   const title = stripEntities(content.title?.trim() || story.name);
   const excerpt = stripEntities(content.excerpt?.trim() || '');
   const tags = (story.tag_list ?? []).map((tag) => yamlScalar(stripEntities(tag)));
+  const canonical = `${siteUrl}/${slug}`;
 
   return [
     '---',
@@ -63,7 +64,7 @@ export function buildFrontMatter(story: StoryblokStory<PostBlok>, siteUrl: strin
     `slug: ${yamlScalar(slug)}`,
     `publishedAt: ${yamlScalar(datePublished)}`,
     `dateModified: ${yamlScalar(dateModified)}`,
-    `canonical: ${yamlScalar(`${siteUrl}/${slug}`)}`,
+    `canonical: ${yamlScalar(canonical)}`,
     `author: ${yamlScalar(AUTHOR_NAME)}`,
     `tags: [${tags.join(', ')}]`,
     `excerpt: ${yamlScalar(excerpt)}`,
@@ -129,7 +130,6 @@ function serializeBlok(blok: PostBodyBlok): string {
       // Compile-time guard: a new body blok type forces a case above. At runtime
       // an unknown component (schema drift) is skipped, never thrown (RT#5).
       const _exhaustive: never = blok;
-      void _exhaustive;
       return '';
     }
   }
@@ -158,21 +158,65 @@ export function postToMarkdown(
 /** Strip markdown syntax down to prose plaintext (code fences excluded). */
 function markdownToPlainText(markdown: string): string {
   return markdown
-    .replace(/```[\s\S]*?```/g, ' ')
-    .replace(/~~~[\s\S]*?~~~/g, ' ')
-    .replace(/`([^`]*)`/g, '$1')
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
-    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
-    .replace(/^\s{0,3}#{1,6}\s+/gm, '')
-    .replace(/^\s{0,3}>\s?/gm, '')
-    .replace(/^\s{0,3}[-*+]\s+/gm, '')
-    .replace(/^\s{0,3}\d+\.\s+/gm, '')
-    .replace(/^\s{0,3}(?:-{3,}|\*{3,}|_{3,})\s*$/gm, '')
-    .replace(/[*_]{1,3}([^*_]+)[*_]{1,3}/g, '$1')
-    .replace(/~~([^~]+)~~/g, '$1')
-    .replace(/\r\n/g, '\n')
-    .replace(/\n{3,}/g, '\n\n')
+    .replaceAll(/```[\s\S]*?```/g, ' ')
+    .replaceAll(/~~~[\s\S]*?~~~/g, ' ')
+    .replaceAll(/`([^`]*)`/g, '$1')
+    .replaceAll(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+    // eslint-disable-next-line sonarjs/super-linear-regex -- polynomial only on adversarial input; strips links from trusted build-time markdown, and a linear rewrite would change parsing for links whose text/URL contains brackets or parentheses
+    .replaceAll(/\[([^\]]*)\]\([^)]*\)/g, '$1') // NOSONAR: see disable note above
+
+    .replaceAll(/^\s{0,3}#{1,6}\s+/gm, '')
+    .replaceAll(/^\s{0,3}>\s?/gm, '')
+    .replaceAll(/^\s{0,3}[-*+]\s+/gm, '')
+    .replaceAll(/^\s{0,3}\d+\.\s+/gm, '')
+    .replaceAll(/^\s{0,3}(?:-{3,}|\*{3,}|_{3,})\s*$/gm, '')
+    .replaceAll(/[*_]{1,3}([^*_]+)[*_]{1,3}/g, '$1')
+    .replaceAll(/~~([^~]+)~~/g, '$1')
+    .replaceAll('\r\n', '\n')
+    .replaceAll(/\n{3,}/g, '\n\n')
     .trim();
+}
+
+/** Card headings + prose bodies of a comparison, in reading order (no code). */
+function extractComparisonProse(blok: ComparisonBlok): string[] {
+  const prose: string[] = [];
+  const title = (blok.title ?? '').trim();
+  if (title) prose.push(title);
+  for (const card of blok.columns ?? []) {
+    const heading = (card.heading ?? '').trim();
+    if (heading) prose.push(heading);
+    const text = richtextToPlainText(card.body as unknown as RichtextNode).trim();
+    if (text) prose.push(text);
+  }
+  return prose;
+}
+
+/** Prose (plaintext) and code samples contributed by a single body blok. */
+function extractBlokContent(blok: PostBodyBlok): ExtractedPostContent {
+  switch (blok.component) {
+    case 'richtext': {
+      const node = blok.content as unknown as RichtextNode;
+      const text = richtextToPlainText(node).trim();
+      return { prose: text, codeSamples: collectRichtextCodeSamples(node) };
+    }
+    case 'markdown':
+      return { prose: markdownToPlainText(blok.content ?? '').trim(), codeSamples: [] };
+    case 'code_tabs':
+      return { prose: '', codeSamples: codeTabsToCodeSamples(blok) };
+    case 'alert': {
+      // TL;DR prose counts toward articleBody/wordCount; a summary carries no
+      // code samples (those live in the body bloks).
+      const node = blok.body as unknown as RichtextNode;
+      return { prose: richtextToPlainText(node).trim(), codeSamples: [] };
+    }
+    case 'comparison':
+      // Card headings + prose bodies count toward articleBody/wordCount; like
+      // alert, a comparison carries no code samples (those live in body bloks).
+      return { prose: extractComparisonProse(blok).join('\n\n'), codeSamples: [] };
+    default:
+      // `media` and any unknown component contribute neither prose nor code.
+      return { prose: '', codeSamples: [] };
+  }
 }
 
 /**
@@ -186,52 +230,14 @@ export function extractPostContent(
   const codeSamples: CodeSample[] = [];
 
   for (const blok of body ?? []) {
-    switch (blok.component) {
-      case 'richtext': {
-        const node = blok.content as unknown as RichtextNode;
-        const text = richtextToPlainText(node).trim();
-        if (text) proseParts.push(text);
-        codeSamples.push(...collectRichtextCodeSamples(node));
-        break;
-      }
-      case 'markdown': {
-        const text = markdownToPlainText(blok.content ?? '').trim();
-        if (text) proseParts.push(text);
-        break;
-      }
-      case 'code_tabs':
-        codeSamples.push(...codeTabsToCodeSamples(blok));
-        break;
-      case 'alert': {
-        // TL;DR prose counts toward articleBody/wordCount; a summary carries no
-        // code samples (those live in the body bloks).
-        const node = blok.body as unknown as RichtextNode;
-        const text = richtextToPlainText(node).trim();
-        if (text) proseParts.push(text);
-        break;
-      }
-      case 'comparison': {
-        // Card headings + prose bodies count toward articleBody/wordCount; like
-        // alert, a comparison carries no code samples (those live in body bloks).
-        const title = (blok.title ?? '').trim();
-        if (title) proseParts.push(title);
-        for (const card of blok.columns ?? []) {
-          const heading = (card.heading ?? '').trim();
-          if (heading) proseParts.push(heading);
-          const text = richtextToPlainText(card.body as unknown as RichtextNode).trim();
-          if (text) proseParts.push(text);
-        }
-        break;
-      }
-      case 'media':
-        break;
-      default:
-        break;
-    }
+    const { prose, codeSamples: blokCode } = extractBlokContent(blok);
+    if (prose) proseParts.push(prose);
+    codeSamples.push(...blokCode);
   }
 
   const prose = stripEntities(proseParts.join('\n\n'))
-    .replace(/[ \t]+\n/g, '\n')
+    // eslint-disable-next-line sonarjs/super-linear-regex -- polynomial only on adversarial input; runs on trusted build-time prose, and a byte-exact linear rewrite isn't expressible with a sonarjs-accepted pattern
+    .replaceAll(/[ \t]+\n/g, '\n') // NOSONAR: see disable note above
     .trim();
   return { prose, codeSamples };
 }

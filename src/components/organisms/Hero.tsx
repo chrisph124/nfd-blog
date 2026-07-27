@@ -17,7 +17,7 @@ interface HeroProps {
 interface HeroImageProps {
   image: StoryblokAsset;
   position: HeroBlockBlok["position"];
-  imageType?: HeroBlockBlok["image_type"];
+  imageType?: NonNullable<HeroBlockBlok["image_type"]>;
 }
 
 interface HeroContentProps {

@@ -82,6 +82,7 @@ export default function PostListClient({
           )}
 
           <button
+            type="button"
             onClick={loadMore}
             disabled={loading}
             className={LOAD_MORE_BUTTON_CLASSES}

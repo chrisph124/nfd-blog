@@ -11,7 +11,7 @@ let mockObserverInstance: MockIntersectionObserver | null = null;
 class MockIntersectionObserver implements IntersectionObserver {
   constructor(callback: IntersectionObserverCallback) {
     mockObserverCallback = callback;
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
+     
     mockObserverInstance = this;
   }
 
@@ -133,7 +133,7 @@ describe('RichtextReveal Component', () => {
         </RichtextReveal>
       );
 
-      expect(observedElements.length).toBe(initialObservedLength);
+      expect(observedElements).toHaveLength(initialObservedLength);
     });
 
     it('observes img elements', () => {
@@ -203,7 +203,7 @@ describe('RichtextReveal Component', () => {
       const iframe = container.querySelector('iframe');
 
       // 4 elements: standalone img, figure, video, iframe (img inside figure is skipped)
-      expect(observedElements.length).toBe(4);
+      expect(observedElements).toHaveLength(4);
       expect(observedElements).toContain(standaloneImg);
       expect(observedElements).not.toContain(nestedImg);
       expect(observedElements).toContain(figure);
@@ -400,7 +400,7 @@ describe('RichtextReveal Component', () => {
 
       unmount();
 
-      expect(observedElements.length).toBe(0);
+      expect(observedElements).toHaveLength(0);
     });
 
     it('handles unmount when no media elements exist', () => {
@@ -476,7 +476,7 @@ describe('RichtextReveal Component', () => {
       const iframe = container.querySelector('iframe');
 
       // 4 elements: standalone img, video, figure, iframe (img inside figure skipped)
-      expect(observedElements.length).toBe(4);
+      expect(observedElements).toHaveLength(4);
       expect(observedElements).toContain(images[0]); // standalone img
       expect(observedElements).not.toContain(images[1]); // img inside figure — skipped
       expect(observedElements).toContain(video);
@@ -496,7 +496,7 @@ describe('RichtextReveal Component', () => {
       unmount();
 
       // Should not crash
-      expect(observedElements.length).toBe(0);
+      expect(observedElements).toHaveLength(0);
     });
 
     it('handles elements added dynamically after mount', () => {

@@ -22,7 +22,7 @@ export interface FeedOptions {
 }
 
 function escapeXml(value: string): string {
-  return value.replace(/[&<>"']/g, (ch) => {
+  return value.replaceAll(/[&<>"']/g, (ch) => {
     switch (ch) {
       case '&': return '&amp;';
       case '<': return '&lt;';
@@ -52,7 +52,7 @@ function detectMime(url: string | undefined): string {
 }
 
 function trimDescription(input: string, max = 500): string {
-  const clean = stripEntities(input).replace(/\s+/g, ' ').trim();
+  const clean = stripEntities(input).replaceAll(/\s+/g, ' ').trim();
   if (clean.length <= max) return clean;
   return `${clean.slice(0, max - 1).trimEnd()}…`;
 }

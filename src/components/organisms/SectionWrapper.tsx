@@ -12,7 +12,7 @@ interface SectionWrapperProps {
 
 interface SectionHeaderProps {
   heading?: string;
-  navigateTo?: SectionWrapperBlok["navigate_to"];
+  navigateTo?: NonNullable<SectionWrapperBlok["navigate_to"]>;
 }
 
 const SectionHeader = memo(({ heading, navigateTo }: SectionHeaderProps) => {

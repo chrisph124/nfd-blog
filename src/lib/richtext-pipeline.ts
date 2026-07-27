@@ -118,7 +118,7 @@ function rehypeMarkdownDetect() {
     visit(parent, 'element', (node: Element, index) => {
       if (node.tagName !== 'p' || index === undefined) return;
       const textContent = getTextContent(node);
-      const match = textContent.match(/^(#{1,4})\s+(\S.*)$/);
+      const match = /^(#{1,4})\s+(\S.*)$/.exec(textContent);
       if (match) {
         headingNodes.push({ node, index, level: match[1].length, text: match[2] });
       }
@@ -134,7 +134,7 @@ function rehypeMarkdownDetect() {
 
     // Pass 2: Convert inline backticks and bold within text nodes
     visit(parent, 'text', (node: Text, index, parentNode) => {
-      if (!parentNode || parentNode.type !== 'element' || index === undefined) return;
+      if (parentNode?.type !== 'element' || index === undefined) return;
       const parentElem = parentNode as Element;
       if (parentElem.tagName !== 'p' && parentElem.tagName !== 'h1' &&
           parentElem.tagName !== 'h2' && parentElem.tagName !== 'h3' &&
@@ -143,7 +143,7 @@ function rehypeMarkdownDetect() {
       const value = node.value;
 
       // Convert **bold** to <strong>
-      const boldMatch = value.match(/\*\*(.+?)\*\*/);
+      const boldMatch = /\*\*(.+?)\*\*/.exec(value);
       if (boldMatch) {
         const matchIndex = boldMatch.index ?? 0;
         const before = value.slice(0, matchIndex);
@@ -160,7 +160,7 @@ function rehypeMarkdownDetect() {
       }
 
       // Convert `inline` to <code>
-      const codeMatch = value.match(/`([^`]+)`/);
+      const codeMatch = /`([^`]+)`/.exec(value);
       if (codeMatch) {
         const codeIndex = value.indexOf(codeMatch[0]);
         const before = value.slice(0, codeIndex);
@@ -205,9 +205,9 @@ function rehypeImageFigure() {
       if (node.tagName !== 'p' || parent === undefined || index === undefined) return;
 
       const img = soleElementChild(node);
-      if (!img || img.tagName !== 'img') return;
+      if (img?.tagName !== 'img') return;
 
-      const properties = { ...(img.properties ?? {}) };
+      const properties = { ...img.properties };
       const rawTitle = properties.title;
       const caption =
         typeof rawTitle === 'string' && rawTitle.trim() !== '' ? rawTitle : undefined;
@@ -249,7 +249,7 @@ function rehypeYouTubeEmbed() {
       if (node.tagName !== 'p' || parent === undefined || index === undefined) return;
 
       const anchor = soleElementChild(node);
-      if (!anchor || anchor.tagName !== 'a') return;
+      if (anchor?.tagName !== 'a') return;
 
       const href = anchor.properties?.href;
       if (typeof href !== 'string' || !isYouTubeUrl(href)) return;

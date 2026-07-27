@@ -190,7 +190,7 @@ describe('DynamicPage — about slug (personJsonLd path)', () => {
     expect(screen.getByTestId('storyblok-story')).toBeInTheDocument();
     const script = container.querySelector('script[type="application/ld+json"]');
     expect(script).toBeInTheDocument();
-    const parsed = JSON.parse(script!.innerHTML.replace(/\\u003c/g, '<'));
+    const parsed = JSON.parse(script!.innerHTML.replaceAll(String.raw`\u003c`, '<'));
     expect(parsed['@type']).toBe('Person');
   });
 });
@@ -272,7 +272,7 @@ describe('DynamicPage — JSON-LD escaping', () => {
     expect(script).toBeInTheDocument();
     // The raw innerHTML should not contain literal < from injected title
     expect(script!.innerHTML).not.toContain('<script>');
-    expect(script!.innerHTML).toContain('\\u003c');
+    expect(script!.innerHTML).toContain(String.raw`\u003c`);
   });
 });
 
@@ -359,7 +359,7 @@ describe('DynamicPage — title/description fallbacks in post JSON-LD', () => {
 
     const script = container.querySelector('script[type="application/ld+json"]');
     expect(script).toBeInTheDocument();
-    const parsed = JSON.parse(script!.innerHTML.replace(/\\u003c/g, '<'));
+    const parsed = JSON.parse(script!.innerHTML.replaceAll(String.raw`\u003c`, '<'));
     expect(parsed.headline).toBe('Story Name Used');
   });
 
@@ -378,7 +378,7 @@ describe('DynamicPage — title/description fallbacks in post JSON-LD', () => {
 
     const script = container.querySelector('script[type="application/ld+json"]');
     expect(script).toBeInTheDocument();
-    const parsed = JSON.parse(script!.innerHTML.replace(/\\u003c/g, '<'));
+    const parsed = JSON.parse(script!.innerHTML.replaceAll(String.raw`\u003c`, '<'));
     // description should be empty string when no excerpt
     expect(parsed.description).toBe('');
   });
@@ -404,7 +404,7 @@ describe('DynamicPage — date fallback in JSON-LD', () => {
 
     const script = container.querySelector('script[type="application/ld+json"]');
     expect(script).toBeInTheDocument();
-    const parsed = JSON.parse(script!.innerHTML.replace(/\\u003c/g, '<'));
+    const parsed = JSON.parse(script!.innerHTML.replaceAll(String.raw`\u003c`, '<'));
     expect(parsed.datePublished).toBe('2024-07-01T00:00:00.000Z');
   });
 });
@@ -417,7 +417,7 @@ describe('DynamicPage — Phase 3 JSON-LD enrichment', () => {
 
   const parseJsonLd = (container: HTMLElement) => {
     const script = container.querySelector('script[type="application/ld+json"]');
-    return JSON.parse(script!.innerHTML.replace(/\\u003c/g, '<'));
+    return JSON.parse(script!.innerHTML.replaceAll(String.raw`\u003c`, '<'));
   };
 
   it('adds serializer-derived articleBody and SoftwareSourceCode hasPart', async () => {
