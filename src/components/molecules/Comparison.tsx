@@ -1,4 +1,4 @@
-import { renderRichText, type StoryblokRichTextNode } from '@storyblok/react/rsc';
+import { renderRichText, type SbRichTextNode } from '@storyblok/react/rsc';
 import {
   Comparison as ComparisonRoot,
   ComparisonCard,
@@ -31,7 +31,7 @@ export default function Comparison({ blok }: Readonly<{ blok: ComparisonBlok }>)
           // body renders no description (and renderRichText is never handed
           // undefined).
           const html = card.body
-            ? renderRichText(card.body as unknown as StoryblokRichTextNode<string>)
+            ? renderRichText(card.body as unknown as SbRichTextNode<string>)
             : '';
           return (
             <ComparisonCard key={card._uid} tone={card.tone ?? 'neutral'}>

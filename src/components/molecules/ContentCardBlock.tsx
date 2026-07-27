@@ -2,8 +2,8 @@
 
 import { memo } from 'react';
 import dynamic from 'next/dynamic';
-import { StoryblokRichText } from '@storyblok/react';
-import { StoryblokServerComponent } from '@storyblok/react/rsc';
+import { renderRichText } from '@storyblok/react';
+import { StoryblokServerComponent, type SbRichTextNode } from '@storyblok/react/rsc';
 import { makeStoryblokEditable } from '@/lib/storyblok-utils';
 import type { ContentCardBlockBlok } from '@/types/storyblok';
 import { cn } from '@/lib/utils';
@@ -55,9 +55,12 @@ const ContentCardBlock = memo(({ blok }: ContentCardBlockProps) => {
         <p className="text-gray-700 font-normal">{subtitle}</p>
       )}
       {hasDescription && (
-        <div className="prose prose-lg max-w-none prose-headings:font-bold prose-p:text-gray-700 dark:prose-p:text-gray-200">
-          <StoryblokRichText doc={description as Parameters<typeof StoryblokRichText>[0]['doc']} />
-        </div>
+        <div
+          className="prose prose-lg max-w-none prose-headings:font-bold prose-p:text-gray-700 dark:prose-p:text-gray-200"
+          dangerouslySetInnerHTML={{
+            __html: renderRichText(description as unknown as SbRichTextNode<string>) ?? '',
+          }}
+        />
       )}
       {cta_group && cta_group.length > 0 && (
         <div className="flex flex-wrap gap-3 items-center">

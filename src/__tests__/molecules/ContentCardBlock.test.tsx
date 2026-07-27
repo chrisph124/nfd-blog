@@ -61,11 +61,9 @@ vi.mock('react-icons/hi2', () => ({
   HiChevronRight: () => <span data-testid="chevron-right">Right</span>,
 }));
 
-// Mock @storyblok/react (client — where StoryblokRichText now lives)
+// Mock @storyblok/react (client — renderRichText converts a richtext doc to HTML)
 vi.mock('@storyblok/react', () => ({
-  StoryblokRichText: ({ doc: _doc }: { doc: unknown }) => (
-    <p data-testid="storyblok-richtext">Rendered rich text content</p>
-  ),
+  renderRichText: (_doc: unknown) => '<p>Rendered rich text content</p>',
 }));
 
 // Mock @storyblok/react/rsc (still used for StoryblokServerComponent)

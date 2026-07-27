@@ -19,7 +19,7 @@
   "dependencies": {
     "@heroicons/react": "~2.2.0",
     "@shikijs/rehype": "~4.0.2",
-    "@storyblok/react": "~6.1.7",
+    "@storyblok/react": "~7.2.1",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "class-variance-authority": "^0.7.1",
