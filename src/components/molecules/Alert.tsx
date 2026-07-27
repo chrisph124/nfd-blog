@@ -1,4 +1,4 @@
-import { renderRichText, type StoryblokRichTextNode } from '@storyblok/react/rsc';
+import { renderRichText, type SbRichTextNode } from '@storyblok/react/rsc';
 import {
   HiOutlineInformationCircle,
   HiOutlineExclamationTriangle,
@@ -31,7 +31,7 @@ export default function Alert({ blok }: Readonly<{ blok: AlertBlok }>) {
   // the same cast the Richtext atom uses. Guard first so an empty body renders
   // no description (and renderRichText is never handed undefined).
   const html = blok.body
-    ? renderRichText(blok.body as unknown as StoryblokRichTextNode<string>)
+    ? renderRichText(blok.body as unknown as SbRichTextNode<string>)
     : '';
 
   return (

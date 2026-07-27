@@ -1,4 +1,4 @@
-import { renderRichText, type StoryblokRichTextNode } from '@storyblok/react/rsc';
+import { renderRichText, type SbRichTextNode } from '@storyblok/react/rsc';
 import type { RichtextBlok } from '@/types/storyblok';
 import { makeStoryblokEditable } from '@/lib/storyblok-utils';
 import { injectLazyLoading } from '@/lib/utils';
@@ -13,7 +13,7 @@ interface RichtextProps {
 export default function Richtext({ blok }: Readonly<RichtextProps>) {
   if (!blok.content) return null;
 
-  const renderedContent = renderRichText(blok.content as unknown as StoryblokRichTextNode<string>);
+  const renderedContent = renderRichText(blok.content as unknown as SbRichTextNode<string>);
 
   if (!renderedContent) return null;
 
