@@ -51,8 +51,12 @@ jobs:
 
       # PR decoration is via the SonarCloud GitHub App, not GITHUB_TOKEN —
       # contents: read is sufficient for this step.
+      # Coverage upload is reporting, not a merge gate: a SonarCloud outage
+      # (e.g. HTTP 500 on report upload) must not fail the required job. The
+      # SonarCloud quality gate reports separately via its own status check.
       - name: Upload coverage to SonarCloud
         uses: SonarSource/sonarqube-scan-action@v8
+        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
