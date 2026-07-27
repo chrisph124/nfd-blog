@@ -1,4 +1,4 @@
-import type { StoryblokRichTextNode } from '@storyblok/react/rsc';
+import type { SbRichTextNode } from '@storyblok/react/rsc';
 
 // ============================================================================
 // RichText Node Types
@@ -74,7 +74,7 @@ export type StoryblokEditableFunction = <T extends StoryblokEditableProps>(blok:
 /**
  * Storyblok renderRichText function signature
  */
-export type RenderRichTextFunction = (content: StoryblokRichTextNode<string> | null | undefined) => string | null;
+export type RenderRichTextFunction = (content: SbRichTextNode<string> | null | undefined) => string | null;
 
 // ============================================================================
 // Storyblok API Types
@@ -153,7 +153,7 @@ export function createStoryblokEditable(): StoryblokEditableFunction {
  * Creates a mock renderRichText function
  */
 export function createRenderRichText(): RenderRichTextFunction {
-  return function mockRenderRichText(content: StoryblokRichTextNode<string> | null | undefined): string | null {
+  return function mockRenderRichText(content: SbRichTextNode<string> | null | undefined): string | null {
     if (!content) return null;
     if (typeof content === 'object' && content !== null) {
       // Simulate rich text rendering

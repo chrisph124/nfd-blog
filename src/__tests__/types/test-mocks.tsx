@@ -1,6 +1,6 @@
 import React from 'react';
 import { vi } from 'vitest';
-import { type StoryblokRichTextNode } from '@storyblok/react/rsc';
+import { type SbRichTextNode } from '@storyblok/react/rsc';
 import Image from 'next/image';
 
 /**
@@ -132,7 +132,7 @@ export interface StoryblokEditableProps {
  * Matches the real renderRichText function signature
  */
 export interface RenderRichTextProps {
-  content: StoryblokRichTextNode<string>;
+  content: SbRichTextNode<string>;
   options?: {
     resolveRelations?: boolean;
     resolver?: (type: string, blok: Record<string, unknown>) => React.ReactNode;
@@ -294,7 +294,7 @@ export function createStoryblokEditable(): (blok: Record<string, unknown>) => St
  * Handles Storyblok rich text content properly
  */
 export function createRenderRichText() {
-  return (content?: StoryblokRichTextNode<string> | StoryblokRichTextNode<string>[]): string => {
+  return (content?: SbRichTextNode<string> | SbRichTextNode<string>[]): string => {
     if (!content) return '';
 
     // Simulate Storyblok rich text rendering

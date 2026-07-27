@@ -1,4 +1,4 @@
-import { SbBlokData, type StoryblokRichTextNode } from "@storyblok/react/rsc";
+import { SbBlokData, type SbRichTextNode } from "@storyblok/react/rsc";
 
 // ============================================================================
 // Base Storyblok Types
@@ -275,7 +275,7 @@ export interface RichtextBlok extends StoryblokBlok {
   // Storyblok delivers richtext as a ProseMirror JSON document (node tree), not a
   // string. Typed as the same node shape `Richtext.tsx` feeds to `renderRichText`
   // so the markdown serializer can walk it without falling back to `any`.
-  content?: StoryblokRichTextNode<string>;
+  content?: SbRichTextNode<string>;
 }
 
 /**
