@@ -13,11 +13,19 @@ updates:
       semver-patch-days: 1
       semver-minor-days: 3
       semver-major-days: 7
+    # Group only non-breaking bumps (minor/patch); major bumps get isolated
+    # single-package PRs so breaking upgrades are reviewed individually.
     groups:
       production-dependencies:
         dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
       development-dependencies:
         dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
 
   - package-ecosystem: "github-actions"
     directory: "/"
