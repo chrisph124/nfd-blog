@@ -615,10 +615,14 @@ describe('injectLazyLoading', () => {
       expect(injectLazyLoading(html)).toBe(html);
     });
 
-    it('handles malformed HTML gracefully', () => {
-      const html = '<img src="test.jpg" <iframe src="test.html">';
+    it.each([
+      { name: 'handles malformed HTML gracefully', html: '<img src="test.jpg" <iframe src="test.html">', expected: 'loading="lazy"' },
+      { name: 'handles attributes with quotes inside values', html: '<img src="test.jpg" alt=\'Image with "quotes"\' />', expected: 'loading="lazy"' },
+      { name: 'handles tags with multiple spaces before tag name', html: '<img  src="test.jpg" />', expected: 'loading="lazy"' },
+      { name: 'does not modify src attribute values', html: '<img src="loading.jpg" />', expected: 'src="loading.jpg"' },
+    ])('$name', ({ html, expected }) => {
       const result = injectLazyLoading(html);
-      expect(result).toContain('loading="lazy"');
+      expect(result).toContain(expected);
     });
 
     it('handles self-closing vs non-self-closing tags', () => {
@@ -636,29 +640,11 @@ describe('injectLazyLoading', () => {
       expect(result).toContain('data-info="a|b"');
     });
 
-    it('handles attributes with quotes inside values', () => {
-      const html = '<img src="test.jpg" alt=\'Image with "quotes"\' />';
-      const result = injectLazyLoading(html);
-      expect(result).toContain('loading="lazy"');
-    });
-
     it('handles very long HTML strings', () => {
       const images = Array.from({ length: 100 }, (_, i) => `<img src="image-${i}.jpg" />`).join('\n');
       const result = injectLazyLoading(images);
       const matches = result.match(/loading="lazy"/g);
       expect(matches?.length).toBe(100);
-    });
-
-    it('handles tags with multiple spaces before tag name', () => {
-      const html = '<img  src="test.jpg" />';
-      const result = injectLazyLoading(html);
-      expect(result).toContain('loading="lazy"');
-    });
-
-    it('does not modify src attribute values', () => {
-      const html = '<img src="loading.jpg" />';
-      const result = injectLazyLoading(html);
-      expect(result).toContain('src="loading.jpg"');
     });
   });
 

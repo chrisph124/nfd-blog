@@ -3,10 +3,15 @@ import { proxy, config } from '@/proxy';
 
 describe('proxy function', () => {
   describe('Blocking /global routes', () => {
-    it('blocks /global route and does not call next', async () => {
+    it.each([
+      { name: 'blocks /global route and does not call next', pathname: '/global' },
+      { name: 'blocks /global/header route and does not call next', pathname: '/global/header' },
+      { name: 'blocks /global/footer route and does not call next', pathname: '/global/footer' },
+      { name: 'blocks deeply nested /global routes', pathname: '/global/some/deep/path' },
+    ])('$name', async ({ pathname }) => {
       const mockRequest = {
-        nextUrl: { pathname: '/global' },
-        url: 'http://localhost/global',
+        nextUrl: { pathname },
+        url: `http://localhost${pathname}`,
       } as unknown as Request;
 
       const result = await proxy(mockRequest as any);
@@ -15,85 +20,18 @@ describe('proxy function', () => {
       // Rewrite responses don't have x-middleware-next header
       expect(result.headers.get('x-middleware-next')).toBeNull();
     });
-
-    it('blocks /global/header route and does not call next', async () => {
-      const mockRequest = {
-        nextUrl: { pathname: '/global/header' },
-        url: 'http://localhost/global/header',
-      } as unknown as Request;
-
-      const result = await proxy(mockRequest as any);
-
-      expect(result).toBeDefined();
-      expect(result.headers.get('x-middleware-next')).toBeNull();
-    });
-
-    it('blocks /global/footer route and does not call next', async () => {
-      const mockRequest = {
-        nextUrl: { pathname: '/global/footer' },
-        url: 'http://localhost/global/footer',
-      } as unknown as Request;
-
-      const result = await proxy(mockRequest as any);
-
-      expect(result).toBeDefined();
-      expect(result.headers.get('x-middleware-next')).toBeNull();
-    });
-
-    it('blocks deeply nested /global routes', async () => {
-      const mockRequest = {
-        nextUrl: { pathname: '/global/some/deep/path' },
-        url: 'http://localhost/global/some/deep/path',
-      } as unknown as Request;
-
-      const result = await proxy(mockRequest as any);
-
-      expect(result).toBeDefined();
-      expect(result.headers.get('x-middleware-next')).toBeNull();
-    });
   });
 
   describe('Allowing normal routes', () => {
-    it('allows homepage route - has x-middleware-next header', async () => {
+    it.each([
+      { name: 'allows homepage route - has x-middleware-next header', pathname: '/' },
+      { name: 'allows /blog route', pathname: '/blog' },
+      { name: 'allows /blog/my-post route', pathname: '/blog/my-post' },
+      { name: 'allows /about route', pathname: '/about' },
+    ])('$name', async ({ pathname }) => {
       const mockRequest = {
-        nextUrl: { pathname: '/' },
-        url: 'http://localhost/',
-      } as unknown as Request;
-
-      const result = await proxy(mockRequest as any);
-
-      expect(result).toBeDefined();
-      expect(result.headers.get('x-middleware-next')).toBe('1');
-    });
-
-    it('allows /blog route', async () => {
-      const mockRequest = {
-        nextUrl: { pathname: '/blog' },
-        url: 'http://localhost/blog',
-      } as unknown as Request;
-
-      const result = await proxy(mockRequest as any);
-
-      expect(result).toBeDefined();
-      expect(result.headers.get('x-middleware-next')).toBe('1');
-    });
-
-    it('allows /blog/my-post route', async () => {
-      const mockRequest = {
-        nextUrl: { pathname: '/blog/my-post' },
-        url: 'http://localhost/blog/my-post',
-      } as unknown as Request;
-
-      const result = await proxy(mockRequest as any);
-
-      expect(result).toBeDefined();
-      expect(result.headers.get('x-middleware-next')).toBe('1');
-    });
-
-    it('allows /about route', async () => {
-      const mockRequest = {
-        nextUrl: { pathname: '/about' },
-        url: 'http://localhost/about',
+        nextUrl: { pathname },
+        url: `http://localhost${pathname}`,
       } as unknown as Request;
 
       const result = await proxy(mockRequest as any);

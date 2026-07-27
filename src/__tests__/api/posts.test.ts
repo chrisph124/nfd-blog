@@ -93,44 +93,14 @@ describe('POST API Route', () => {
   });
 
   describe('Parameter validation', () => {
-    it('rejects page < 1', async () => {
-      const request = createMockRequest('0', '12');
-      const response = await GET(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(400);
-      expect(data.error).toContain('Invalid pagination parameters');
-    });
-
-    it('rejects per_page < 1', async () => {
-      const request = createMockRequest('1', '0');
-      const response = await GET(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(400);
-      expect(data.error).toContain('Invalid pagination parameters');
-    });
-
-    it('rejects per_page > 100', async () => {
-      const request = createMockRequest('1', '101');
-      const response = await GET(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(400);
-      expect(data.error).toContain('Invalid pagination parameters');
-    });
-
-    it('rejects NaN for page parameter', async () => {
-      const request = createMockRequest('abc', '12');
-      const response = await GET(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(400);
-      expect(data.error).toContain('Invalid pagination parameters');
-    });
-
-    it('rejects NaN for per_page parameter', async () => {
-      const request = createMockRequest('1', 'xyz');
+    it.each([
+      { name: 'rejects page < 1', page: '0', perPage: '12' },
+      { name: 'rejects per_page < 1', page: '1', perPage: '0' },
+      { name: 'rejects per_page > 100', page: '1', perPage: '101' },
+      { name: 'rejects NaN for page parameter', page: 'abc', perPage: '12' },
+      { name: 'rejects NaN for per_page parameter', page: '1', perPage: 'xyz' },
+    ])('$name', async ({ page, perPage }) => {
+      const request = createMockRequest(page, perPage);
       const response = await GET(request);
       const data = await response.json();
 

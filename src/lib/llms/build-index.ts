@@ -16,7 +16,7 @@ export interface LlmsIndexOptions {
 }
 
 function compactDescription(input: string, max = 160): string {
-  const clean = stripEntities(input).replace(/\s+/g, ' ').trim();
+  const clean = stripEntities(input).replaceAll(/\s+/g, ' ').trim();
   if (!clean) return '';
   if (clean.length <= max) return clean;
   return `${clean.slice(0, max - 1).trimEnd()}…`;
@@ -31,15 +31,16 @@ export function buildLlmsIndex(opts: LlmsIndexOptions): string {
   });
 
   const lines: string[] = [];
-  lines.push(`# ${siteName}`);
-  lines.push('');
-  lines.push(`> ${compactDescription(description, 300)}`);
-  lines.push('');
-  lines.push('## Posts');
+  lines.push(
+    `# ${siteName}`,
+    '',
+    `> ${compactDescription(description, 300)}`,
+    '',
+    '## Posts',
+  );
 
   if (sorted.length === 0) {
-    lines.push('');
-    lines.push('_No posts yet._');
+    lines.push('', '_No posts yet._');
   } else {
     for (const post of sorted) {
       const desc = compactDescription(post.description);
@@ -51,9 +52,7 @@ export function buildLlmsIndex(opts: LlmsIndexOptions): string {
   }
 
   if (aboutUrl) {
-    lines.push('');
-    lines.push('## About');
-    lines.push(`- [About the author](${aboutUrl})`);
+    lines.push('', '## About', `- [About the author](${aboutUrl})`);
   }
 
   return `${lines.join('\n')}\n`;

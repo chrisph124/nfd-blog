@@ -22,7 +22,6 @@ interface CardImageProps {
 
 interface CardMetaProps {
   createdAt?: string;
-  excerpt?: string;
   body?: unknown[];
 }
 

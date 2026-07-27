@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import ImageCarousel from '@/components/molecules/ImageCarousel';
 import type { StoryblokAsset } from '@/types/storyblok';
 
@@ -215,9 +215,7 @@ describe('ImageCarousel', () => {
       render(<ImageCarousel images={images} />);
 
       const leftArrow = screen.getByTestId('chevron-left').parentElement!;
-      act(() => {
-        fireEvent.mouseEnter(leftArrow);
-      });
+      fireEvent.mouseEnter(leftArrow);
 
       expect(mockAutoplayStop).toHaveBeenCalledTimes(1);
     });
@@ -230,9 +228,7 @@ describe('ImageCarousel', () => {
       render(<ImageCarousel images={images} />);
 
       const leftArrow = screen.getByTestId('chevron-left').parentElement!;
-      act(() => {
-        fireEvent.mouseLeave(leftArrow);
-      });
+      fireEvent.mouseLeave(leftArrow);
 
       expect(mockAutoplayPlay).toHaveBeenCalledTimes(1);
     });
@@ -243,7 +239,7 @@ describe('ImageCarousel', () => {
       const images = [createMockImage()];
       const { container } = render(<ImageCarousel images={images} hideOnMobile />);
 
-      const carouselContainer = container.querySelector('.hidden.md\\:block');
+      const carouselContainer = container.querySelector(String.raw`.hidden.md\:block`);
       expect(carouselContainer).toBeInTheDocument();
     });
 
@@ -251,7 +247,7 @@ describe('ImageCarousel', () => {
       const images = [createMockImage({ id: 1 }), createMockImage({ id: 2 })];
       const { container } = render(<ImageCarousel images={images} hideOnMobile />);
 
-      const carouselContainer = container.querySelector('.hidden.md\\:block');
+      const carouselContainer = container.querySelector(String.raw`.hidden.md\:block`);
       expect(carouselContainer).toBeInTheDocument();
     });
 
@@ -259,7 +255,7 @@ describe('ImageCarousel', () => {
       const images = [createMockImage()];
       const { container } = render(<ImageCarousel images={images} hideOnMobile={false} />);
 
-      const carouselContainer = container.querySelector('.hidden.md\\:block');
+      const carouselContainer = container.querySelector(String.raw`.hidden.md\:block`);
       expect(carouselContainer).not.toBeInTheDocument();
     });
 
@@ -267,7 +263,7 @@ describe('ImageCarousel', () => {
       const images = [createMockImage()];
       const { container } = render(<ImageCarousel images={images} />);
 
-      const carouselContainer = container.querySelector('.hidden.md\\:block');
+      const carouselContainer = container.querySelector(String.raw`.hidden.md\:block`);
       expect(carouselContainer).not.toBeInTheDocument();
     });
   });
@@ -285,9 +281,7 @@ describe('ImageCarousel', () => {
       const allDivs = Array.from(container.querySelectorAll('.rounded-3xl.overflow-hidden')) as HTMLElement[];
       // The inner emblaRef div comes after the outer wrapper
       const emblaDiv = allDivs.find(el => el.parentElement?.classList.contains('rounded-3xl')) ?? allDivs[allDivs.length - 1];
-      act(() => {
-        fireEvent.mouseEnter(emblaDiv);
-      });
+      fireEvent.mouseEnter(emblaDiv);
 
       expect(mockAutoplayStop).toHaveBeenCalled();
     });
@@ -301,9 +295,7 @@ describe('ImageCarousel', () => {
 
       const allDivs = Array.from(container.querySelectorAll('.rounded-3xl.overflow-hidden')) as HTMLElement[];
       const emblaDiv = allDivs.find(el => el.parentElement?.classList.contains('rounded-3xl')) ?? allDivs[allDivs.length - 1];
-      act(() => {
-        fireEvent.mouseLeave(emblaDiv);
-      });
+      fireEvent.mouseLeave(emblaDiv);
 
       expect(mockAutoplayPlay).toHaveBeenCalled();
     });

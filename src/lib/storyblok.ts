@@ -29,7 +29,7 @@ import { cache } from 'react';
 import { storyblokVersion } from './storyblok-version';
 
 // Re-export so existing imports from '@/lib/storyblok' keep working.
-export { storyblokVersion };
+export { storyblokVersion } from './storyblok-version';
 
 // Component mapping type
 const components = {

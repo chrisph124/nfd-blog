@@ -1,8 +1,7 @@
 'use client';
 
 import { memo } from 'react';
-import { useScroll, useSpring } from 'motion/react';
-import { m } from 'motion/react';
+import { m, useScroll, useSpring } from 'motion/react';
 import { cn } from '@/lib/utils';
 
 interface ReadingProgressBarProps {

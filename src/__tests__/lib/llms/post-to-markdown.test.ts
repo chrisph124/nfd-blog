@@ -87,8 +87,8 @@ describe('buildFrontMatter', () => {
       },
     });
     const fm = buildFrontMatter(story, 'https://example.com');
-    expect(fm).toContain('title: "Title: with \\"quote\\""');
-    expect(fm).toContain('excerpt: "line1\\n---\\nkey: injected"');
+    expect(fm).toContain(String.raw`title: "Title: with \"quote\""`);
+    expect(fm).toContain(String.raw`excerpt: "line1\n---\nkey: injected"`);
     // The injected `---` must not appear as a real line break in the block.
     expect(fm.split('\n').filter((l) => l === '---')).toHaveLength(2);
   });
@@ -98,7 +98,7 @@ describe('buildFrontMatter', () => {
       content: { _uid: 'post', component: 'post', title: 'a\rb', excerpt: '', body: [] },
     });
     const fm = buildFrontMatter(story, 'https://example.com');
-    expect(fm).toContain('title: "a\\nb"');
+    expect(fm).toContain(String.raw`title: "a\nb"`);
     expect(fm).not.toMatch(/\r/);
   });
 });

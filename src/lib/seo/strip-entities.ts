@@ -18,5 +18,5 @@ const ENTITY_PATTERN = /&(?:quot|apos|amp|lt|gt|nbsp|#x27|#34|#39|#60|#62|#38|#1
 
 export function stripEntities(input: string | undefined | null): string {
   if (!input) return '';
-  return input.replace(ENTITY_PATTERN, (match) => ENTITY_MAP[match.toLowerCase()] ?? match);
+  return input.replaceAll(ENTITY_PATTERN, (match) => ENTITY_MAP[match.toLowerCase()] ?? match);
 }

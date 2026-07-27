@@ -40,28 +40,15 @@ describe('processRichtext', () => {
   });
 
   describe('Markdown heading detection', () => {
-    it('converts h1 markdown pattern to h1 tag', async () => {
-      const html = '<p># Project Context</p>';
+    it.each([
+      { name: 'converts h1 markdown pattern to h1 tag', markdown: '# Project Context', expected: '<h1>Project Context</h1>' },
+      { name: 'converts h2 markdown pattern to h2 tag', markdown: '## Tech Stack', expected: '<h2>Tech Stack</h2>' },
+      { name: 'converts h3 markdown pattern to h3 tag', markdown: '### Subheading', expected: '<h3>Subheading</h3>' },
+      { name: 'converts h4 markdown pattern to h4 tag', markdown: '#### Deep heading', expected: '<h4>Deep heading</h4>' },
+    ])('$name', async ({ markdown, expected }) => {
+      const html = `<p>${markdown}</p>`;
       const result = await processRichtext(html);
-      expect(result).toContain('<h1>Project Context</h1>');
-    });
-
-    it('converts h2 markdown pattern to h2 tag', async () => {
-      const html = '<p>## Tech Stack</p>';
-      const result = await processRichtext(html);
-      expect(result).toContain('<h2>Tech Stack</h2>');
-    });
-
-    it('converts h3 markdown pattern to h3 tag', async () => {
-      const html = '<p>### Subheading</p>';
-      const result = await processRichtext(html);
-      expect(result).toContain('<h3>Subheading</h3>');
-    });
-
-    it('converts h4 markdown pattern to h4 tag', async () => {
-      const html = '<p>#### Deep heading</p>';
-      const result = await processRichtext(html);
-      expect(result).toContain('<h4>Deep heading</h4>');
+      expect(result).toContain(expected);
     });
 
     it('does NOT convert hashtag without space after #', async () => {
@@ -87,10 +74,13 @@ describe('processRichtext', () => {
   });
 
   describe('Bold conversion', () => {
-    it('converts **bold** pattern to strong tag', async () => {
-      const html = '<p>This is **bold** text</p>';
+    it.each([
+      { name: 'converts **bold** pattern to strong tag', html: '<p>This is **bold** text</p>', expected: '<strong>bold</strong>' },
+      { name: 'handles bold at start of text', html: '<p>**Bold start** regular text</p>', expected: '<strong>Bold start</strong>' },
+      { name: 'handles bold at end of text', html: '<p>Regular text **bold end**</p>', expected: '<strong>bold end</strong>' },
+    ])('$name', async ({ html, expected }) => {
       const result = await processRichtext(html);
-      expect(result).toContain('<strong>bold</strong>');
+      expect(result).toContain(expected);
     });
 
     it('converts multiple bold patterns in same paragraph', async () => {
@@ -99,25 +89,16 @@ describe('processRichtext', () => {
       expect(result).toContain('<strong>First</strong>');
       expect(result).toContain('<strong>second</strong>');
     });
-
-    it('handles bold at start of text', async () => {
-      const html = '<p>**Bold start** regular text</p>';
-      const result = await processRichtext(html);
-      expect(result).toContain('<strong>Bold start</strong>');
-    });
-
-    it('handles bold at end of text', async () => {
-      const html = '<p>Regular text **bold end**</p>';
-      const result = await processRichtext(html);
-      expect(result).toContain('<strong>bold end</strong>');
-    });
   });
 
   describe('Inline code conversion', () => {
-    it('converts inline backticks to code tag', async () => {
-      const html = '<p>Use `npm install`</p>';
+    it.each([
+      { name: 'converts inline backticks to code tag', html: '<p>Use `npm install`</p>', expected: '<code>npm install</code>' },
+      { name: 'handles code at start of text', html: '<p>`code` at start</p>', expected: '<code>code</code>' },
+      { name: 'handles code at end of text', html: '<p>end with `code`</p>', expected: '<code>code</code>' },
+    ])('$name', async ({ html, expected }) => {
       const result = await processRichtext(html);
-      expect(result).toContain('<code>npm install</code>');
+      expect(result).toContain(expected);
     });
 
     it('handles multiple inline code in same paragraph', async () => {
@@ -126,37 +107,16 @@ describe('processRichtext', () => {
       expect(result).toContain('<code>git</code>');
       expect(result).toContain('<code>npm</code>');
     });
-
-    it('handles code at start of text', async () => {
-      const html = '<p>`code` at start</p>';
-      const result = await processRichtext(html);
-      expect(result).toContain('<code>code</code>');
-    });
-
-    it('handles code at end of text', async () => {
-      const html = '<p>end with `code`</p>';
-      const result = await processRichtext(html);
-      expect(result).toContain('<code>code</code>');
-    });
   });
 
   describe('Lazy loading attributes', () => {
-    it('adds loading="lazy" to img tags without loading attribute', async () => {
-      const html = '<img src="image.jpg" alt="test">';
+    it.each([
+      { name: 'adds loading="lazy" to img tags without loading attribute', html: '<img src="image.jpg" alt="test">', expected: 'loading="lazy"' },
+      { name: 'adds loading="lazy" to iframe tags without loading attribute', html: '<iframe src="https://example.com"></iframe>', expected: 'loading="lazy"' },
+      { name: 'adds preload="none" to video tags', html: '<video src="video.mp4"></video>', expected: 'preload="none"' },
+    ])('$name', async ({ html, expected }) => {
       const result = await processRichtext(html);
-      expect(result).toContain('loading="lazy"');
-    });
-
-    it('adds loading="lazy" to iframe tags without loading attribute', async () => {
-      const html = '<iframe src="https://example.com"></iframe>';
-      const result = await processRichtext(html);
-      expect(result).toContain('loading="lazy"');
-    });
-
-    it('adds preload="none" to video tags', async () => {
-      const html = '<video src="video.mp4"></video>';
-      const result = await processRichtext(html);
-      expect(result).toContain('preload="none"');
+      expect(result).toContain(expected);
     });
 
     it('preserves existing loading attribute on img', async () => {

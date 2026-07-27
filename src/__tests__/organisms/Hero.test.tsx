@@ -171,28 +171,16 @@ describe('Hero', () => {
   });
 
   describe('Content Alignment', () => {
-    it('applies left alignment classes', () => {
-      const blok = createMockBlok({ content_alignment: 'left' });
+    it.each([
+      { name: 'applies left alignment classes', content_alignment: 'left', expectedClasses: ['items-start', 'text-left'] },
+      { name: 'applies center alignment classes', content_alignment: 'center', expectedClasses: ['items-center', 'text-center'] },
+      { name: 'applies right alignment classes', content_alignment: 'right', expectedClasses: ['items-end', 'text-right'] },
+    ] as const)('$name', ({ content_alignment, expectedClasses }) => {
+      const blok = createMockBlok({ content_alignment });
       const { container } = render(<Hero blok={blok} />);
 
       const content = container.querySelector('[aria-label="Hero section content"]');
-      expect(content).toHaveClass('items-start', 'text-left');
-    });
-
-    it('applies center alignment classes', () => {
-      const blok = createMockBlok({ content_alignment: 'center' });
-      const { container } = render(<Hero blok={blok} />);
-
-      const content = container.querySelector('[aria-label="Hero section content"]');
-      expect(content).toHaveClass('items-center', 'text-center');
-    });
-
-    it('applies right alignment classes', () => {
-      const blok = createMockBlok({ content_alignment: 'right' });
-      const { container } = render(<Hero blok={blok} />);
-
-      const content = container.querySelector('[aria-label="Hero section content"]');
-      expect(content).toHaveClass('items-end', 'text-right');
+      expect(content).toHaveClass(...expectedClasses);
     });
 
     it('defaults to left alignment when content_alignment is undefined', () => {
@@ -584,11 +572,36 @@ describe('Hero', () => {
     });
 
     describe('Dimension Extraction', () => {
-      it('extracts and applies correct width/height from URL', () => {
+      it.each([
+        {
+          name: 'extracts and applies correct width/height from URL',
+          filename: 'https://a.storyblok.com/f/12345/300x200/hash/test.png',
+          expectedWidth: '300',
+          expectedHeight: '200',
+        },
+        {
+          name: 'uses fallback dimensions for invalid URLs',
+          filename: 'https://invalid-url.com/no-dimensions.png',
+          expectedWidth: '1920',
+          expectedHeight: '1080',
+        },
+        {
+          name: 'uses fallback dimensions for malformed dimension strings',
+          filename: 'https://a.storyblok.com/f/12345/invalidx/hash/test.png',
+          expectedWidth: '1920',
+          expectedHeight: '1080',
+        },
+        {
+          name: 'uses fallback dimensions for zero or negative values',
+          filename: 'https://a.storyblok.com/f/12345/0x-100/hash/test.png',
+          expectedWidth: '1920',
+          expectedHeight: '1080',
+        },
+      ])('$name', ({ filename, expectedWidth, expectedHeight }) => {
         const blok = createMockBlok({
           image: {
             id: 123456789,
-            filename: 'https://a.storyblok.com/f/12345/300x200/hash/test.png',
+            filename,
             alt: 'Test image',
           },
           image_type: 'auto',
@@ -596,24 +609,8 @@ describe('Hero', () => {
         const { container } = render(<Hero blok={blok} />);
 
         const img = container.querySelector('[data-testid="next-image"]');
-        expect(img).toHaveAttribute('data-width', '300');
-        expect(img).toHaveAttribute('data-height', '200');
-      });
-
-      it('uses fallback dimensions for invalid URLs', () => {
-        const blok = createMockBlok({
-          image: {
-            id: 123456789,
-            filename: 'https://invalid-url.com/no-dimensions.png',
-            alt: 'Test image',
-          },
-          image_type: 'auto',
-        });
-        const { container } = render(<Hero blok={blok} />);
-
-        const img = container.querySelector('[data-testid="next-image"]');
-        expect(img).toHaveAttribute('data-width', '1920');
-        expect(img).toHaveAttribute('data-height', '1080');
+        expect(img).toHaveAttribute('data-width', expectedWidth);
+        expect(img).toHaveAttribute('data-height', expectedHeight);
       });
 
       it('logs warning for invalid URL format', () => {
@@ -628,38 +625,6 @@ describe('Hero', () => {
         render(<Hero blok={blok} />);
 
         expect(consoleWarnSpy).toHaveBeenCalled();
-      });
-
-      it('uses fallback dimensions for malformed dimension strings', () => {
-        const blok = createMockBlok({
-          image: {
-            id: 123456789,
-            filename: 'https://a.storyblok.com/f/12345/invalidx/hash/test.png',
-            alt: 'Test image',
-          },
-          image_type: 'auto',
-        });
-        const { container } = render(<Hero blok={blok} />);
-
-        const img = container.querySelector('[data-testid="next-image"]');
-        expect(img).toHaveAttribute('data-width', '1920');
-        expect(img).toHaveAttribute('data-height', '1080');
-      });
-
-      it('uses fallback dimensions for zero or negative values', () => {
-        const blok = createMockBlok({
-          image: {
-            id: 123456789,
-            filename: 'https://a.storyblok.com/f/12345/0x-100/hash/test.png',
-            alt: 'Test image',
-          },
-          image_type: 'auto',
-        });
-        const { container } = render(<Hero blok={blok} />);
-
-        const img = container.querySelector('[data-testid="next-image"]');
-        expect(img).toHaveAttribute('data-width', '1920');
-        expect(img).toHaveAttribute('data-height', '1080');
       });
     });
   });

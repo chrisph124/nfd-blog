@@ -17,7 +17,7 @@ export async function GET(_request: Request, { params }: RouteContext): Promise<
 
   // Only published posts are exposed as markdown (RT#1, RT#14). A non-post page
   // (e.g. /about.md) or an unpublished/unknown slug is a 404.
-  if (!story || story.content.component !== 'post') {
+  if (story?.content.component !== 'post') {
     return new Response('Not Found', { status: 404 });
   }
   if (!(story.first_published_at || story.published_at)) {
