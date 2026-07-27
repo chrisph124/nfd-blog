@@ -58,7 +58,7 @@ const ContentCardBlock = memo(({ blok }: ContentCardBlockProps) => {
         <div
           className="prose prose-lg max-w-none prose-headings:font-bold prose-p:text-gray-700 dark:prose-p:text-gray-200"
           dangerouslySetInnerHTML={{
-            __html: renderRichText(description as unknown as SbRichTextNode<string>) ?? '',
+            __html: renderRichText(description as unknown as SbRichTextNode<string>),
           }}
         />
       )}
