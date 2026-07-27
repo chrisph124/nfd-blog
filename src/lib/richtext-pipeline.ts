@@ -12,7 +12,9 @@ import { getYouTubeId, isYouTubeUrl } from './youtube';
 
 /** Normalize a HAST node's className (array | string | absent) to string[]. */
 function classList(node: Element): string[] {
-  const cls = node.properties?.className;
+  // Type as `unknown`: @types/hast >=3.0.5 narrows `className` such that the
+  // string branch would be `never`; the runtime guards below stay correct.
+  const cls: unknown = node.properties?.className;
   if (Array.isArray(cls)) return cls.map(String);
   if (typeof cls === 'string') return cls.split(/\s+/).filter(Boolean);
   return [];
