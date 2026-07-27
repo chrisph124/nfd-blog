@@ -52,7 +52,7 @@ jobs:
       # PR decoration is via the SonarCloud GitHub App, not GITHUB_TOKEN —
       # contents: read is sufficient for this step.
       - name: Upload coverage to SonarCloud
-        uses: SonarSource/sonarqube-scan-action@v6
+        uses: SonarSource/sonarqube-scan-action@v8
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
