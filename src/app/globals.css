@@ -664,8 +664,9 @@ a:not(.cta-primary-gradient-border, .cta-primary-outlined-border) {
 
 /* Richtext container overflow safety */
 .richtext {
-  overflow-wrap: break-word;
-  word-break: break-word;
+  /* Modern equivalent of the deprecated `word-break: break-word`: breaks long
+     unbreakable tokens and matches its intrinsic-size behavior. */
+  overflow-wrap: anywhere;
 }
 
 /* Shiki code block base styles */

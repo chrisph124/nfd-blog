@@ -30,5 +30,5 @@ export function fenceFor(code: string): string {
  * break the attribute, so both are removed (RT#4 — fence injection).
  */
 export function sanitizeFenceMeta(value: string | undefined | null): string {
-  return (value ?? '').replace(/[\r\n]+/g, ' ').replace(/"/g, '').trim();
+  return (value ?? '').replaceAll(/[\r\n]+/g, ' ').replaceAll('"', '').trim();
 }

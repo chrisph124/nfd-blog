@@ -160,7 +160,7 @@ export function buildPersonJsonLd({
 
 export function estimateWordCount(text: string | undefined | null): number {
   if (!text) return 0;
-  const cleaned = text.replace(/\s+/g, ' ').trim();
+  const cleaned = text.replaceAll(/\s+/g, ' ').trim();
   if (!cleaned) return 0;
   return cleaned.split(' ').length;
 }
@@ -192,7 +192,6 @@ export function buildHomeJsonLdGraph({
   // Strip nested @context — the outer one covers every node in @graph.
   const stripContext = <T extends { '@context'?: string }>(node: T) => {
     const { '@context': _ctx, ...rest } = node;
-    void _ctx;
     return rest;
   };
 

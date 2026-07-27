@@ -38,11 +38,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   );
 
   const isPost = source === 'posts' && content.component === 'post';
-  const ogType: 'article' | 'profile' | 'website' = isPost
-    ? 'article'
-    : slug === 'about'
-      ? 'profile'
-      : 'website';
+  let ogType: 'article' | 'profile' | 'website' = 'website';
+  if (isPost) ogType = 'article';
+  else if (slug === 'about') ogType = 'profile';
 
   // Advertise the machine-readable markdown variant on posts only; non-post
   // pages have no `/{slug}.md` route, so the alternate would 404 (RT#14).
@@ -93,7 +91,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return metadata;
 }
 
-export default async function DynamicPage({ params }: PageProps) {
+export default async function DynamicPage({ params }: Readonly<PageProps>) {
   const { slug } = await params;
 
   const result = await fetchStoryBySlug(slug);

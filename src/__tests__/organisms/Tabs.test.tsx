@@ -133,7 +133,7 @@ describe('Tabs', () => {
       const { container } = render(<Tabs blok={blok} />);
 
       // Open dropdown
-      const mobileDropdown = container.querySelector('.md\\:hidden button');
+      const mobileDropdown = container.querySelector(String.raw`.md\:hidden button`);
       if (mobileDropdown) {
         fireEvent.click(mobileDropdown);
 
@@ -150,7 +150,7 @@ describe('Tabs', () => {
       const blok = createMockBlok();
       const { container } = render(<Tabs blok={blok} />);
 
-      const mobileDropdown = container.querySelector('.md\\:hidden');
+      const mobileDropdown = container.querySelector(String.raw`.md\:hidden`);
       expect(mobileDropdown).toBeInTheDocument();
     });
 
@@ -158,7 +158,7 @@ describe('Tabs', () => {
       const blok = createMockBlok();
       const { container } = render(<Tabs blok={blok} />);
 
-      const desktopTabs = container.querySelector('.hidden.md\\:flex');
+      const desktopTabs = container.querySelector(String.raw`.hidden.md\:flex`);
       expect(desktopTabs).toBeInTheDocument();
     });
   });
@@ -191,7 +191,7 @@ describe('Tabs', () => {
       const { container } = render(<Tabs blok={blok} />);
 
       // Find mobile dropdown button
-      const mobileDropdown = container.querySelector('.md\\:hidden button');
+      const mobileDropdown = container.querySelector(String.raw`.md\:hidden button`);
       expect(mobileDropdown).toBeInTheDocument();
 
       if (mobileDropdown) {
@@ -208,7 +208,7 @@ describe('Tabs', () => {
       const { container, getByTestId, queryByTestId } = render(<Tabs blok={blok} />);
 
       // Open dropdown
-      const mobileDropdown = container.querySelector('.md\\:hidden button');
+      const mobileDropdown = container.querySelector(String.raw`.md\:hidden button`);
       if (mobileDropdown) {
         fireEvent.click(mobileDropdown);
 
@@ -227,7 +227,7 @@ describe('Tabs', () => {
       const { container } = render(<Tabs blok={blok} />);
 
       // Open dropdown
-      const mobileDropdown = container.querySelector('.md\\:hidden button');
+      const mobileDropdown = container.querySelector(String.raw`.md\:hidden button`);
       if (mobileDropdown) {
         fireEvent.click(mobileDropdown);
         expect(screen.getByRole('listbox')).toBeInTheDocument();
@@ -246,7 +246,7 @@ describe('Tabs', () => {
       const { container } = render(<Tabs blok={blok} />);
 
       // Open dropdown
-      const mobileDropdown = container.querySelector('.md\\:hidden button');
+      const mobileDropdown = container.querySelector(String.raw`.md\:hidden button`);
       if (mobileDropdown) {
         fireEvent.click(mobileDropdown);
         expect(screen.getByRole('listbox')).toBeInTheDocument();
@@ -263,7 +263,7 @@ describe('Tabs', () => {
       const blok = createMockBlok();
       const { container } = render(<Tabs blok={blok} />);
 
-      const mobileDropdown = container.querySelector('.md\\:hidden button');
+      const mobileDropdown = container.querySelector(String.raw`.md\:hidden button`);
       expect(mobileDropdown).toHaveTextContent('Tab 1');
     });
 
@@ -272,7 +272,7 @@ describe('Tabs', () => {
       const { container } = render(<Tabs blok={blok} />);
 
       // Open dropdown and select second tab
-      const mobileDropdown = container.querySelector('.md\\:hidden button');
+      const mobileDropdown = container.querySelector(String.raw`.md\:hidden button`);
       if (mobileDropdown) {
         fireEvent.click(mobileDropdown);
         const options = screen.getAllByRole('option');
@@ -287,11 +287,11 @@ describe('Tabs', () => {
       const blok = createMockBlok();
       const { container } = render(<Tabs blok={blok} />);
 
-      const mobileDropdown = container.querySelector('.md\\:hidden button');
+      const mobileDropdown = container.querySelector(String.raw`.md\:hidden button`);
       if (mobileDropdown) {
         fireEvent.click(mobileDropdown);
 
-        const chevron = container.querySelector('.md\\:hidden [data-testid="chevron-down-icon"]');
+        const chevron = container.querySelector(String.raw`.md\:hidden [data-testid="chevron-down-icon"]`);
         expect(chevron).toHaveClass('rotate-180');
       }
     });
@@ -300,7 +300,7 @@ describe('Tabs', () => {
       const blok = createMockBlok();
       const { container } = render(<Tabs blok={blok} />);
 
-      const mobileDropdown = container.querySelector('.md\\:hidden button');
+      const mobileDropdown = container.querySelector(String.raw`.md\:hidden button`);
       expect(mobileDropdown).toHaveAttribute('aria-expanded', 'false');
 
       if (mobileDropdown) {

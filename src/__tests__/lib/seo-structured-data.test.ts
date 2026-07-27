@@ -180,7 +180,7 @@ describe('buildBlogPostingJsonLd — articleBody & code samples (Phase 3)', () =
     const serialized = escapeJsonLd(json);
     expect(serialized).not.toContain('<script>');
     expect(serialized).not.toContain('<img');
-    expect(serialized).toContain('\\u003c');
+    expect(serialized).toContain(String.raw`\u003c`);
   });
 });
 

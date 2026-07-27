@@ -154,28 +154,16 @@ describe('Footer', () => {
   });
 
   describe('Responsive Layout', () => {
-    it('mobile layout stacks vertically', () => {
+    it.each([
+      { name: 'mobile layout stacks vertically', expectedClass: 'flex-col' },
+      { name: 'tablet+ layout uses flex-row', expectedClass: 'md:flex-row' },
+      { name: 'tablet+ layout has justify-between', expectedClass: 'md:justify-between' },
+    ])('$name', ({ expectedClass }) => {
       const blok = createMockBlok();
       render(<Footer blok={blok} />);
 
       const innerContainer = screen.getByRole('contentinfo').querySelector('div > div');
-      expect(innerContainer).toHaveClass('flex-col');
-    });
-
-    it('tablet+ layout uses flex-row', () => {
-      const blok = createMockBlok();
-      render(<Footer blok={blok} />);
-
-      const innerContainer = screen.getByRole('contentinfo').querySelector('div > div');
-      expect(innerContainer).toHaveClass('md:flex-row');
-    });
-
-    it('tablet+ layout has justify-between', () => {
-      const blok = createMockBlok();
-      render(<Footer blok={blok} />);
-
-      const innerContainer = screen.getByRole('contentinfo').querySelector('div > div');
-      expect(innerContainer).toHaveClass('md:justify-between');
+      expect(innerContainer).toHaveClass(expectedClass);
     });
   });
 

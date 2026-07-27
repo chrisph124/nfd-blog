@@ -1,7 +1,7 @@
-import { storyblokEditable, renderRichText, StoryblokServerComponent } from '@storyblok/react/rsc';
+import { storyblokEditable } from '@storyblok/react/rsc';
 
 // Re-export the original functions for convenience
-export { storyblokEditable, renderRichText, StoryblokServerComponent };
+export { renderRichText, StoryblokServerComponent, storyblokEditable } from '@storyblok/react/rsc';
 
 /**
  * Type-safe wrapper for storyblokEditable function

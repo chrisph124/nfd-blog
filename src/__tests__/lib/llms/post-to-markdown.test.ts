@@ -87,8 +87,8 @@ describe('buildFrontMatter', () => {
       },
     });
     const fm = buildFrontMatter(story, 'https://example.com');
-    expect(fm).toContain('title: "Title: with \\"quote\\""');
-    expect(fm).toContain('excerpt: "line1\\n---\\nkey: injected"');
+    expect(fm).toContain(String.raw`title: "Title: with \"quote\""`);
+    expect(fm).toContain(String.raw`excerpt: "line1\n---\nkey: injected"`);
     // The injected `---` must not appear as a real line break in the block.
     expect(fm.split('\n').filter((l) => l === '---')).toHaveLength(2);
   });
@@ -98,7 +98,7 @@ describe('buildFrontMatter', () => {
       content: { _uid: 'post', component: 'post', title: 'a\rb', excerpt: '', body: [] },
     });
     const fm = buildFrontMatter(story, 'https://example.com');
-    expect(fm).toContain('title: "a\\nb"');
+    expect(fm).toContain(String.raw`title: "a\nb"`);
     expect(fm).not.toMatch(/\r/);
   });
 });
@@ -299,5 +299,45 @@ describe('post-to-markdown — alert blok (TL;DR)', () => {
     const { prose, codeSamples } = extractPostContent([alertBlok('TL;DR', 'Summary sentence.')]);
     expect(prose).toContain('Summary sentence.');
     expect(codeSamples).toEqual([]);
+  });
+});
+
+describe('post-to-markdown — comparison blok', () => {
+  const comparisonBlok = () =>
+    ({
+      _uid: 'cmp',
+      component: 'comparison',
+      title: 'Then vs Now',
+      columns: [
+        {
+          _uid: 'c1',
+          component: 'comparison_column',
+          heading: 'Before',
+          body: richtextNode({ type: 'paragraph', content: [{ type: 'text', text: 'Old way.' }] }) as unknown as string,
+        },
+        {
+          _uid: 'c2',
+          component: 'comparison_column',
+          heading: 'After',
+          body: richtextNode({ type: 'paragraph', content: [{ type: 'text', text: 'New way.' }] }) as unknown as string,
+        },
+      ],
+    }) as unknown as PostBody[number];
+
+  it('extractPostContent counts comparison title, headings, and card prose toward articleBody', () => {
+    const { prose, codeSamples } = extractPostContent([comparisonBlok()]);
+    expect(prose).toContain('Then vs Now');
+    expect(prose).toContain('Before');
+    expect(prose).toContain('Old way.');
+    expect(prose).toContain('After');
+    expect(prose).toContain('New way.');
+    expect(codeSamples).toEqual([]);
+  });
+
+  it('serializes a comparison as sequential prose blocks led by the title', () => {
+    const out = postToMarkdown(createStory([comparisonBlok()]), { siteUrl: 'https://example.com' });
+    expect(out).toContain('**Then vs Now**');
+    expect(out).toContain('**Before:** Old way.');
+    expect(out).toContain('**After:** New way.');
   });
 });

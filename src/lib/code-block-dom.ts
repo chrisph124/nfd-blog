@@ -175,7 +175,8 @@ async function copyText(text: string): Promise<CopyState> {
     ta.style.opacity = '0';
     document.body.appendChild(ta);
     ta.select();
-    return document.execCommand('copy') ? 'success' : 'error';
+    // eslint-disable-next-line @typescript-eslint/no-deprecated, sonarjs/deprecation -- intentional synchronous fallback for browsers/contexts without navigator.clipboard
+    return document.execCommand('copy') ? 'success' : 'error'; // NOSONAR: deprecated API kept as the legacy clipboard fallback
   } catch {
     return 'error';
   } finally {

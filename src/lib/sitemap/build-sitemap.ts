@@ -11,7 +11,7 @@ export interface SitemapOptions {
 }
 
 function escapeXml(value: string): string {
-  return value.replace(/[&<>"']/g, (ch) => {
+  return value.replaceAll(/[&<>"']/g, (ch) => {
     switch (ch) {
       case '&': return '&amp;';
       case '<': return '&lt;';

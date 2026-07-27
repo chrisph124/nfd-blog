@@ -48,7 +48,7 @@ class ResizeObserverMock {
 }
 global.ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver;
 
-if (typeof globalThis.PointerEvent === 'undefined') {
+if (globalThis.PointerEvent === undefined) {
   class PointerEvent extends MouseEvent {
     public pointerId: number;
     public pointerType: string;

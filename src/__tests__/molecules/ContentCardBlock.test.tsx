@@ -289,7 +289,7 @@ describe('ContentCardBlock', () => {
       const { container } = render(<ContentCardBlock blok={blok} />);
 
       // When hideOnMobile is true, ImageCarousel container should have hidden md:block
-      const hiddenDiv = container.querySelector('.hidden.md\\:block');
+      const hiddenDiv = container.querySelector(String.raw`.hidden.md\:block`);
       expect(hiddenDiv).toBeInTheDocument();
     });
   });

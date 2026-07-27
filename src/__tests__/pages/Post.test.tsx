@@ -370,7 +370,7 @@ describe('Post', () => {
 
       expect(container.querySelector(String.raw`.bg-black\/80`)).not.toBeInTheDocument();
       expect(container.querySelector(String.raw`.min-h-\[300px\]`)).not.toBeInTheDocument();
-      expect(container.querySelector(String.raw`.-z-10`)).not.toBeInTheDocument();
+      expect(container.querySelector('.-z-10')).not.toBeInTheDocument();
     });
 
     it('renders banner sections in order: tags → title → meta → figure', () => {

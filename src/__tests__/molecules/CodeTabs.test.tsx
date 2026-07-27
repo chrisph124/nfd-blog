@@ -85,8 +85,8 @@ describe('CodeTabs (server component)', () => {
     const { container } = render(ui);
     // One frame around the whole thing (not a separate frame per tab), with
     // both tabs' code present (forceMounted).
-    expect(container.querySelectorAll('.code-tabs').length).toBe(1);
-    expect(container.querySelectorAll('pre.shiki').length).toBe(2);
+    expect(container.querySelectorAll('.code-tabs')).toHaveLength(1);
+    expect(container.querySelectorAll('pre.shiki')).toHaveLength(2);
   });
 
   it('renders a filename header bar for a tab that has a filename', async () => {
@@ -166,7 +166,7 @@ describe('CodeTabs (server component)', () => {
 
     // forceMount → both pre.shiki exist at mount; enhancer adds a copy button to each.
     await waitFor(() =>
-      expect(container.querySelectorAll('[data-copy-btn]').length).toBe(2)
+      expect(container.querySelectorAll('[data-copy-btn]')).toHaveLength(2)
     );
   });
 

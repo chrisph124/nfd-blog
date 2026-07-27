@@ -54,7 +54,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function CatchAllPage({ params }: PageProps) {
+export default async function CatchAllPage({ params }: Readonly<PageProps>) {
   const { slug } = await params;
   const fullSlug = slug.join('/');
 

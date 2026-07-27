@@ -15,22 +15,14 @@ describe('Skeleton Components', () => {
       expect(container.querySelector('div')).toBeInTheDocument();
     });
 
-    it('has animate-pulse class', () => {
+    it.each([
+      { name: 'has animate-pulse class', className: 'animate-pulse' },
+      { name: 'has bg-gray-200 class', className: 'bg-gray-200' },
+      { name: 'has rounded-md class', className: 'rounded-md' },
+    ])('$name', ({ className }) => {
       const { container } = render(<Skeleton />);
       const element = container.querySelector('div');
-      expect(element).toHaveClass('animate-pulse');
-    });
-
-    it('has bg-gray-200 class', () => {
-      const { container } = render(<Skeleton />);
-      const element = container.querySelector('div');
-      expect(element).toHaveClass('bg-gray-200');
-    });
-
-    it('has rounded-md class', () => {
-      const { container } = render(<Skeleton />);
-      const element = container.querySelector('div');
-      expect(element).toHaveClass('rounded-md');
+      expect(element).toHaveClass(className);
     });
 
     it('has aria-hidden="true"', () => {

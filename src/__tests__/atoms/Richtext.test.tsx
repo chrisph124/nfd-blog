@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, act } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import type { RichtextBlok } from '@/types/storyblok';
 import type { SbRichTextNode } from '@storyblok/react/rsc';
 
@@ -75,20 +75,16 @@ describe('Richtext Component', () => {
   };
 
   describe('Rendering', () => {
-    it('renders richtext content when content is provided', async () => {
-      await act(async () => {
-        render(<Richtext blok={mockBlok} />);
-      });
+    it('renders richtext content when content is provided', () => {
+      render(<Richtext blok={mockBlok} />);
 
       const richtextElement = document.querySelector('.richtext');
       expect(richtextElement).toBeInTheDocument();
       expect(richtextElement).toHaveAttribute('data-blok-cuid', 'test-richtext-1');
     });
 
-    it('renders with correct styling classes', async () => {
-      await act(async () => {
-        render(<Richtext blok={mockBlok} />);
-      });
+    it('renders with correct styling classes', () => {
+      render(<Richtext blok={mockBlok} />);
 
       const richtextElement = document.querySelector('.richtext');
       expect(richtextElement).toHaveClass(
@@ -102,10 +98,8 @@ describe('Richtext Component', () => {
       );
     });
 
-    it('renders with prose styling classes', async () => {
-      await act(async () => {
-        render(<Richtext blok={mockBlok} />);
-      });
+    it('renders with prose styling classes', () => {
+      render(<Richtext blok={mockBlok} />);
 
       const richtextElement = document.querySelector('.richtext');
       expect(richtextElement).toHaveClass(
