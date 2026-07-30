@@ -327,7 +327,9 @@ describe('PostListClient', () => {
       );
 
       const grid = container.querySelector('.grid');
-      expect(grid).toHaveClass('grid-cols-1', 'md:grid-cols-2', 'lg:grid-cols-3', '2xl:grid-cols-4');
+      // mobile 1 / tablet 768–1023 = 2 / desktop >=1024 = 3 (no 4-up at xl).
+      expect(grid).toHaveClass('grid-cols-1', 'md:grid-cols-2', 'lg:grid-cols-3');
+      expect(grid).not.toHaveClass('xl:grid-cols-4');
     });
 
     it('applies correct padding classes to container', () => {

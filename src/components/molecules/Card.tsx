@@ -4,7 +4,6 @@ import { memo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { StoryblokStory, PostBlok } from '@/types/storyblok';
-import { Card as CardShell, CardContent } from '@/components/ui/card';
 import { cn, getStoryReadingTime, formatDate } from '@/lib/utils';
 
 interface CardProps {
@@ -14,35 +13,10 @@ interface CardProps {
   style?: React.CSSProperties;
 }
 
-interface CardImageProps {
-  image: PostBlok['featured_image'];
-  title: string;
-  priority?: boolean;
-}
-
 interface CardMetaProps {
   createdAt?: string;
   body?: unknown[];
 }
-
-const CardImage = memo(({ image, title, priority = false }: CardImageProps) => {
-  if (!image?.filename) return null;
-
-  return (
-    <div className="relative aspect-16/10 w-full overflow-hidden rounded-t-xl">
-      <Image
-        src={image.filename}
-        alt={image.alt || title}
-        fill
-        className="object-cover transition-transform duration-300 group-hover:scale-105"
-        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-        priority={priority}
-      />
-    </div>
-  );
-});
-
-CardImage.displayName = 'CardImage';
 
 const CardMeta = memo(({ createdAt, body }: CardMetaProps) => {
   const formattedDate = createdAt ? formatDate(createdAt) : '';
@@ -51,7 +25,7 @@ const CardMeta = memo(({ createdAt, body }: CardMetaProps) => {
   if (!formattedDate && !readingTime) return null;
 
   return (
-    <div className="flex items-center gap-2 text-xs italic text-gray-600">
+    <div className="flex items-center gap-2 text-xs italic text-white/80">
       {formattedDate && <span>{formattedDate}</span>}
       {formattedDate && readingTime && <span>•</span>}
       {readingTime && <span>{readingTime}</span>}
@@ -68,41 +42,70 @@ const Card = memo(({ story, priority = false, className, style }: CardProps) => 
   // Strip "posts/" prefix to get root-level URL (e.g., "posts/my-post" -> "my-post")
   const postSlug = full_slug.replace(/^posts\//, '');
 
+  // Black image-poster: image fills a fixed-aspect card, content overlays the
+  // bottom. Reveal behavior lives in globals.css (.post-poster*), driven by the
+  // `(hover:hover) and (min-width:768px)` capability query. Content stays in the
+  // DOM (a11y + SEO); the whole card is a single click target.
   return (
-    // shadcn Card supplies rounded-xl / border / bg-card / text-card-foreground /
-    // shadow-sm; asChild keeps the semantic <article>. Overrides restore the
-    // bespoke layout (row→col, no outer padding/gap) and explicit border color
-    // (no global border base layer is added, so `border` alone would be currentColor).
-    <CardShell
-      asChild
+    <article
       className={cn(
-        'group relative h-full flex flex-row md:flex-col gap-0 py-0 border-gray-200',
-        'transition-all duration-200 hover:shadow-md max-w-full lg:max-w-[320px] xl:max-w-full',
-        className
+        'post-poster group relative w-full aspect-16/10 overflow-hidden rounded-xl bg-black',
+        'transition-shadow duration-200 hover:shadow-md',
+        className // carries post-card-reveal from the parent
       )}
+      style={style} // carries --reveal-i
     >
-      <article style={style}>
-        <Link href={`/${postSlug}`} className="block">
-          <CardImage image={featured_image} title={title} priority={priority} />
-        </Link>
+      <Link
+        href={`/${postSlug}`}
+        aria-label={title || 'Read post'}
+        className="absolute inset-0 z-30"
+      />
 
-        <CardContent className="flex flex-col gap-2 p-4 flex-1">
-          <Link href={`/${postSlug}`} className='no-underline!'>
-            <h2 className="h3 body-1 font-semibold line-clamp-3 group-hover:text-primary-700 transition-colors">
-              {title}
-            </h2>
-          </Link>
+      {featured_image?.filename && (
+        <Image
+          src={featured_image.filename}
+          alt={featured_image.alt || title}
+          fill
+          className="object-cover transition-transform duration-300 group-hover:scale-105"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 25vw"
+          priority={priority}
+        />
+      )}
+
+      <div className="post-poster__scrim absolute inset-x-0 bottom-0 h-1/2 pointer-events-none" />
+      <div className="post-poster__overlay absolute inset-0 pointer-events-none" />
+
+      {/* No `gap` on this container: the excerpt reveal must not reserve any
+          space when collapsed, so title+date stay flush at the bottom in the
+          desktop default state. Title+meta carry their own gap; the meta↔excerpt
+          spacing lives inside the reveal (excerpt `pt-2`) so it collapses too. */}
+      <div className="post-poster__content absolute inset-x-0 bottom-0 z-20 p-4 flex flex-col pointer-events-none">
+        <div className="flex flex-col gap-2">
+          {/* text-primary-400! (important): the unlayered global `.h3` rule sets
+              color:var(--primary-900); a layered Tailwind utility would lose to it,
+              so the poster title needs the important variant to hold primary-400 in
+              light mode. Dark mode already resolves primary-400 via the token. */}
+          <h2 className="h3 body-1 font-semibold line-clamp-3 text-primary-400!">
+            {title}
+          </h2>
 
           <CardMeta createdAt={created_at} body={body} />
+        </div>
 
-          {excerpt && (
-            <p className="subtitle-2 line-clamp-4 mt-auto">
+        {excerpt && (
+          // Reveal wrapper animates height (grid-rows 0fr<->1fr) on desktop hover so
+          // title+date slide up to reveal the excerpt. text-white/90: theme-invariant.
+          // `.subtitle-2` sets no color, so the excerpt would inherit body
+          // `--foreground` (black in light theme) and vanish on the always-dark poster.
+          // `pt-2` sits inside the reveal so the meta↔excerpt gap collapses with it.
+          <div className="post-poster__excerpt-reveal">
+            <p className="post-poster__excerpt subtitle-2 line-clamp-3 text-white/90 pt-2">
               {excerpt}
             </p>
-          )}
-        </CardContent>
-      </article>
-    </CardShell>
+          </div>
+        )}
+      </div>
+    </article>
   );
 });
 

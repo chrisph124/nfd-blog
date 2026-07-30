@@ -576,6 +576,82 @@ h6, .h6 {
   }
 }
 
+/* Post poster card: image background + overlaid content.
+   Base (mobile <768) & tablet (>=768, no hover) = static end-state: full 80%
+   overlay, title+date+excerpt all visible.
+   Desktop (>=768 + hover):
+     default = only the bottom-half feathered scrim (title+date legible over image);
+     hover   = full overlay slides up to cover, and the excerpt row expands so
+               title+date slide up to reveal it; reverses on mouse-out. */
+.post-poster__scrim {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.75), transparent);
+}
+
+.post-poster__overlay {
+  background: rgba(0, 0, 0, 0.8); /* mobile 80% */
+  opacity: 1;
+}
+
+/* Excerpt reveal wrapper: height animates via grid-template-rows (0fr<->1fr).
+   Base/tablet = open, so the excerpt always shows on non-hover devices. */
+.post-poster__excerpt-reveal {
+  display: grid;
+  grid-template-rows: 1fr;
+}
+.post-poster__excerpt-reveal > .post-poster__excerpt {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.post-poster__excerpt {
+  opacity: 1;
+}
+
+@media (min-width: 768px) {
+  .post-poster__overlay {
+    background: rgba(0, 0, 0, 0.8); /* tablet static 80% */
+  }
+}
+
+@media (hover: hover) and (min-width: 768px) {
+  /* Full overlay parked below the card with a feathered top edge; slides up on
+     hover. Default state therefore shows only the bottom-half scrim. */
+  .post-poster__overlay {
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 45%, rgba(0, 0, 0, 0) 100%);
+    opacity: 1;
+    transform: translateY(100%);
+    transition: transform 0.35s ease;
+  }
+  /* Default: excerpt collapsed (no reserved space) so title+date sit at the bottom. */
+  .post-poster__excerpt-reveal {
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.35s ease;
+  }
+  .post-poster__excerpt {
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+
+  /* Hover: overlay slides up to cover; excerpt row expands, pushing title+date up. */
+  .post-poster:hover .post-poster__overlay {
+    transform: translateY(0);
+  }
+  .post-poster:hover .post-poster__excerpt-reveal {
+    grid-template-rows: 1fr;
+  }
+  .post-poster:hover .post-poster__excerpt {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .post-poster__overlay,
+  .post-poster__excerpt-reveal,
+  .post-poster__excerpt {
+    transition: none;
+  }
+}
+
 /* ============================================
    CTA Gradient Border Styles
    ============================================ */

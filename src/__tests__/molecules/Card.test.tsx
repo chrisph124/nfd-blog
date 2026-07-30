@@ -124,28 +124,40 @@ describe('Card', () => {
   });
 
   describe('Links', () => {
-    it('renders multiple links (no nesting)', () => {
+    it('renders a single whole-card link labelled by the title', () => {
       const story = createMockStory();
       render(<Card story={story} />);
 
       const links = screen.getAllByRole('link');
-      expect(links.length).toBeGreaterThan(1);
+      expect(links).toHaveLength(1);
+      expect(links[0]).toHaveAttribute('aria-label', 'Test Post Title');
+    });
+
+    it('gives the whole-card link a non-empty aria-label when the title is missing', () => {
+      const story = createMockStory({
+        content: { _uid: 'content-uid', component: 'post', title: '', body: [] },
+      });
+      render(<Card story={story} />);
+
+      // Never a nameless link for screen readers when a post ships without a title.
+      const link = screen.getByRole('link');
+      expect(link).toHaveAttribute('aria-label', 'Read post');
     });
 
     it('renders title link with correct href', () => {
       const story = createMockStory();
       render(<Card story={story} />);
 
-      const titleLink = screen.getByRole('link', { name: /Test Post Title/i });
-      expect(titleLink).toHaveAttribute('href', '/test-post');
+      const cardLink = screen.getByRole('link', { name: /Test Post Title/i });
+      expect(cardLink).toHaveAttribute('href', '/test-post');
     });
 
     it('strips posts/ prefix from full_slug for root-level URL', () => {
       const story = createMockStory({ full_slug: 'posts/my-blog-post' });
       render(<Card story={story} />);
 
-      const titleLink = screen.getByRole('link', { name: /Test Post Title/i });
-      expect(titleLink).toHaveAttribute('href', '/my-blog-post');
+      const cardLink = screen.getByRole('link', { name: /Test Post Title/i });
+      expect(cardLink).toHaveAttribute('href', '/my-blog-post');
     });
   });
 
@@ -267,11 +279,76 @@ describe('Card', () => {
       render(<Card story={createMockStory()} />);
 
       const article = screen.getByRole('article');
-      // Both the image wrapper and the title are links to the post.
-      expect(within(article).getAllByRole('link').length).toBeGreaterThanOrEqual(2);
+      // A single whole-card link owns navigation; image + heading + excerpt overlay it.
+      expect(within(article).getAllByRole('link')).toHaveLength(1);
       expect(within(article).getByRole('img')).toBeInTheDocument();
       expect(within(article).getByRole('heading', { level: 2 })).toHaveTextContent('Test Post Title');
       expect(within(article).getByText('This is a test excerpt for the post.')).toBeInTheDocument();
+    });
+
+    it('renders the poster shell with scrim, overlay, and content layers', () => {
+      const { container } = render(<Card story={createMockStory()} />);
+
+      const article = screen.getByRole('article');
+      expect(article).toHaveClass('post-poster', 'group', 'aspect-16/10', 'bg-black');
+      expect(container.querySelector('.post-poster__scrim')).toBeInTheDocument();
+      expect(container.querySelector('.post-poster__overlay')).toBeInTheDocument();
+      expect(container.querySelector('.post-poster__content')).toBeInTheDocument();
+    });
+  });
+
+  describe('Poster title color', () => {
+    it('recolors the title to text-primary-400 with no hover/dark overrides', () => {
+      render(<Card story={createMockStory()} />);
+
+      const heading = screen.getByRole('heading', { level: 2 });
+      // Important variant: beats the unlayered global `.h3` color so the title
+      // stays primary-400 in light mode too (see Card.tsx comment).
+      expect(heading).toHaveClass('text-primary-400!');
+      // Old palette must be gone: no per-state hover color, no dark-mode override.
+      expect(heading).not.toHaveClass('group-hover:text-primary-700');
+      expect(heading).not.toHaveClass('dark:text-primary-300');
+    });
+  });
+
+  describe('Reveal is opacity/transform, not unmount', () => {
+    it('keeps the excerpt in the DOM (proves it is not display:none / removed)', () => {
+      const { container } = render(<Card story={createMockStory()} />);
+
+      const excerpt = screen.getByText('This is a test excerpt for the post.');
+      expect(excerpt).toBeInTheDocument();
+      expect(excerpt).toHaveClass('post-poster__excerpt');
+      // Theme-invariant light copy: `.subtitle-2` sets no color, so without this
+      // the excerpt inherits body `--foreground` (black in light theme) and is
+      // invisible on the always-dark poster.
+      expect(excerpt).toHaveClass('text-white/90');
+      expect(container.querySelector('.post-poster__excerpt')).toBeInTheDocument();
+      // Excerpt lives inside the grid-rows reveal wrapper (desktop hover slide-up).
+      const reveal = container.querySelector('.post-poster__excerpt-reveal');
+      expect(reveal).toBeInTheDocument();
+      expect(reveal).toContainElement(excerpt);
+    });
+  });
+
+  describe('No-image fallback', () => {
+    it('renders title, meta, and excerpt over the black poster when image is absent', () => {
+      const story = createMockStory({
+        content: {
+          _uid: 'content-uid',
+          component: 'post',
+          title: 'Imageless Poster',
+          excerpt: 'Still legible without a picture.',
+          body: [],
+        },
+      });
+      const { container } = render(<Card story={story} />);
+
+      expect(screen.queryByRole('img')).not.toBeInTheDocument();
+      expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Imageless Poster');
+      expect(screen.getByText('Still legible without a picture.')).toBeInTheDocument();
+      // The black shell + overlay still render so content stays readable.
+      expect(screen.getByRole('article')).toHaveClass('bg-black');
+      expect(container.querySelector('.post-poster__overlay')).toBeInTheDocument();
     });
   });
 });
