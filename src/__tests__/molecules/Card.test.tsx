@@ -222,7 +222,7 @@ describe('Card', () => {
       const { container } = render(<Card story={story} />);
 
       // Reading time still renders because getStoryReadingTime always returns a string
-      expect(container.querySelector('.text-xs.italic')).toBeInTheDocument();
+      expect(container.querySelector('.italic')).toBeInTheDocument();
       expect(screen.getByText(/min read/)).toBeInTheDocument();
     });
 
@@ -322,6 +322,8 @@ describe('Card', () => {
       // the excerpt inherits body `--foreground` (black in light theme) and is
       // invisible on the always-dark poster.
       expect(excerpt).toHaveClass('text-white/90');
+      // Responsive clamp: 3 lines on mobile/tablet (<1280), up to 5 on desktop (xl).
+      expect(excerpt).toHaveClass('line-clamp-3', 'xl:line-clamp-5');
       expect(container.querySelector('.post-poster__excerpt')).toBeInTheDocument();
       // Excerpt lives inside the grid-rows reveal wrapper (desktop hover slide-up).
       const reveal = container.querySelector('.post-poster__excerpt-reveal');
@@ -392,7 +394,7 @@ describe('CardMeta null return', () => {
     const { container } = render(<Card story={story} />);
 
     // CardMeta shows readingTime even without date
-    expect(container.querySelector('.text-xs.italic')).toBeInTheDocument();
+    expect(container.querySelector('.italic')).toBeInTheDocument();
   });
 });
 

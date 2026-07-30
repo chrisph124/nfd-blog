@@ -577,19 +577,33 @@ h6, .h6 {
 }
 
 /* Post poster card: image background + overlaid content.
-   Base (mobile <768) & tablet (>=768, no hover) = static end-state: full 80%
-   overlay, title+date+excerpt all visible.
-   Desktop (>=768 + hover):
-     default = only the bottom-half feathered scrim (title+date legible over image);
-     hover   = full overlay slides up to cover, and the excerpt row expands so
-               title+date slide up to reveal it; reverses on mouse-out. */
+   Mobile (<768) & tablet (768–1279), plus any no-hover device = static end-state:
+   a single flat 85% overlay (scrim hidden), title+date+excerpt all visible.
+   Desktop (>=1280 + hover):
+     default = image visible; only the bottom scrim gradient darkens the title band;
+     hover   = a flat 75% overlay slides up to cover, the excerpt row expands and
+               title+date slide up to reveal it; reverses on mouse-out.
+   The reveal threshold (1280px) matches the grid/clamp breakpoint so tablet width
+   never collapses content, even on a hover-capable (desktop-resized) browser. */
+
+/* Scrim is desktop-only: in the pre-hover state the sliding overlay is parked away,
+   so this bottom gradient is what keeps the title/date legible over the image. It
+   is hidden on mobile/tablet, where the single 85% overlay already darkens the card
+   — rendering both there stacked to ~99% opaque. */
 .post-poster__scrim {
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.75), transparent);
+  display: none;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.95) 0%,
+    rgba(0, 0, 0, 0.8) 40%,
+    rgba(0, 0, 0, 0.4) 80%,
+    transparent 100%
+  );
 }
 
 .post-poster__overlay {
-  background: rgba(0, 0, 0, 0.8); /* mobile 80% */
-  opacity: 1;
+  background: rgba(0, 0, 0, 1); /* mobile/tablet: single flat 85% layer */
+  opacity: 85%;
 }
 
 /* Excerpt reveal wrapper: height animates via grid-template-rows (0fr<->1fr).
@@ -609,15 +623,18 @@ h6, .h6 {
 
 @media (min-width: 768px) {
   .post-poster__overlay {
-    background: rgba(0, 0, 0, 0.8); /* tablet static 80% */
+    background: rgba(0, 0, 0, 0.85); /* tablet static 85% */
   }
 }
 
-@media (hover: hover) and (min-width: 768px) {
-  /* Full overlay parked below the card with a feathered top edge; slides up on
-     hover. Default state therefore shows only the bottom-half scrim. */
+@media (hover: hover) and (min-width: 1280px) {
+  /* Desktop: reveal the scrim (pre-hover legibility) and park the full overlay
+     below the card, sliding it up on hover to a flat 75% cover. */
+  .post-poster__scrim {
+    display: block;
+  }
   .post-poster__overlay {
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 45%, rgba(0, 0, 0, 0) 100%);
+    background: rgba(0, 0, 0, 0.75);
     opacity: 1;
     transform: translateY(100%);
     transition: transform 0.35s ease;
