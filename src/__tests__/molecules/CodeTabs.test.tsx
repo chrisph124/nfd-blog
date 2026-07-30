@@ -99,6 +99,21 @@ describe('CodeTabs (server component)', () => {
     expect(title).toHaveTextContent('package.json');
   });
 
+  it('wraps a long filename in .code-tabs__filename with <wbr> break points at path separators', async () => {
+    const ui = await CodeTabs({
+      blok: makeBlok([
+        makeTab('t1', 'npm', 'a', 'ts', '.github/instructions/frontend.instructions.md'),
+      ]),
+    });
+    const { container } = render(ui);
+    const label = container.querySelector('.code-tabs__filename');
+    expect(label).toBeInTheDocument();
+    // Full path preserved as text (the <wbr>s carry no text)...
+    expect(label).toHaveTextContent('.github/instructions/frontend.instructions.md');
+    // ...with break opportunities injected so it wraps at separators, never mid-segment.
+    expect(label?.querySelectorAll('wbr').length).toBeGreaterThan(0);
+  });
+
   it('renders no filename header when a tab has no filename', async () => {
     const ui = await CodeTabs({ blok: makeBlok([makeTab('t1', 'npm', 'npm i')]) });
     const { container } = render(ui);

@@ -1,5 +1,6 @@
 'use client';
 
+import { Fragment } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import CodeBlockEnhancer from '@/components/atoms/CodeBlockEnhancer';
 
@@ -16,6 +17,27 @@ export interface RenderedCodeTab {
 
 interface CodeTabsClientProps {
   tabs: RenderedCodeTab[];
+}
+
+// Render a filename with a <wbr> after each path separator (`/ . _ -`) so a long
+// name wraps at natural boundaries instead of splitting a segment mid-word. The
+// enhancer appends the copy button to the same title bar; CSS lets this label
+// shrink and wrap so the button always stays in view.
+function FilenameLabel({ filename }: Readonly<{ filename: string }>) {
+  // Split on path separators (keeping them) and add a <wbr> after each, so a long
+  // name wraps at natural boundaries instead of splitting a segment mid-word.
+  // Capturing split (not lookbehind) for older-Safari compatibility.
+  const parts = filename.split(/([/._-])/).filter(Boolean);
+  return (
+    <span className="code-tabs__filename">
+      {parts.map((part, i) => (
+        <Fragment key={`${part}-${i}`}>
+          {part}
+          {/^[/._-]$/.test(part) && <wbr />}
+        </Fragment>
+      ))}
+    </span>
+  );
 }
 
 export default function CodeTabsClient({ tabs }: Readonly<CodeTabsClientProps>) {
@@ -59,7 +81,9 @@ export default function CodeTabsClient({ tabs }: Readonly<CodeTabsClientProps>) 
                   tied to its own code (a single figure can't caption N files). */}
               <figure className="code-tabs__panel">
                 {tab.filename && (
-                  <figcaption className="code-frame__title">{tab.filename}</figcaption>
+                  <figcaption className="code-frame__title">
+                    <FilenameLabel filename={tab.filename} />
+                  </figcaption>
                 )}
                 <div dangerouslySetInnerHTML={{ __html: tab.html }} />
               </figure>
