@@ -22,7 +22,7 @@ export default function Post({ blok, tags = [], createdAt }: Readonly<PostProps>
         position="fixed"
         zIndex={40}
       />
-      <article className="flex flex-col items-center gap-y-6 md:gap-y-12 pt-4">
+      <article className="flex flex-col items-center gap-y-6 md:gap-y-10 pt-4">
         <header className="w-full max-w-[1280px] mx-auto px-4 md:px-8 lg:px-12 xl:px-5 flex flex-col items-center gap-4 text-center">
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-2 justify-center">

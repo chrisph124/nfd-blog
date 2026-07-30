@@ -576,6 +576,99 @@ h6, .h6 {
   }
 }
 
+/* Post poster card: image background + overlaid content.
+   Mobile (<768) & tablet (768–1279), plus any no-hover device = static end-state:
+   a single flat 85% overlay (scrim hidden), title+date+excerpt all visible.
+   Desktop (>=1280 + hover):
+     default = image visible; only the bottom scrim gradient darkens the title band;
+     hover   = a flat 75% overlay slides up to cover, the excerpt row expands and
+               title+date slide up to reveal it; reverses on mouse-out.
+   The reveal threshold (1280px) matches the grid/clamp breakpoint so tablet width
+   never collapses content, even on a hover-capable (desktop-resized) browser. */
+
+/* Scrim is desktop-only: in the pre-hover state the sliding overlay is parked away,
+   so this bottom gradient is what keeps the title/date legible over the image. It
+   is hidden on mobile/tablet, where the single 85% overlay already darkens the card
+   — rendering both there stacked to ~99% opaque. */
+.post-poster__scrim {
+  display: none;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.95) 0%,
+    rgba(0, 0, 0, 0.8) 40%,
+    rgba(0, 0, 0, 0.4) 80%,
+    transparent 100%
+  );
+}
+
+.post-poster__overlay {
+  background: rgba(0, 0, 0, 1); /* mobile/tablet: single flat 85% layer */
+  opacity: 85%;
+}
+
+/* Excerpt reveal wrapper: height animates via grid-template-rows (0fr<->1fr).
+   Base/tablet = open, so the excerpt always shows on non-hover devices. */
+.post-poster__excerpt-reveal {
+  display: grid;
+  grid-template-rows: 1fr;
+}
+.post-poster__excerpt-reveal > .post-poster__excerpt {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.post-poster__excerpt {
+  opacity: 1;
+}
+
+@media (min-width: 768px) {
+  .post-poster__overlay {
+    background: rgba(0, 0, 0, 0.85); /* tablet static 85% */
+  }
+}
+
+@media (hover: hover) and (min-width: 1280px) {
+  /* Desktop: reveal the scrim (pre-hover legibility) and park the full overlay
+     below the card, sliding it up on hover to a flat 75% cover. */
+  .post-poster__scrim {
+    display: block;
+  }
+  .post-poster__overlay {
+    background: rgba(0, 0, 0, 0.75);
+    opacity: 1;
+    transform: translateY(100%);
+    transition: transform 0.35s ease;
+  }
+  /* Default: excerpt collapsed (no reserved space) so title+date sit at the bottom. */
+  .post-poster__excerpt-reveal {
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.35s ease;
+  }
+  .post-poster__excerpt {
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+
+  /* Hover: overlay slides up to cover; excerpt row expands, pushing title+date up. */
+  .post-poster:hover .post-poster__overlay {
+    transform: translateY(0);
+  }
+  .post-poster:hover .post-poster__excerpt-reveal {
+    grid-template-rows: 1fr;
+  }
+  .post-poster:hover .post-poster__excerpt {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .post-poster__overlay,
+  .post-poster__excerpt-reveal,
+  .post-poster__excerpt {
+    transition: none;
+  }
+}
+
 /* ============================================
    CTA Gradient Border Styles
    ============================================ */
