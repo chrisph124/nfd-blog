@@ -6,7 +6,8 @@ A personal blog by Hieu (Chris) Pham - notes on software engineering. Built with
 
 ## Tech Stack
 
-- **Next.js 16.2.3.0** - React framework with App Router and Server Components
+- **Next.js 16.2.12** - React framework with App Router and Server Components
+- **React 19.2** - UI library with Server Components (bundled with Next.js)
 - **Storyblok** - Headless CMS for content management
 - **Tailwind CSS v4** - Utility-first CSS with new `@tailwindcss/postcss` plugin
 - **TypeScript** - Type-safe development with strict mode
