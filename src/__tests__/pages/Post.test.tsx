@@ -330,7 +330,7 @@ describe('Post', () => {
       const { container } = render(<Post blok={blok} />);
 
       const article = container.querySelector('article');
-      expect(article).toHaveClass('flex', 'flex-col', 'items-center', 'gap-y-6', 'md:gap-y-12', 'pt-4');
+      expect(article).toHaveClass('flex', 'flex-col', 'items-center', 'gap-y-6', 'md:gap-y-10', 'pt-4');
     });
 
     it('applies prose styling to body content', () => {
@@ -707,7 +707,7 @@ describe('Post', () => {
 
       // Check responsive classes are maintained
       const article = container.querySelector('article');
-      expect(article).toHaveClass('gap-y-6', 'md:gap-y-12', 'pt-4');
+      expect(article).toHaveClass('gap-y-6', 'md:gap-y-10', 'pt-4');
 
       const figure = container.querySelector('figure');
       expect(figure).toHaveClass('max-w-[1080px]');
