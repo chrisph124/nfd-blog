@@ -51,6 +51,14 @@ describe('Alert (molecule blok wrapper)', () => {
     expect(getByTestId('icon-information')).toBeInTheDocument();
   });
 
+  it('is full-width with no margin on mobile, 75% centered from md up', () => {
+    const { container } = render(<Alert blok={makeBlok()} />);
+    const el = root(container);
+    // Mobile-first: full-bleed with no auto margin; md+ restores the 75% centered card.
+    expect(el).toHaveClass('w-full', 'md:w-3/4', 'md:m-auto');
+    expect(el).not.toHaveClass('w-3/4', 'm-auto');
+  });
+
   it.each([
     ['emerald', ['border-emerald-600', 'text-white', 'bg-emerald-600', 'dark:bg-emerald-200', 'dark:border-emerald-200']],
     ['primary', ['border-primary-600', 'text-white', 'bg-primary-600', 'dark:bg-primary-200', 'dark:border-primary-200']],

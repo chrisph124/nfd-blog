@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const alertVariants = cva(
-  "relative w-3/4 rounded-xl border border-2 px-4 py-3 flex items-start gap-3 m-auto",
+  "relative w-full rounded-xl border border-2 px-4 py-3 flex items-start gap-3 md:w-3/4 md:m-auto",
   {
     variants: {
       // Filled accent card: a colored fill + matching border, with white
