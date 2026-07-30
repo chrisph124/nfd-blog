@@ -327,7 +327,11 @@ describe('PostListClient', () => {
       );
 
       const grid = container.querySelector('.grid');
-      expect(grid).toHaveClass('grid-cols-1', 'md:grid-cols-2', 'lg:grid-cols-3', '2xl:grid-cols-4');
+      // mobile 1 / tablet 768–1279 = 2 / desktop >=1280 (xl) = 3. Named `xl:` (not
+      // arbitrary min-[1280px]:) so it out-cascades md:grid-cols-2 — Tailwind v4 orders
+      // arbitrary min-[] variants BEFORE named breakpoints, so md would otherwise win.
+      expect(grid).toHaveClass('grid-cols-1', 'md:grid-cols-2', 'xl:grid-cols-3');
+      expect(grid).not.toHaveClass('lg:grid-cols-3', 'min-[1280px]:grid-cols-3', 'xl:grid-cols-4');
     });
 
     it('applies correct padding classes to container', () => {

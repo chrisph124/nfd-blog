@@ -26,7 +26,6 @@ export default function PostListClient({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load more button classes (98 chars)
   const LOAD_MORE_BUTTON_CLASSES = "px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors";
 
   const loadMore = async () => {
@@ -59,8 +58,7 @@ export default function PostListClient({
 
   return (
     <div className="flex flex-col gap-6 max-w-[1280px] px-4 md:px-8 lg:px-12 xl:px-5 mx-auto">
-      {/* Posts Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {posts.map((story, index) => (
           <Card
             key={story.uuid}
@@ -72,7 +70,6 @@ export default function PostListClient({
         ))}
       </div>
 
-      {/* Load More Button */}
       {hasMore && (
         <div className="flex flex-col items-center gap-4">
           {error && (
