@@ -781,6 +781,12 @@ a:not(.cta-primary-gradient-border, .cta-primary-outlined-border) {
 pre.shiki {
   position: relative;
   border-radius: 0.75rem;
+  /* Wrap long lines. code_tabs live outside `.richtext`, so they miss the
+     `.richtext pre` wrap rule above; without this, long lines overflow and the
+     collapsible `overflow: hidden` (below) clips them at every viewport. Matches
+     the wrapping model already used for richtext code blocks. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 pre.shiki code {
@@ -1158,6 +1164,24 @@ pre.shiki[data-collapsed="false"] [data-toggle-btn]:focus-visible {
    + code), so it carries no box of its own. */
 .code-tabs__panel {
   margin: 0;
+}
+
+/* code_tabs filename bar: let a long filename wrap (at the <wbr> path-separator
+   break points injected in CodeTabsClient) while the enhancer-appended copy
+   button stays pinned top-right and fully in view. `min-width: 0` lets the label
+   shrink and wrap instead of pushing the button off the edge; the button never
+   shrinks. Scoped to code_tabs so the single-frame macOS chrome title is
+   unaffected. */
+.code-tabs__panel .code-frame__title {
+  align-items: flex-start;
+}
+.code-tabs__panel .code-frame__title .code-tabs__filename {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+.code-tabs__panel .code-frame__title [data-copy-btn] {
+  flex-shrink: 0;
 }
 
 /* Inside a frame the code block owns no radius/shadow — the frame does — and
