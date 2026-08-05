@@ -26,6 +26,11 @@ export async function POST(request: NextRequest) {
     revalidatePath('/llms.txt');
     revalidatePath('/llms-full.txt');
 
+    // Tags index — its counts/membership can shift on any publish/unpublish.
+    // Individual /tags/<slug> archives are NOT enumerated here (the webhook is
+    // tag-unaware); they rely on lazy ISR (revalidate = 3600).
+    revalidatePath('/tags');
+
     // Revalidate specific story path if provided
     if (story?.full_slug) {
       const slug = story.full_slug;

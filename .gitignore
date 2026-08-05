@@ -40,6 +40,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# tag-taxonomy retag backups (full story content dumps — never commit)
+scripts/.tag-backup/
+scripts/tag-mapping.json
+
 # claude code documentation
 CLAUDE.md
 .claude/

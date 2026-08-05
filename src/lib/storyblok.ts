@@ -174,7 +174,10 @@ export const fetchAllPosts = cache(async (): Promise<StoryblokStory<PostBlok>[]>
       const total = Number.parseInt(response.headers.total || '0', 10);
       if (allStories.length >= total || stories.length < perPage) break;
       page += 1;
-      if (page > 50) break;
+      if (page > 50) {
+        console.warn(`fetchAllPosts: hit pagination cap at page 50 (${allStories.length}/${total} stories); results may be undercounted.`);
+        break;
+      }
     }
 
     return allStories;

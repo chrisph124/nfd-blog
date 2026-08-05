@@ -10,6 +10,7 @@ import {
   estimateWordCount,
 } from '@/lib/seo-structured-data';
 import { extractPostContent } from '@/lib/llms/post-to-markdown';
+import { getTagCensus, buildTagLinks } from '@/lib/tags';
 import { escapeJsonLd } from '@/lib/seo/json-ld-escape';
 import { AUTHOR_NAME, AUTHOR_SAME_AS } from '@/lib/seo/author';
 import { stripEntities } from '@/lib/seo/strip-entities';
@@ -129,6 +130,15 @@ export default async function DynamicPage({ params }: Readonly<PageProps>) {
       codeSamples: codeSamples.length > 0 ? codeSamples : undefined,
     });
 
+    // Read the census once at the page boundary and precompute link decisions
+    // for this post's tags (RT#5 — `Post` stays sync, never fetches). On a
+    // census failure, degrade every pill to a plain `<span>` (fail-open, RT#6):
+    // this render path has no `error.tsx`, so a transient blip must not 500.
+    const censusResult = await getTagCensus();
+    const tagLinks = censusResult.ok
+      ? buildTagLinks(censusResult.census, story.tag_list ?? [])
+      : undefined;
+
     return (
       <div className="page">
         <script
@@ -138,6 +148,7 @@ export default async function DynamicPage({ params }: Readonly<PageProps>) {
         <Post
           blok={story.content}
           tags={story.tag_list}
+          tagLinks={tagLinks}
           createdAt={datePublished}
         />
       </div>

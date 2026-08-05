@@ -165,6 +165,49 @@ export function estimateWordCount(text: string | undefined | null): number {
   return cleaned.split(' ').length;
 }
 
+interface CollectionPageItem {
+  url: string;
+  name: string;
+}
+
+interface CollectionPageJsonLdParams {
+  url: string;
+  name: string;
+  description?: string;
+  items: CollectionPageItem[];
+}
+
+/**
+ * Build `CollectionPage` JSON-LD for a listing surface (a `/tags/<slug>` archive
+ * or the `/tags` hub). `mainEntity` is an ordered `ItemList` of the members —
+ * posts for an archive, tag archives for the index — each a `ListItem` with a
+ * URL and name. Strings are escaped at render time via `escapeJsonLd`.
+ */
+export function buildCollectionPageJsonLd({
+  url,
+  name,
+  description,
+  items,
+}: CollectionPageJsonLdParams) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name,
+    url,
+    ...(description && { description }),
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: items.length,
+      itemListElement: items.map((item, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        url: item.url,
+        name: item.name,
+      })),
+    },
+  };
+}
+
 interface HomeJsonLdGraphParams {
   siteUrl: string;
   siteName: string;

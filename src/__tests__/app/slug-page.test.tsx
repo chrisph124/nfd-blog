@@ -11,6 +11,9 @@ vi.mock('@/lib/storyblok', () => ({
   fetchStoryBySlug: (...args: unknown[]) => mockFetchStoryBySlug(...args),
   getSiteUrl: () => mockGetSiteUrl(),
   getStoryblokApi: () => mockGetStoryblokApi(),
+  // The post branch now reads the tag census (via getTagCensus → fetchAllPosts).
+  // An empty result yields ok:false, so pills fail open to plain spans.
+  fetchAllPosts: () => Promise.resolve([]),
   storyblokVersion: 'published',
 }));
 
