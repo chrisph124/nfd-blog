@@ -114,6 +114,21 @@ describe('generateMetadata ([...slug])', () => {
     expect(metadata.openGraph?.url).toBe('https://example.com/docs/getting-started');
   });
 
+  it('strips the posts/ prefix from the canonical + og:url when rendering a post (F1 defense-in-depth)', async () => {
+    // If the catch-all ever renders a `posts/*` path (editor preview or the
+    // proxy's fail-open branch), the canonical must point at the clean root the
+    // 308 redirect targets — never self-canonicalize the duplicate URL.
+    const story = createMockStory('posts/the-ai-agent-roi-playbook');
+    mockFetchStory.mockResolvedValue(story);
+
+    const metadata = await generateMetadata({
+      params: makeParams(['posts', 'the-ai-agent-roi-playbook']),
+    });
+
+    expect(metadata.alternates?.canonical).toBe('/the-ai-agent-roi-playbook');
+    expect(metadata.openGraph?.url).toBe('https://example.com/the-ai-agent-roi-playbook');
+  });
+
   it('falls back to story name when og_title is empty', async () => {
     const story = createMockStory();
     story.content.og_title = '  ';
@@ -168,7 +183,7 @@ describe('generateStaticParams ([...slug])', () => {
     ]);
   });
 
-  it('excludes folders, home, and global/ slugs', async () => {
+  it('excludes folders, home, global/, and posts/ slugs', async () => {
     mockGetStoryblokApi.mockReturnValue({
       get: vi.fn().mockResolvedValue({
         data: {
@@ -177,6 +192,9 @@ describe('generateStaticParams ([...slug])', () => {
             '2': { slug: 'docs', is_folder: true },
             '3': { slug: 'home', is_folder: false },
             '4': { slug: 'global/header', is_folder: false },
+            // Posts render at the root via `[slug]` and `/posts/*` is redirected
+            // by the proxy, so the catch-all must not pre-build them.
+            '5': { slug: 'posts/the-ai-agent-roi-playbook', is_folder: false },
           },
         },
       }),
