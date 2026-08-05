@@ -18,11 +18,38 @@ import {
   buildTagLinks,
   getTagCensus,
 } from '@/lib/tags';
+import type { TagCensus } from '@/lib/tags';
 
 // Only `tag_list` is read to build the census; the returned post objects are
 // compared by identity, so a minimal shape is enough for the fixtures.
 const mkPost = (uuid: string, tags: string[]): StoryblokStory<PostBlok> =>
   ({ uuid, tag_list: tags } as unknown as StoryblokStory<PostBlok>);
+
+// A census with one archived tag ('AI', exactly at THRESHOLD) and one
+// sub-threshold tag ('Retired', THRESHOLD - 1 posts). At THRESHOLD=1 'Retired'
+// sits at count 0 — a slug still mapped but whose last post dropped the tag (the
+// shrink/untagged case the sub-threshold guards exist for). Built by hand rather
+// than from posts because a sub-threshold tag cannot arise from post data once
+// THRESHOLD is 1. Expressed via THRESHOLD so it holds at any knob value.
+const archivedPost = mkPost('archived', ['AI']);
+const subThresholdCensus = (): TagCensus => ({
+  counts: new Map([
+    ['AI', THRESHOLD],
+    ['Retired', THRESHOLD - 1],
+  ]),
+  membership: new Map([
+    ['AI', [archivedPost]],
+    ['Retired', []],
+  ]),
+  slugToName: new Map([
+    ['ai', 'AI'],
+    ['retired', 'Retired'],
+  ]),
+  nameToSlug: new Map([
+    ['AI', 'ai'],
+    ['Retired', 'retired'],
+  ]),
+});
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -81,13 +108,14 @@ describe('buildTagCensus', () => {
 
   it('dedupes whitespace variants within a post so one post cannot self-promote a tag', () => {
     // "AI" and " AI" trim to the same name — a single post must count once and
-    // stay below THRESHOLD, never appearing twice in membership.
+    // appear once in membership, never twice. Count stays 1 (not 3), so the tag
+    // surfaces in exactly one archive entry rather than a self-inflated one.
     const p1 = mkPost('p1', ['AI', ' AI', 'AI ']);
     const census = buildTagCensus([p1]);
 
     expect(census.counts.get('AI')).toBe(1);
     expect(census.membership.get('AI')).toEqual([p1]);
-    expect(selectArchivedTags(census)).toEqual([]);
+    expect(selectArchivedTags(census)).toEqual([{ slug: 'ai', name: 'AI', count: 1 }]);
   });
 
   it('trims whitespace and skips empty/whitespace-only tags', () => {
@@ -146,15 +174,14 @@ describe('buildTagCensus', () => {
 });
 
 describe('selectArchivedTags', () => {
-  it('includes only tags at or above THRESHOLD', () => {
-    const census = buildTagCensus([
-      mkPost('p1', ['AI', 'Solo']),
-      mkPost('p2', ['AI']),
-    ]);
+  it('includes only tags at or above THRESHOLD, excluding sub-threshold ones', () => {
+    // 'AI' sits at THRESHOLD (archived); 'Retired' is one below (excluded) —
+    // holds whatever THRESHOLD is set to.
+    const census = subThresholdCensus();
     const archived = selectArchivedTags(census);
 
     expect(archived.map((t) => t.name)).toEqual(['AI']);
-    expect(archived[0]).toEqual({ slug: 'ai', name: 'AI', count: 2 });
+    expect(archived[0]).toEqual({ slug: 'ai', name: 'AI', count: THRESHOLD });
   });
 
   it('orders by count descending, then alphabetically as a tie-break (VL#4)', () => {
@@ -185,7 +212,9 @@ describe('resolveTagName', () => {
   });
 
   it('returns null for a thin (below-threshold) slug', () => {
-    expect(resolveTagName(census, 'solo')).toBeNull();
+    // 'retired' is a mapped slug whose count sits below THRESHOLD — the archive
+    // 404 path (VL#1 shrink-below-threshold), distinct from an unknown slug.
+    expect(resolveTagName(subThresholdCensus(), 'retired')).toBeNull();
   });
 
   it('returns null for an unknown slug', () => {
@@ -209,7 +238,7 @@ describe('selectPostsForTag', () => {
   });
 
   it('returns [] for a thin slug', () => {
-    expect(selectPostsForTag(census, 'solo')).toEqual([]);
+    expect(selectPostsForTag(subThresholdCensus(), 'retired')).toEqual([]);
   });
 
   it('returns [] for an unknown slug', () => {
@@ -228,7 +257,7 @@ describe('isTagLinkable', () => {
   });
 
   it('is false for a thin name', () => {
-    expect(isTagLinkable(census, 'Solo')).toBe(false);
+    expect(isTagLinkable(subThresholdCensus(), 'Retired')).toBe(false);
   });
 
   it('is false for an unknown name', () => {
@@ -254,8 +283,9 @@ describe('buildTagLinks', () => {
   });
 
   it('marks a thin tag non-linkable but still carries a fallback slug', () => {
-    const links = buildTagLinks(census, ['Solo']);
-    expect(links.get('Solo')).toEqual({ slug: 'solo', linkable: false });
+    // 'Retired' has a committed slug but sits below THRESHOLD → span, not link.
+    const links = buildTagLinks(subThresholdCensus(), ['Retired']);
+    expect(links.get('Retired')).toEqual({ slug: 'retired', linkable: false });
   });
 
   it('falls back to slugify() for a tag absent from the census map', () => {
@@ -306,7 +336,7 @@ describe('getTagCensus (RT#6 — fetch failure ≠ empty)', () => {
 });
 
 describe('THRESHOLD', () => {
-  it('is the single archival knob and equals 2', () => {
-    expect(THRESHOLD).toBe(2);
+  it('is the single archival knob and equals 1', () => {
+    expect(THRESHOLD).toBe(1);
   });
 });

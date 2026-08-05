@@ -16,7 +16,7 @@
  */
 
 /** Mirror of `THRESHOLD` in `src/lib/tags.ts`. A tag needs this many posts to earn a page. */
-export const THRESHOLD = 2;
+export const THRESHOLD = 1;
 
 /**
  * Deterministic, idempotent slug for a human-readable tag name.

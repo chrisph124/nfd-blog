@@ -195,7 +195,7 @@ describe('GET /sitemap.xml', () => {
     expect(body).toContain('<image:title>Fallback Story Name</image:title>');
   });
 
-  it('emits the /tags hub plus one entry per archived tag, excluding thin tags', async () => {
+  it('emits the /tags hub plus one entry per archived tag', async () => {
     mockGet.mockResolvedValue({ data: { links: {} } as StoryblokLinksResponse });
     mockFetchAllPosts.mockResolvedValue([
       post({ uuid: 'u-1', full_slug: 'posts/a', tag_list: ['AI', 'Solo'], published_at: '2024-08-01T00:00:00.000Z' }),
@@ -205,11 +205,12 @@ describe('GET /sitemap.xml', () => {
     const body = await (await GET()).text();
 
     expect(body).toContain('<loc>https://example.com/tags</loc>');
-    // AI has 2 posts → archived; Solo has 1 → excluded.
+    // THRESHOLD=1 → every tag on any post is archived: AI (2 posts) and Solo (1).
     expect(body).toContain('<loc>https://example.com/tags/ai</loc>');
-    expect(body).not.toContain('https://example.com/tags/solo');
+    expect(body).toContain('<loc>https://example.com/tags/solo</loc>');
     // lastmod tracks the newest (first-in-membership) post carrying the tag.
     expect(body).toContain('<loc>https://example.com/tags/ai</loc>\n    <lastmod>2024-08-01T00:00:00.000Z</lastmod>');
+    expect(body).toContain('<loc>https://example.com/tags/solo</loc>\n    <lastmod>2024-08-01T00:00:00.000Z</lastmod>');
   });
 
   it('falls back to first_published_at for a tag lastmod when published_at is null', async () => {

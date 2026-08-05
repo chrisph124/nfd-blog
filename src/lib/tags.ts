@@ -14,9 +14,13 @@ import type { PostBlok, StoryblokStory } from '@/types/storyblok';
 
 /**
  * A tag becomes an "archived" (crawlable) tag once at least this many posts
- * carry it. Single knob — bump to `3` here and every surface follows.
+ * carry it. Single knob — change it here and every surface (index, archives,
+ * pills, sitemap) follows. At `1`, every tag that appears on any post is
+ * archived; the sub-threshold code paths below then guard only the count-drops-
+ * to-zero (fully untagged) case. Bump to `2`+ to re-enable the thin-content gate
+ * if Google Search Console reports archives "crawled – not indexed".
  */
-export const THRESHOLD = 2;
+export const THRESHOLD = 1;
 
 /**
  * Deterministic, idempotent slug for a human-readable tag name.
