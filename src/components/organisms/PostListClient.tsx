@@ -64,7 +64,8 @@ export default function PostListClient({
             key={story.uuid}
             story={story}
             priority={index === 0}
-            className="post-card-reveal"
+            // First card is the LCP element: transform-only reveal, no opacity gate.
+            className={index === 0 ? 'post-card-reveal-lcp' : 'post-card-reveal'}
             style={{ '--reveal-i': index % perPage } as React.CSSProperties}
           />
         ))}

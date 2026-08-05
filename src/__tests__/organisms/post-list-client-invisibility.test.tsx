@@ -83,4 +83,15 @@ describe('PostListClient SSR invisibility regression', () => {
     const articleMatches = html.match(/<article/g);
     expect(articleMatches?.length).toBeGreaterThanOrEqual(3);
   });
+
+  it('gives only the first (LCP) card the opacity-gate-free reveal variant', () => {
+    const html = renderToString(
+      <PostListClient initialPosts={posts} perPage={12} hasMore={false} />
+    );
+
+    // Exactly one card — the first/priority (LCP) card — uses the transform-only
+    // variant, so the largest paint is never deferred behind an opacity fade.
+    const lcpMatches = html.match(/post-card-reveal-lcp/g);
+    expect(lcpMatches).toHaveLength(1);
+  });
 });

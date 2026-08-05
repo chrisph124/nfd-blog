@@ -50,11 +50,22 @@ describe('PostGrid', () => {
     expect(grid).toHaveClass('grid', 'grid-cols-1', 'md:grid-cols-2', 'xl:grid-cols-3', 'gap-6');
   });
 
-  it('gives each card the staggered reveal animation, like the homepage', () => {
+  it('reveals cards with an LCP-safe variant on the first (priority) card', () => {
     render(<PostGrid posts={[mkPost('a'), mkPost('b'), mkPost('c')]} />);
+    const cards = screen.getAllByTestId('card');
 
-    screen.getAllByTestId('card').forEach((card, index) => {
+    // First card is the LCP element: transform-only reveal, no opacity:0 gate.
+    expect(cards[0]).toHaveClass('post-card-reveal-lcp');
+    expect(cards[0]).not.toHaveClass('post-card-reveal');
+
+    // Remaining cards keep the full fade-up reveal.
+    cards.slice(1).forEach((card) => {
       expect(card).toHaveClass('post-card-reveal');
+      expect(card).not.toHaveClass('post-card-reveal-lcp');
+    });
+
+    // Stagger index preserved on every card.
+    cards.forEach((card, index) => {
       expect(card.style.getPropertyValue('--reveal-i')).toBe(String(index));
     });
   });
