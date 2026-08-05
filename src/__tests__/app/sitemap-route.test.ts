@@ -195,6 +195,70 @@ describe('GET /sitemap.xml', () => {
     expect(body).toContain('<image:title>Fallback Story Name</image:title>');
   });
 
+  it('emits the /tags hub plus one entry per archived tag', async () => {
+    mockGet.mockResolvedValue({ data: { links: {} } as StoryblokLinksResponse });
+    mockFetchAllPosts.mockResolvedValue([
+      post({ uuid: 'u-1', full_slug: 'posts/a', tag_list: ['AI', 'Solo'], published_at: '2024-08-01T00:00:00.000Z' }),
+      post({ uuid: 'u-2', full_slug: 'posts/b', tag_list: ['AI'], published_at: '2024-07-01T00:00:00.000Z' }),
+    ]);
+
+    const body = await (await GET()).text();
+
+    expect(body).toContain('<loc>https://example.com/tags</loc>');
+    // THRESHOLD=1 → every tag on any post is archived: AI (2 posts) and Solo (1).
+    expect(body).toContain('<loc>https://example.com/tags/ai</loc>');
+    expect(body).toContain('<loc>https://example.com/tags/solo</loc>');
+    // lastmod tracks the newest (first-in-membership) post carrying the tag.
+    expect(body).toContain('<loc>https://example.com/tags/ai</loc>\n    <lastmod>2024-08-01T00:00:00.000Z</lastmod>');
+    expect(body).toContain('<loc>https://example.com/tags/solo</loc>\n    <lastmod>2024-08-01T00:00:00.000Z</lastmod>');
+  });
+
+  it('falls back to first_published_at for a tag lastmod when published_at is null', async () => {
+    mockGet.mockResolvedValue({ data: { links: {} } as StoryblokLinksResponse });
+    mockFetchAllPosts.mockResolvedValue([
+      post({ uuid: 'u-1', full_slug: 'posts/a', tag_list: ['AI'], published_at: null, first_published_at: '2024-03-03T00:00:00.000Z' }),
+      post({ uuid: 'u-2', full_slug: 'posts/b', tag_list: ['AI'], published_at: null, first_published_at: '2024-02-02T00:00:00.000Z' }),
+    ]);
+
+    const body = await (await GET()).text();
+
+    expect(body).toContain('<loc>https://example.com/tags/ai</loc>\n    <lastmod>2024-03-03T00:00:00.000Z</lastmod>');
+  });
+
+  it('still emits a tag entry when the newest post carries neither date', async () => {
+    mockGet.mockResolvedValue({ data: { links: {} } as StoryblokLinksResponse });
+    mockFetchAllPosts.mockResolvedValue([
+      post({ uuid: 'u-1', full_slug: 'posts/a', tag_list: ['AI'], published_at: null, first_published_at: null }),
+      post({ uuid: 'u-2', full_slug: 'posts/b', tag_list: ['AI'], published_at: null, first_published_at: null }),
+    ]);
+
+    const body = await (await GET()).text();
+
+    expect(body).toContain('<loc>https://example.com/tags/ai</loc>');
+  });
+
+  it('fetches posts exactly once — tag entries reuse the same census (RT#12)', async () => {
+    mockGet.mockResolvedValue({ data: { links: {} } as StoryblokLinksResponse });
+    mockFetchAllPosts.mockResolvedValue([
+      post({ uuid: 'u-1', full_slug: 'posts/a', tag_list: ['AI'] }),
+      post({ uuid: 'u-2', full_slug: 'posts/b', tag_list: ['AI'] }),
+    ]);
+
+    await GET();
+
+    expect(mockFetchAllPosts).toHaveBeenCalledTimes(1);
+  });
+
+  it('still emits the /tags hub with no children when there are no archived tags', async () => {
+    mockGet.mockResolvedValue({ data: { links: {} } as StoryblokLinksResponse });
+    mockFetchAllPosts.mockResolvedValue([]);
+
+    const body = await (await GET()).text();
+
+    expect(body).toContain('<loc>https://example.com/tags</loc>');
+    expect(body).not.toContain('https://example.com/tags/');
+  });
+
   it('omits image entry when post has no featured_image', async () => {
     mockGet.mockResolvedValue({
       data: {
