@@ -204,6 +204,14 @@ describe('Post', () => {
       expect(tagsContainer).not.toBeInTheDocument();
     });
 
+    it('does not render tags section when every tag is empty/whitespace', () => {
+      const blok = createMockBlok();
+      const { container } = render(<Post blok={blok} tags={['', '   ']} />);
+
+      const tagsContainer = container.querySelector('.flex.flex-wrap.gap-2');
+      expect(tagsContainer).not.toBeInTheDocument();
+    });
+
     it('renders tags as styled spans', () => {
       const blok = createMockBlok();
       const tags = ['AI', 'Tech'];
@@ -214,7 +222,9 @@ describe('Post', () => {
 
       expect(aiSpan.tagName).toBe('SPAN');
       expect(techSpan.tagName).toBe('SPAN');
-      expect(aiSpan).toHaveClass('px-3', 'py-1', 'text-xs', 'font-bold', 'text-white', 'uppercase', 'bg-viva-magenta-500', 'rounded-full');
+      expect(aiSpan).toHaveClass('px-3', 'py-1', 'text-xs', 'font-bold', 'text-white', 'bg-viva-magenta-500', 'rounded-full');
+      // Tags are stored/displayed in their human-readable case — never uppercased.
+      expect(aiSpan).not.toHaveClass('uppercase');
     });
 
     it('renders tags above title', () => {
@@ -247,6 +257,84 @@ describe('Post', () => {
       expect(tagSpan).toHaveClass('text-xs');
       expect(tagSpan).toHaveClass('rounded-full');
       expect(tagSpan.className).toMatch(/text-white|bg-viva-magenta-500/);
+    });
+  });
+
+  // Post stays SYNCHRONOUS: link decisions are prop-drilled in via `tagLinks`,
+  // precomputed once at the page boundary from the census (RT#5). Post never
+  // fetches or consults the census itself.
+  describe('Tag links (prop-drilled)', () => {
+    it('renders a linkable tag as an anchor to its archive', () => {
+      const blok = createMockBlok();
+      const tagLinks = new Map([['AI', { slug: 'ai', linkable: true }]]);
+      render(<Post blok={blok} tags={['AI']} tagLinks={tagLinks} />);
+
+      const ai = screen.getByText('AI');
+      expect(ai.tagName).toBe('A');
+      expect(ai).toHaveAttribute('href', '/tags/ai');
+      expect(ai).toHaveClass('px-3', 'py-1', 'text-xs', 'font-bold', 'text-white', 'bg-viva-magenta-500', 'rounded-full');
+      expect(ai).not.toHaveClass('uppercase');
+    });
+
+    it('renders a non-linkable tag (linkable: false) as a plain span', () => {
+      const blok = createMockBlok();
+      const tagLinks = new Map([['Draft', { slug: 'draft', linkable: false }]]);
+      render(<Post blok={blok} tags={['Draft']} tagLinks={tagLinks} />);
+
+      const draft = screen.getByText('Draft');
+      expect(draft.tagName).toBe('SPAN');
+      expect(draft).not.toHaveAttribute('href');
+    });
+
+    it('renders a tag absent from the map as a plain span (fail-open)', () => {
+      const blok = createMockBlok();
+      const tagLinks = new Map([['AI', { slug: 'ai', linkable: true }]]);
+      render(<Post blok={blok} tags={['Ghost']} tagLinks={tagLinks} />);
+
+      const ghost = screen.getByText('Ghost');
+      expect(ghost.tagName).toBe('SPAN');
+    });
+
+    it('renders a mixed set: linkable → anchor, thin → span, in one post', () => {
+      const blok = createMockBlok();
+      const tagLinks = new Map([
+        ['Machine Learning', { slug: 'machine-learning', linkable: true }],
+        ['Solo', { slug: 'solo', linkable: false }],
+      ]);
+      render(<Post blok={blok} tags={['Machine Learning', 'Solo']} tagLinks={tagLinks} />);
+
+      const ml = screen.getByText('Machine Learning');
+      const solo = screen.getByText('Solo');
+      expect(ml.tagName).toBe('A');
+      expect(ml).toHaveAttribute('href', '/tags/machine-learning');
+      expect(solo.tagName).toBe('SPAN');
+    });
+
+    it('falls back to spans for every tag when tagLinks is undefined', () => {
+      const blok = createMockBlok();
+      render(<Post blok={blok} tags={['AI', 'Tech']} />);
+
+      expect(screen.getByText('AI').tagName).toBe('SPAN');
+      expect(screen.getByText('Tech').tagName).toBe('SPAN');
+    });
+
+    it('trims a whitespace-padded tag so it still resolves to its archive link', () => {
+      const blok = createMockBlok();
+      // Census map is keyed by the trimmed name; the raw tag carries whitespace.
+      const tagLinks = new Map([['AI', { slug: 'ai', linkable: true }]]);
+      render(<Post blok={blok} tags={[' AI ']} tagLinks={tagLinks} />);
+
+      const ai = screen.getByText('AI');
+      expect(ai.tagName).toBe('A');
+      expect(ai).toHaveAttribute('href', '/tags/ai');
+    });
+
+    it('renders a single pill for whitespace-variant duplicates of one tag', () => {
+      const blok = createMockBlok();
+      const tagLinks = new Map([['AI', { slug: 'ai', linkable: true }]]);
+      render(<Post blok={blok} tags={['AI', ' AI']} tagLinks={tagLinks} />);
+
+      expect(screen.getAllByText('AI')).toHaveLength(1);
     });
   });
 

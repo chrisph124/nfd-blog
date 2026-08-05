@@ -1,19 +1,38 @@
 import Image from "next/image";
+import Link from "next/link";
 import { StoryblokServerComponent } from "@/lib/storyblok-utils";
 import { getStoryReadingTime, formatDate } from "@/lib/utils";
 import ReadingProgressBar from "@/components/atoms/ReadingProgress";
 import type { PostBlok } from "@/types/storyblok";
+import type { TagLink } from "@/lib/tags";
+
+const TAG_PILL_CLASSES =
+  "px-3 py-1 text-xs font-bold text-white bg-viva-magenta-500 rounded-full";
 
 interface PostProps {
   blok: PostBlok;
   tags?: string[];
+  /**
+   * Per-tag link decision, keyed by display name, precomputed once from the
+   * census by `[slug]/page.tsx` and prop-drilled in (RT#5). `Post` stays
+   * synchronous and never consults the census itself. Missing/`linkable: false`
+   * → plain `<span>`; linkable → `<Link>` to the tag archive.
+   */
+  tagLinks?: Map<string, TagLink>;
   createdAt?: string;
 }
 
-export default function Post({ blok, tags = [], createdAt }: Readonly<PostProps>) {
+export default function Post({ blok, tags = [], tagLinks, createdAt }: Readonly<PostProps>) {
   const { title = "", featured_image, excerpt, body } = blok;
   const readingTime = getStoryReadingTime(body);
   const formattedDate = createdAt ? formatDate(createdAt) : '';
+
+  // Normalize to trimmed, de-duplicated display names so the pill lookup key
+  // matches the census map (keyed by trimmed name in `buildTagLinks`) and a
+  // whitespace variant can't render a duplicate pill.
+  const displayTags = [
+    ...new Set(tags.map((tag) => tag?.trim()).filter((tag): tag is string => Boolean(tag))),
+  ];
 
   return (
     <>
@@ -24,16 +43,20 @@ export default function Post({ blok, tags = [], createdAt }: Readonly<PostProps>
       />
       <article className="flex flex-col items-center gap-y-6 md:gap-y-10 pt-4">
         <header className="w-full max-w-[1280px] mx-auto px-4 md:px-8 lg:px-12 xl:px-5 flex flex-col items-center gap-4 text-center">
-          {tags.length > 0 && (
+          {displayTags.length > 0 && (
             <div className="flex flex-wrap gap-2 justify-center">
-              {tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="px-3 py-1 text-xs font-bold text-white uppercase bg-viva-magenta-500 rounded-full"
-                >
-                  {tag}
-                </span>
-              ))}
+              {displayTags.map((tag) => {
+                const link = tagLinks?.get(tag);
+                return link?.linkable ? (
+                  <Link key={tag} href={`/tags/${link.slug}`} className={TAG_PILL_CLASSES}>
+                    {tag}
+                  </Link>
+                ) : (
+                  <span key={tag} className={TAG_PILL_CLASSES}>
+                    {tag}
+                  </span>
+                );
+              })}
             </div>
           )}
 
