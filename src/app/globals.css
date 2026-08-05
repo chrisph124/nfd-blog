@@ -576,6 +576,31 @@ h6, .h6 {
   }
 }
 
+/* LCP-safe reveal for the priority (first) card. Same slide-up motion as
+   `.post-card-reveal` but WITHOUT the `opacity: 0` start: an element that
+   begins at opacity 0 is ineligible as an LCP candidate, so the fade would
+   defer the homepage's largest paint until after hydration. Transform-only
+   keeps the first card paintable on first render. */
+.post-card-reveal-lcp {
+  animation: post-card-reveal-lcp 0.6s ease-out backwards;
+}
+
+@keyframes post-card-reveal-lcp {
+  from {
+    transform: translateY(24px);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .post-card-reveal-lcp {
+    animation: none;
+    transform: none;
+  }
+}
+
 /* Post poster card: image background + overlaid content.
    Mobile (<768) & tablet (768–1279), plus any no-hover device = static end-state:
    a single flat 85% overlay (scrim hidden), title+date+excerpt all visible.

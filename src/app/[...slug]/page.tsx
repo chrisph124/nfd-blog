@@ -21,7 +21,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const content = story.content;
   const siteUrl = getSiteUrl();
-  const canonicalUrl = `${siteUrl}/${fullSlug}`;
+  // Posts live under the internal `posts/` folder but publish at the site root;
+  // `proxy.ts` 308-redirects `/posts/{slug}` -> `/{slug}`. If this catch-all
+  // still renders a `posts/*` path (Storyblok editor preview or the proxy's
+  // fail-open branch), point the canonical + og:url at the clean root so a
+  // crawler never sees a self-referencing duplicate canonical (defense-in-depth
+  // behind the redirect). No-op for non-post slugs.
+  const canonicalPath = fullSlug.replace(/^posts\//, '');
+  const canonicalUrl = `${siteUrl}/${canonicalPath}`;
 
   const title = stripEntities(content.og_title?.trim() || story.name);
   const description = stripEntities(content.og_description?.trim() || '');
@@ -30,7 +37,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title,
     description,
     alternates: {
-      canonical: `/${fullSlug}`,
+      canonical: `/${canonicalPath}`,
     },
     openGraph: {
       type: 'website',
@@ -80,7 +87,17 @@ export async function generateStaticParams() {
     const links = Object.values(data.links) as StoryblokStoryLink[];
 
     const paths = links
-      .filter((link) => !link.is_folder && link.slug !== 'home' && !link.slug.startsWith('global/'))
+      // Exclude posts: they render at the site root via `[slug]` (their
+      // `posts/` prefix stripped), and `proxy.ts` 308-redirects `/posts/*` to
+      // that root URL. Generating `/posts/*` here would only rebuild the dead
+      // duplicate pages the redirect exists to retire.
+      .filter(
+        (link) =>
+          !link.is_folder &&
+          link.slug !== 'home' &&
+          !link.slug.startsWith('global/') &&
+          !link.slug.startsWith('posts/')
+      )
       .map((link) => ({
         slug: link.slug.split('/'),
       }));
