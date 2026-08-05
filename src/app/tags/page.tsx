@@ -79,10 +79,12 @@ export default async function TagsIndexPage() {
               <li key={tag.slug}>
                 <Link
                   href={`/tags/${tag.slug}`}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-viva-magenta-500 rounded-full transition-transform hover:-translate-y-0.5"
+                  className="inline-flex items-center gap-2 px-4 py-2 text-base font-semibold text-white! no-underline! bg-viva-magenta-500 rounded-full transition-transform hover:-translate-y-0.5"
                 >
                   {tag.name}
-                  <span className="text-white/70">{tag.count}</span>
+                  <span className="inline-flex items-center justify-center size-6 rounded-full bg-white text-[#BE3455] text-xs font-bold leading-none tabular-nums">
+                    {tag.count}
+                  </span>
                 </Link>
               </li>
             ))}

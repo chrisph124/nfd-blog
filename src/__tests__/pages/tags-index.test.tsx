@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import type { ArchivedTag } from '@/lib/tags';
 
 const mockGetTagCensus = vi.fn();
@@ -63,6 +63,23 @@ describe('TagsIndexPage', () => {
     expect(tech).toHaveTextContent('2');
     // Source order is preserved in the DOM (AI before Tech).
     expect(ai.compareDocumentPosition(tech) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('styles pills at 16px, forced white, no underline, with a white count circle', async () => {
+    mockGetTagCensus.mockResolvedValue(okCensus);
+    mockSelectArchivedTags.mockReturnValue([
+      { slug: 'ai', name: 'AI', count: 3 },
+    ] as ArchivedTag[]);
+
+    render(await TagsIndexPage());
+
+    const pill = screen.getByRole('link', { name: /AI/ });
+    // 16px label, forced white + no underline (beats the unlayered global `a` rule).
+    expect(pill).toHaveClass('text-base', 'text-white!', 'no-underline!');
+
+    // Count in a 24px (size-6) white circle with an AA-safe deep-magenta number.
+    const circle = within(pill).getByText('3');
+    expect(circle).toHaveClass('bg-white', 'text-[#BE3455]', 'rounded-full', 'size-6');
   });
 
   it('emits CollectionPage JSON-LD listing every archived tag', async () => {

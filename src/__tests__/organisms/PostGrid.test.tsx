@@ -3,8 +3,24 @@ import { render, screen } from '@testing-library/react';
 import type { PostBlok, StoryblokStory } from '@/types/storyblok';
 
 vi.mock('@/components/molecules/Card', () => ({
-  default: ({ story, priority }: { story: StoryblokStory<PostBlok>; priority?: boolean }) => (
-    <div data-testid="card" data-uuid={story.uuid} data-priority={String(priority)} />
+  default: ({
+    story,
+    priority,
+    className,
+    style,
+  }: {
+    story: StoryblokStory<PostBlok>;
+    priority?: boolean;
+    className?: string;
+    style?: React.CSSProperties;
+  }) => (
+    <div
+      data-testid="card"
+      data-uuid={story.uuid}
+      data-priority={String(priority)}
+      className={className}
+      style={style}
+    />
   ),
 }));
 
@@ -32,6 +48,15 @@ describe('PostGrid', () => {
     const grid = container.firstElementChild;
 
     expect(grid).toHaveClass('grid', 'grid-cols-1', 'md:grid-cols-2', 'xl:grid-cols-3', 'gap-6');
+  });
+
+  it('gives each card the staggered reveal animation, like the homepage', () => {
+    render(<PostGrid posts={[mkPost('a'), mkPost('b'), mkPost('c')]} />);
+
+    screen.getAllByTestId('card').forEach((card, index) => {
+      expect(card).toHaveClass('post-card-reveal');
+      expect(card.style.getPropertyValue('--reveal-i')).toBe(String(index));
+    });
   });
 
   it('renders an empty grid with no cards for an empty post set', () => {
