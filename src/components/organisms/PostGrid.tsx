@@ -15,6 +15,9 @@ interface PostGridProps {
  * `prefers-reduced-motion`-guarded (globals.css), so it runs on these
  * server-rendered cards without a client boundary. The archive is unpaginated,
  * so `--reveal-i` is a continuous `index` (no per-page reset like the homepage).
+ * The first (priority/LCP) card uses the `post-card-reveal-lcp` variant instead:
+ * a transform-only reveal with no `opacity: 0` start, so it stays an eligible
+ * LCP candidate and paints on first render.
  */
 export default function PostGrid({ posts }: Readonly<PostGridProps>) {
   return (
@@ -24,7 +27,8 @@ export default function PostGrid({ posts }: Readonly<PostGridProps>) {
           key={story.uuid}
           story={story}
           priority={index === 0}
-          className="post-card-reveal"
+          // First card is the LCP element: transform-only reveal, no opacity gate.
+          className={index === 0 ? 'post-card-reveal-lcp' : 'post-card-reveal'}
           style={{ '--reveal-i': index } as React.CSSProperties}
         />
       ))}

@@ -24,6 +24,27 @@ export function proxy(request: NextRequest) {
       }
     }
 
+    // Canonicalize legacy post URLs. Posts live in the internal Storyblok
+    // `posts/` folder but publish at the site root (`/{slug}`); the catch-all
+    // route also resolves `/posts/{slug}` at 200, so every post is indexable at
+    // two URLs. Redirect public requests to the clean root URL (308 permanent)
+    // so search engines consolidate on one canonical. Skip the Storyblok Visual
+    // Editor, which loads previews with a `_storyblok` query param — redirecting
+    // it would break the in-editor block overlays.
+    if (pathname.startsWith('/posts/') && !request.nextUrl.searchParams.has('_storyblok')) {
+      // Only a single non-slash segment is a canonicalizable post (mirror the
+      // `.md` guard, RT#9): posts publish at a flat `/{slug}`. Nested paths
+      // (`/posts/a/b`) and bare `/posts/` have no clean-root equivalent the
+      // `[slug]` route can resolve, so let them fall through instead of 308-ing
+      // to a 404.
+      const rest = pathname.slice('/posts/'.length);
+      if (rest && !rest.includes('/')) {
+        const url = request.nextUrl.clone();
+        url.pathname = `/${rest}`; // '/posts/foo' -> '/foo'
+        return NextResponse.redirect(url, 308);
+      }
+    }
+
     return NextResponse.next();
   } catch {
     return NextResponse.next();
