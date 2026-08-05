@@ -222,7 +222,7 @@ describe('Post', () => {
 
       expect(aiSpan.tagName).toBe('SPAN');
       expect(techSpan.tagName).toBe('SPAN');
-      expect(aiSpan).toHaveClass('px-3', 'py-1', 'text-xs', 'font-bold', 'text-white', 'bg-viva-magenta-500', 'rounded-full');
+      expect(aiSpan).toHaveClass('px-3', 'py-1', 'text-sm', 'font-bold', 'text-white!', 'bg-viva-magenta-500', 'rounded-full');
       // Tags are stored/displayed in their human-readable case — never uppercased.
       expect(aiSpan).not.toHaveClass('uppercase');
     });
@@ -254,7 +254,7 @@ describe('Post', () => {
       // Check individual classes
       expect(tagSpan).toHaveClass('px-3');
       expect(tagSpan).toHaveClass('py-1');
-      expect(tagSpan).toHaveClass('text-xs');
+      expect(tagSpan).toHaveClass('text-sm');
       expect(tagSpan).toHaveClass('rounded-full');
       expect(tagSpan.className).toMatch(/text-white|bg-viva-magenta-500/);
     });
@@ -272,7 +272,9 @@ describe('Post', () => {
       const ai = screen.getByText('AI');
       expect(ai.tagName).toBe('A');
       expect(ai).toHaveAttribute('href', '/tags/ai');
-      expect(ai).toHaveClass('px-3', 'py-1', 'text-xs', 'font-bold', 'text-white', 'bg-viva-magenta-500', 'rounded-full');
+      // text-white! + no-underline! override the unlayered global `a` rule (link
+      // color + underline) so linkable pills stay white and undecorated.
+      expect(ai).toHaveClass('px-3', 'py-1', 'text-sm', 'font-bold', 'text-white!', 'no-underline!', 'bg-viva-magenta-500', 'rounded-full');
       expect(ai).not.toHaveClass('uppercase');
     });
 

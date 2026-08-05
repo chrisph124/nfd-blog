@@ -6,8 +6,11 @@ import ReadingProgressBar from "@/components/atoms/ReadingProgress";
 import type { PostBlok } from "@/types/storyblok";
 import type { TagLink } from "@/lib/tags";
 
+// `text-white!` + `no-underline!` override the unlayered global `a:not(...)` rule
+// in globals.css (link color + underline), which otherwise beats plain utilities
+// on the `<Link>` (an `<a>`); harmless on the `<span>` variant.
 const TAG_PILL_CLASSES =
-  "px-3 py-1 text-xs font-bold text-white bg-viva-magenta-500 rounded-full";
+  "px-3 py-1 text-sm font-bold text-white! no-underline! bg-viva-magenta-500 rounded-full";
 
 interface PostProps {
   blok: PostBlok;
