@@ -2,6 +2,7 @@ import { getStoryblokApi, fetchStory, getSiteUrl, storyblokVersion } from '@/lib
 import { StoryblokStory } from '@storyblok/react/rsc';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
+import { metadata as notFoundMetadata } from '@/app/not-found';
 import type { StoryblokLinksResponse, StoryblokStoryLink } from '@/types/storyblok';
 import { stripEntities } from '@/lib/seo/strip-entities';
 
@@ -17,7 +18,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const fullSlug = slug.join('/');
   const story = await fetchStory(fullSlug);
-  if (!story) return {};
+  // Same as `[slug]`: without the 404 title here, hydration restores the home title.
+  if (!story) return notFoundMetadata;
 
   const content = story.content;
   const siteUrl = getSiteUrl();

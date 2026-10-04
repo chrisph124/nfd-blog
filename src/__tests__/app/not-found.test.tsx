@@ -1,8 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import NotFound from '@/app/not-found';
+import NotFound, { metadata } from '@/app/not-found';
 
 describe('NotFound', () => {
+  // Without its own title the 404 inherits the home page <title>; the layout
+  // template renders this as "Page not found | Notes of Dev".
+  it('exports its own page title', () => {
+    expect(metadata.title).toBe('Page not found');
+  });
+
   it('renders without crashing', () => {
     expect(() => render(<NotFound />)).not.toThrow();
   });
