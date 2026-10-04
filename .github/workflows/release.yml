@@ -1,0 +1,28 @@
+name: Release
+
+# Safety net for version tags pushed without a release: publish one with auto-generated
+# notes, sectioned by .github/release.yml. A release that already exists (for example one
+# created with curated notes via `gh release create <tag> --target <sha>`) is left untouched.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create release if missing
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          if gh release view "$TAG" --repo "$REPO" > /dev/null 2>&1; then
+            echo "Release $TAG already exists; leaving its notes untouched."
+            exit 0
+          fi
+          if [[ "$TAG" == *-* ]]; then kind=--prerelease; else kind=--latest; fi
+          gh release create "$TAG" --repo "$REPO" --verify-tag --generate-notes --title "$TAG" "$kind"
