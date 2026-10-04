@@ -24,6 +24,15 @@ export function proxy(request: NextRequest) {
       }
     }
 
+    // Serve the public sitemap URL from a regular ISR route handler. A handler
+    // at Next's reserved `/sitemap.xml` metadata path is served by Vercel as a
+    // frozen static asset, so its `revalidate` never runs.
+    if (pathname === '/sitemap.xml') {
+      const url = request.nextUrl.clone();
+      url.pathname = '/xml-sitemap';
+      return NextResponse.rewrite(url);
+    }
+
     // Canonicalize legacy post URLs. Posts live in the internal Storyblok
     // `posts/` folder but publish at the site root (`/{slug}`); the catch-all
     // route also resolves `/posts/{slug}` at 200, so every post is indexable at

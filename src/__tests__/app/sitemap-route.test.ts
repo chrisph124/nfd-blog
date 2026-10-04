@@ -11,7 +11,7 @@ vi.mock('@/lib/storyblok', () => ({
   storyblokVersion: 'published',
 }));
 
-import { GET } from '@/app/sitemap.xml/route';
+import { GET } from '@/app/xml-sitemap/route';
 
 const link = (overrides: Partial<StoryblokStoryLink> = {}): StoryblokStoryLink => ({
   id: 1,
@@ -129,16 +129,38 @@ describe('GET /sitemap.xml', () => {
     expect(body).toContain('<image:title>Hello title</image:title>');
   });
 
-  it('emits lastmod from published_at', async () => {
+  // `published_at` was bulk-reset when posts were retagged, so it no longer
+  // tracks content changes; `first_published_at` is the truthful date.
+  it('dates a post by first_published_at and leaves a non-post page undated', async () => {
     mockGet.mockResolvedValue({
       data: {
-        links: { '1': link({ slug: 'about', published_at: '2024-07-04T12:00:00.000Z' }) },
+        links: {
+          '1': link({ slug: 'about', published_at: '2024-07-04T12:00:00.000Z' }),
+          '2': link({ id: 2, slug: 'posts/hello', published_at: '2024-06-01T00:00:00.000Z' }),
+        },
       } as StoryblokLinksResponse,
     });
-    mockFetchAllPosts.mockResolvedValue([]);
+    mockFetchAllPosts.mockResolvedValue([
+      post({ published_at: '2024-06-01T00:00:00.000Z', first_published_at: '2024-05-15T00:00:00.000Z' }),
+    ]);
 
     const body = await (await GET()).text();
-    expect(body).toContain('<lastmod>2024-07-04T12:00:00.000Z</lastmod>');
+
+    expect(body).toContain('<loc>https://example.com/hello</loc>\n    <lastmod>2024-05-15T00:00:00.000Z</lastmod>');
+    expect(body).toContain('<loc>https://example.com/about</loc>\n    <changefreq>monthly</changefreq>');
+  });
+
+  it('dates the home page and the /tags hub by the newest post', async () => {
+    mockGet.mockResolvedValue({ data: { links: {} } as StoryblokLinksResponse });
+    mockFetchAllPosts.mockResolvedValue([
+      post({ uuid: 'u-1', full_slug: 'posts/a', first_published_at: '2024-09-09T00:00:00.000Z' }),
+      post({ uuid: 'u-2', full_slug: 'posts/b', first_published_at: '2024-01-01T00:00:00.000Z' }),
+    ]);
+
+    const body = await (await GET()).text();
+
+    expect(body).toContain('<loc>https://example.com</loc>\n    <lastmod>2024-09-09T00:00:00.000Z</lastmod>');
+    expect(body).toContain('<loc>https://example.com/tags</loc>\n    <lastmod>2024-09-09T00:00:00.000Z</lastmod>');
   });
 
   it('excludes draft links with null published_at', async () => {
@@ -198,8 +220,8 @@ describe('GET /sitemap.xml', () => {
   it('emits the /tags hub plus one entry per archived tag', async () => {
     mockGet.mockResolvedValue({ data: { links: {} } as StoryblokLinksResponse });
     mockFetchAllPosts.mockResolvedValue([
-      post({ uuid: 'u-1', full_slug: 'posts/a', tag_list: ['AI', 'Solo'], published_at: '2024-08-01T00:00:00.000Z' }),
-      post({ uuid: 'u-2', full_slug: 'posts/b', tag_list: ['AI'], published_at: '2024-07-01T00:00:00.000Z' }),
+      post({ uuid: 'u-1', full_slug: 'posts/a', tag_list: ['AI', 'Solo'], first_published_at: '2024-08-01T00:00:00.000Z' }),
+      post({ uuid: 'u-2', full_slug: 'posts/b', tag_list: ['AI'], first_published_at: '2024-07-01T00:00:00.000Z' }),
     ]);
 
     const body = await (await GET()).text();
@@ -211,18 +233,6 @@ describe('GET /sitemap.xml', () => {
     // lastmod tracks the newest (first-in-membership) post carrying the tag.
     expect(body).toContain('<loc>https://example.com/tags/ai</loc>\n    <lastmod>2024-08-01T00:00:00.000Z</lastmod>');
     expect(body).toContain('<loc>https://example.com/tags/solo</loc>\n    <lastmod>2024-08-01T00:00:00.000Z</lastmod>');
-  });
-
-  it('falls back to first_published_at for a tag lastmod when published_at is null', async () => {
-    mockGet.mockResolvedValue({ data: { links: {} } as StoryblokLinksResponse });
-    mockFetchAllPosts.mockResolvedValue([
-      post({ uuid: 'u-1', full_slug: 'posts/a', tag_list: ['AI'], published_at: null, first_published_at: '2024-03-03T00:00:00.000Z' }),
-      post({ uuid: 'u-2', full_slug: 'posts/b', tag_list: ['AI'], published_at: null, first_published_at: '2024-02-02T00:00:00.000Z' }),
-    ]);
-
-    const body = await (await GET()).text();
-
-    expect(body).toContain('<loc>https://example.com/tags/ai</loc>\n    <lastmod>2024-03-03T00:00:00.000Z</lastmod>');
   });
 
   it('still emits a tag entry when the newest post carries neither date', async () => {

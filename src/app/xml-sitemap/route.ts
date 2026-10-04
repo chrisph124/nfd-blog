@@ -6,14 +6,13 @@ import { stripEntities } from '@/lib/seo/strip-entities';
 
 export const revalidate = 3600;
 
+// Served at the public `/sitemap.xml` through a rewrite in `src/proxy.ts`.
+// A route at Next's reserved metadata path is frozen as a static asset on Vercel,
+// so `revalidate` never took effect there.
 export async function GET() {
   const siteUrl = getSiteUrl();
-  const entries: SitemapEntry[] = [
-    {
-      loc: siteUrl,
-      changefreq: 'daily',
-    },
-  ];
+  const home: SitemapEntry = { loc: siteUrl, changefreq: 'daily' };
+  const entries: SitemapEntry[] = [home];
 
   try {
     const storyblokApi = getStoryblokApi();
@@ -25,6 +24,15 @@ export async function GET() {
       fetchAllPosts(),
     ]);
 
+    // `published_at` was bulk-reset when posts were retagged and `cdn/links` no
+    // longer returns it, so `first_published_at` is the only truthful post date.
+    // `fetchAllPosts` sorts newest first.
+    const newestPostDate = posts[0]?.first_published_at ?? undefined;
+    home.lastmod = newestPostDate;
+
+    const firstPublishedByFullSlug = new Map(
+      posts.map((story) => [story.full_slug, story.first_published_at ?? undefined])
+    );
     const heroBySlug = new Map<string, { loc: string; title?: string }>();
     for (const story of posts) {
       const slug = story.full_slug.replace(/^posts\//, '');
@@ -51,7 +59,7 @@ export async function GET() {
         const hero = heroBySlug.get(slug);
         return {
           loc: `${siteUrl}/${slug}`,
-          lastmod: link.published_at ?? undefined,
+          lastmod: firstPublishedByFullSlug.get(link.slug),
           changefreq: 'monthly',
           images: hero ? [hero] : undefined,
         };
@@ -66,12 +74,12 @@ export async function GET() {
     // upstream failure degrades to the static/dynamic entries above.
     const tagCensus = buildTagCensus(posts);
     const archivedTags = selectArchivedTags(tagCensus);
-    entries.push({ loc: `${siteUrl}/tags`, changefreq: 'weekly' });
+    entries.push({ loc: `${siteUrl}/tags`, lastmod: newestPostDate, changefreq: 'weekly' });
     for (const tag of archivedTags) {
       const newest = selectPostsForTag(tagCensus, tag.slug)[0];
       entries.push({
         loc: `${siteUrl}/tags/${tag.slug}`,
-        lastmod: newest?.published_at ?? newest?.first_published_at ?? undefined,
+        lastmod: newest?.first_published_at ?? undefined,
         changefreq: 'weekly',
       });
     }
