@@ -86,11 +86,19 @@ export default async function RootLayout({
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
         <body className={`${nunito.variable} ${bitcountPropSingle.variable} ${lora.variable} antialiased flex flex-col min-h-full`}>
+          {/* z-[60] keeps it above the sticky header (z-50) and reading-progress bar. */}
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] rounded-md bg-background px-4 py-2"
+          >
+            Skip to content
+          </a>
           <ThemeProvider>
             <StoryblokProvider>
               <MotionProvider>
                 {headerStory && <Header blok={headerStory.content.body[0]} />}
-                <main className="grow py-10 overflow-x-hidden">
+                {/* scroll-mt clears the sticky header (h-[70px] lg:h-[90px]) when the skip link scrolls here. */}
+                <main id="main-content" tabIndex={-1} className="grow py-10 overflow-x-hidden focus:outline-none scroll-mt-[70px] lg:scroll-mt-[90px]">
                   {children}
                 </main>
                 {footerStory && <Footer blok={footerStory.content.body[0]} />}

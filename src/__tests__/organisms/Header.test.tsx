@@ -198,7 +198,8 @@ describe('Header', () => {
           blok={createMockBlok({
             nav_items: [
               createMockNavItem('n1', 'Services', [
-                createMockSubNavItem('s1', 'Service 1', '/service-1'),
+                // Storyblok stores story links without a leading slash.
+                createMockSubNavItem('s1', 'Service 1', 'service-1'),
               ]),
             ],
           })}
@@ -213,7 +214,7 @@ describe('Header', () => {
       expect(screen.getByRole('link', { name: 'Service 1' })).toHaveAttribute('href', '/service-1');
     });
 
-    it('marks the active nav item in the mobile menu', async () => {
+    it('links a slash-less Storyblok story path absolutely and marks it active', async () => {
       mockPathname.mockReturnValue('/about');
       const user = userEvent.setup();
       const blok = createMockBlok({ nav_items: [createMockNavItem('n1', 'About')] });
@@ -221,6 +222,8 @@ describe('Header', () => {
 
       render(<Header blok={blok} />);
       await openMenu(user);
+      // A relative `about` resolves to /tags/about when opened from /tags/ai.
+      expect(screen.getByRole('link', { name: 'About' })).toHaveAttribute('href', '/about');
       expect(screen.getByText('About')).toHaveClass('text-primary-800');
     });
 

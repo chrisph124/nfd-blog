@@ -15,13 +15,18 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { story, reload } = body;
+    const { action, reload } = body;
+    // Storyblok's webhook sends `full_slug` at the top level; `story.full_slug`
+    // is kept for manual calls that use the older nested shape.
+    const fullSlug: string | undefined = body.full_slug ?? body.story?.full_slug;
 
     // Revalidate homepage
     revalidatePath('/');
 
-    // Revalidate SEO surfaces (sitemap, RSS, llms.txt/llms-full.txt) — affected by every publish/unpublish
-    revalidatePath('/sitemap.xml');
+    // Revalidate SEO surfaces (sitemap, RSS, llms.txt/llms-full.txt) — affected by every publish/unpublish.
+    // The public /sitemap.xml is a proxy rewrite to /xml-sitemap, so the rewrite
+    // destination is the real cache key (same as /api/md/* below).
+    revalidatePath('/xml-sitemap');
     revalidatePath('/rss.xml');
     revalidatePath('/llms.txt');
     revalidatePath('/llms-full.txt');
@@ -32,8 +37,8 @@ export async function POST(request: NextRequest) {
     revalidatePath('/tags');
 
     // Revalidate specific story path if provided
-    if (story?.full_slug) {
-      const slug = story.full_slug;
+    if (fullSlug) {
+      const slug = fullSlug;
 
       // Revalidate the specific page
       revalidatePath(`/${slug}`);
@@ -70,14 +75,15 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('[revalidate]', {
-      slug: story?.full_slug ?? null,
+      slug: fullSlug ?? null,
+      action: action ?? null,
       reload: Boolean(reload),
       timestamp: Date.now(),
     });
 
     return NextResponse.json({
       revalidated: true,
-      story: story?.full_slug || 'home',
+      story: fullSlug || 'home',
       timestamp: Date.now(),
     });
   } catch (error) {

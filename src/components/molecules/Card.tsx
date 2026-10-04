@@ -50,6 +50,9 @@ const Card = memo(({ story, priority = false, className, style }: CardProps) => 
       className={cn(
         'post-poster group relative w-full aspect-16/10 overflow-hidden rounded-xl bg-black',
         'transition-shadow duration-200 hover:shadow-md',
+        // The overlay link's own outline is clipped by overflow-hidden, so the
+        // keyboard focus ring is drawn on the article as a box-shadow instead.
+        'has-[a:focus-visible]:ring-[3px] has-[a:focus-visible]:ring-ring has-[a:focus-visible]:ring-offset-2 has-[a:focus-visible]:ring-offset-background',
         className // carries post-card-reveal from the parent
       )}
       style={style} // carries --reveal-i
@@ -57,7 +60,7 @@ const Card = memo(({ story, priority = false, className, style }: CardProps) => 
       <Link
         href={`/${postSlug}`}
         aria-label={title || 'Read post'}
-        className="absolute inset-0 z-30"
+        className="absolute inset-0 z-30 focus-visible:outline-none"
       />
 
       {featured_image?.filename && (

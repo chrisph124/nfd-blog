@@ -11,13 +11,16 @@ describe('robots', () => {
     vi.clearAllMocks();
   });
 
-  it('returns wildcard rule disallowing /api/', () => {
-    const result = robots();
-    expect(result.rules).toContainEqual({
-      userAgent: '*',
-      allow: '/',
-      disallow: '/api/',
-    });
+  // Every page's og:image is /api/og; X and LinkedIn crawl under `*` and render
+  // no thumbnail when that URL is disallowed.
+  it('lets every group fetch /api/og social images while the rest of /api/ stays disallowed', () => {
+    const rules = [robots().rules].flat();
+
+    expect(rules.map((rule) => rule.userAgent)).toContain('*');
+    for (const rule of rules) {
+      expect([rule.allow].flat()).toEqual(expect.arrayContaining(['/', '/api/og']));
+      expect(rule.disallow).toBe('/api/');
+    }
   });
 
   it('explicitly allows known AI bots', () => {

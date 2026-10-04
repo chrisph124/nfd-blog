@@ -26,7 +26,13 @@ describe('proxy — /{slug}.md rewrite', () => {
   it('leaves .txt/.xml SEO surfaces untouched', () => {
     expect(rewriteOf('/robots.txt')).toBeNull();
     expect(rewriteOf('/llms-full.txt')).toBeNull();
-    expect(rewriteOf('/sitemap.xml')).toBeNull();
+    expect(rewriteOf('/rss.xml')).toBeNull();
+  });
+});
+
+describe('proxy — /sitemap.xml rewrite', () => {
+  it('serves the public sitemap URL from the non-reserved /xml-sitemap route', () => {
+    expect(new URL(rewriteOf('/sitemap.xml') ?? 'https://example.com/').pathname).toBe('/xml-sitemap');
   });
 });
 
