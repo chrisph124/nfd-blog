@@ -37,6 +37,12 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Type-check app code only during `next build`. From 16.3 the build also
+  // reports type errors in vitest test files, which 16.2 did not; tests are
+  // not part of the production bundle.
+  typescript: {
+    tsconfigPath: 'tsconfig.build.json',
+  },
   images: {
     remotePatterns: [
       {
