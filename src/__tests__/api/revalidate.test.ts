@@ -97,17 +97,29 @@ describe('Revalidate API Route', () => {
       expect(calls).not.toContain('');
     });
 
-    it('revalidates SEO surfaces on every webhook call', async () => {
+    it('revalidates the post, its markdown and the sitemap for a Storyblok webhook payload', async () => {
       const { revalidatePath } = await import('next/cache');
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      // Storyblok's documented webhook body carries `full_slug` at the top level.
       const request = createMockRequest('test-secret', {
-        story: { full_slug: 'posts/my-post' },
+        text: 'The user published the Story',
+        action: 'published',
+        space_id: 1,
+        story_id: 2,
+        full_slug: 'posts/when-the-interface-starts-with-intent',
       });
 
       await POST(request);
 
-      expect(revalidatePath).toHaveBeenCalledWith('/sitemap.xml');
-      expect(revalidatePath).toHaveBeenCalledWith('/rss.xml');
-      expect(revalidatePath).toHaveBeenCalledWith('/llms.txt');
+      expect(revalidatePath).toHaveBeenCalledWith('/when-the-interface-starts-with-intent');
+      expect(revalidatePath).toHaveBeenCalledWith('/api/md/when-the-interface-starts-with-intent');
+      // The public /sitemap.xml is a proxy rewrite; its cache key is the destination.
+      expect(revalidatePath).toHaveBeenCalledWith('/xml-sitemap');
+      expect(consoleSpy).toHaveBeenCalledWith(
+        '[revalidate]',
+        expect.objectContaining({ slug: 'posts/when-the-interface-starts-with-intent', action: 'published' })
+      );
+      consoleSpy.mockRestore();
     });
 
     it('revalidates SEO surfaces even when story is missing', async () => {
@@ -116,7 +128,7 @@ describe('Revalidate API Route', () => {
 
       await POST(request);
 
-      expect(revalidatePath).toHaveBeenCalledWith('/sitemap.xml');
+      expect(revalidatePath).toHaveBeenCalledWith('/xml-sitemap');
       expect(revalidatePath).toHaveBeenCalledWith('/rss.xml');
       expect(revalidatePath).toHaveBeenCalledWith('/llms.txt');
     });
