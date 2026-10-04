@@ -9,7 +9,7 @@ changelog:
   categories:
     - title: 💥 Breaking Changes
       labels: [breaking-change]
-    - title: ✨ New Features
+    - title: ✨ Features & Improvements
       labels: [enhancement]
     - title: 🐛 Bug Fixes
       labels: [bug]
