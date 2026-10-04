@@ -52,7 +52,7 @@ export async function GET() {
           !link.is_folder &&
           link.slug !== 'home' &&
           !link.slug.startsWith('global/') &&
-          link.published_at !== null
+          link.published
       )
       .map((link): SitemapEntry => {
         const slug = link.slug.replace(/^posts\//, '');

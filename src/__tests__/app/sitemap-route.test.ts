@@ -163,12 +163,13 @@ describe('GET /sitemap.xml', () => {
     expect(body).toContain('<loc>https://example.com/tags</loc>\n    <lastmod>2024-09-09T00:00:00.000Z</lastmod>');
   });
 
-  it('excludes draft links with null published_at', async () => {
+  // `cdn/links` returns a `published` flag but no `published_at`.
+  it('excludes unpublished links', async () => {
     mockGet.mockResolvedValue({
       data: {
         links: {
           '1': link({ slug: 'about' }),
-          '2': link({ id: 2, slug: 'draft-page', published_at: null }),
+          '2': link({ id: 2, slug: 'draft-page', published: false }),
         },
       } as StoryblokLinksResponse,
     });
