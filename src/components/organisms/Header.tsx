@@ -8,7 +8,7 @@ import MenuToggle from "@/components/atoms/MenuToggle";
 import NavBar from "@/components/organisms/NavBar";
 import type { StoryblokComponentProps, HeaderBlok } from "@/types/storyblok";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { cn, normalizeStoryblokUrl } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTitle, SheetClose } from "@/components/ui/sheet";
 import {
   Accordion,
@@ -33,7 +33,7 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
 
   const getIsActive = (itemUrl: string) =>
     (pathname === "/" && (itemUrl === "/" || itemUrl.includes("home"))) ||
-    (pathname !== "/" && itemUrl !== "/" && pathname === `/${itemUrl}`);
+    (pathname !== "/" && itemUrl !== "/" && pathname === itemUrl);
 
   return (
     <>
@@ -85,7 +85,7 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
 
           <div className="flex flex-col gap-[12px] px-[16px] py-[32px] h-full overflow-y-auto">
             {navItems.map((item, index) => {
-              const itemUrl = item.link?.cached_url ?? item.link?.url ?? "#";
+              const itemUrl = normalizeStoryblokUrl(item.link?.cached_url ?? item.link?.url);
               const isActive = getIsActive(itemUrl);
               const hasSubItems = item.sub_items && item.sub_items.length > 0;
 
@@ -117,11 +117,9 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
                             {item.sub_items?.map((subItem) => (
                               <SheetClose asChild key={subItem._uid}>
                                 <Link
-                                  href={
-                                    subItem.link?.cached_url ??
-                                    subItem.link?.url ??
-                                    "#"
-                                  }
+                                  href={normalizeStoryblokUrl(
+                                    subItem.link?.cached_url ?? subItem.link?.url
+                                  )}
                                   className="flex items-center justify-between px-[16px] py-[12px] hover:bg-secondary-200 transition-colors"
                                 >
                                   <p className="font-medium text-[18px] leading-[28px] text-foreground">

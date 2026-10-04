@@ -143,11 +143,13 @@ describe('generateMetadata (tags/[tag])', () => {
     expect(metadata).toEqual({});
   });
 
-  it('returns an empty object when the slug does not resolve', async () => {
+  // The page 404s for an unknown slug, and hydration applies this metadata, so
+  // `{}` would replace the 404's server-rendered title with the home title.
+  it('titles an unknown slug as the 404 page', async () => {
     mockGetTagCensus.mockResolvedValue(okCensus);
     mockResolveTagName.mockReturnValue(null);
 
     const metadata = await generateMetadata({ params: params('ghost') });
-    expect(metadata).toEqual({});
+    expect(metadata.title).toBe('Page not found');
   });
 });

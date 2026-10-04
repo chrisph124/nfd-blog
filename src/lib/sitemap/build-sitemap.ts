@@ -7,7 +7,6 @@ export interface SitemapEntry {
 
 export interface SitemapOptions {
   entries: SitemapEntry[];
-  generatedAt?: Date;
 }
 
 function escapeXml(value: string): string {
@@ -23,18 +22,19 @@ function escapeXml(value: string): string {
   });
 }
 
-function isoDate(value: string | undefined, fallback: Date): string {
-  if (!value) return fallback.toISOString();
+function isoDate(value: string | undefined): string | undefined {
+  if (!value) return undefined;
   const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime()) ? fallback.toISOString() : parsed.toISOString();
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed.toISOString();
 }
 
 export function buildSitemap(opts: SitemapOptions): string {
-  const generatedAt = opts.generatedAt ?? new Date();
-
   const urls = opts.entries
     .map((entry) => {
-      const lastmod = `\n    <lastmod>${isoDate(entry.lastmod, generatedAt)}</lastmod>`;
+      // An unknown date is omitted rather than stamped with generation time:
+      // a lastmod that moves on every regeneration teaches crawlers to ignore it.
+      const lastmodIso = isoDate(entry.lastmod);
+      const lastmod = lastmodIso ? `\n    <lastmod>${lastmodIso}</lastmod>` : '';
       const changefreq = entry.changefreq
         ? `\n    <changefreq>${entry.changefreq}</changefreq>`
         : '';

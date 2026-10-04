@@ -5,7 +5,6 @@ describe('buildSitemap', () => {
   it('produces well-formed urlset with image namespace', () => {
     const xml = buildSitemap({
       entries: [{ loc: 'https://example.com' }],
-      generatedAt: new Date('2024-06-01T00:00:00.000Z'),
     });
 
     expect(xml.startsWith('<?xml version="1.0" encoding="UTF-8"?>')).toBe(true);
@@ -14,17 +13,17 @@ describe('buildSitemap', () => {
     expect(xml).toContain('<loc>https://example.com</loc>');
   });
 
-  it('emits per-entry lastmod from input or falls back to generatedAt', () => {
+  it('emits lastmod only for entries with a valid date, never a generation-time stand-in', () => {
     const xml = buildSitemap({
       entries: [
         { loc: 'https://example.com/a', lastmod: '2024-06-15T10:00:00.000Z' },
         { loc: 'https://example.com/b' },
+        { loc: 'https://example.com/c', lastmod: 'garbage' },
       ],
-      generatedAt: new Date('2024-12-01T00:00:00.000Z'),
     });
 
-    expect(xml).toContain('<lastmod>2024-06-15T10:00:00.000Z</lastmod>');
-    expect(xml).toContain('<lastmod>2024-12-01T00:00:00.000Z</lastmod>');
+    expect(xml.match(/<lastmod>/g)).toHaveLength(1);
+    expect(xml).toContain('<loc>https://example.com/a</loc>\n    <lastmod>2024-06-15T10:00:00.000Z</lastmod>');
   });
 
   it('renders changefreq when provided', () => {
@@ -69,15 +68,6 @@ describe('buildSitemap', () => {
 
     expect(xml).toContain('https://example.com/?q=a&amp;b=c');
     expect(xml).toContain('<image:title>a &amp; b</image:title>');
-  });
-
-  it('falls back to generatedAt when lastmod is an invalid date string', () => {
-    const xml = buildSitemap({
-      entries: [{ loc: 'https://example.com', lastmod: 'garbage' }],
-      generatedAt: new Date('2024-12-01T00:00:00.000Z'),
-    });
-
-    expect(xml).toContain('<lastmod>2024-12-01T00:00:00.000Z</lastmod>');
   });
 
   it('handles empty entries list', () => {

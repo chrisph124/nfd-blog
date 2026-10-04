@@ -42,9 +42,9 @@ describe('Alert (molecule blok wrapper)', () => {
     expect(el).toHaveAttribute('role', 'note');
     expect(container.querySelector('[data-slot="alert-title"]')).toHaveTextContent('TL;DR');
     expect(el).toHaveClass(
-      'border-emerald-600',
+      'border-emerald-700',
       'text-white',
-      'bg-emerald-600',
+      'bg-emerald-700',
       'dark:bg-emerald-200',
       'dark:border-emerald-200'
     );
@@ -60,7 +60,7 @@ describe('Alert (molecule blok wrapper)', () => {
   });
 
   it.each([
-    ['emerald', ['border-emerald-600', 'text-white', 'bg-emerald-600', 'dark:bg-emerald-200', 'dark:border-emerald-200']],
+    ['emerald', ['border-emerald-700', 'text-white', 'bg-emerald-700', 'dark:bg-emerald-200', 'dark:border-emerald-200']],
     ['primary', ['border-primary-600', 'text-white', 'bg-primary-600', 'dark:bg-primary-200', 'dark:border-primary-200']],
     ['secondary', ['border-secondary-600', 'text-white', 'bg-secondary-600', 'dark:bg-secondary-200', 'dark:border-secondary-200']],
     ['cyan', ['border-cyan-800', 'text-white', 'bg-cyan-800', 'dark:bg-cyan-800', 'dark:border-cyan-800']],

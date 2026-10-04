@@ -149,12 +149,14 @@ describe('generateMetadata ([...slug])', () => {
     expect(metadata.description).toBe('');
   });
 
-  it('returns empty object when story not found', async () => {
+  // The browser applies this segment's metadata on hydration, so `{}` would
+  // replace the 404's server-rendered title with the home page title.
+  it('titles a missing story as the 404 page', async () => {
     mockFetchStory.mockResolvedValue(null);
 
     const metadata = await generateMetadata({ params: makeParams(['missing']) });
 
-    expect(metadata).toEqual({});
+    expect(metadata.title).toBe('Page not found');
   });
 });
 

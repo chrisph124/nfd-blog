@@ -2,6 +2,7 @@ import { getStoryblokApi, fetchStoryBySlug, getSiteUrl, storyblokVersion } from 
 import { StoryblokStory } from '@storyblok/react/rsc';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
+import { metadata as notFoundMetadata } from '@/app/not-found';
 import type { StoryblokLinksResponse, StoryblokStoryLink } from '@/types/storyblok';
 import Post from '@/components/templates/Post';
 import {
@@ -26,7 +27,9 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const result = await fetchStoryBySlug(slug);
-  if (!result) return {};
+  // The client applies this segment's metadata on hydration, so a missing story
+  // must carry the 404 title or the tab falls back to the home title.
+  if (!result) return notFoundMetadata;
 
   const { story, source } = result;
   const content = story.content;

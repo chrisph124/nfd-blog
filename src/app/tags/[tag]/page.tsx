@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { metadata as notFoundMetadata } from '@/app/not-found';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getSiteUrl } from '@/lib/storyblok';
@@ -25,7 +26,9 @@ export async function generateMetadata({ params }: TagPageProps): Promise<Metada
   if (!result.ok) return {};
 
   const name = resolveTagName(result.census, tag);
-  if (!name) return {};
+  // The page 404s for this slug; without the 404 title here, hydration restores
+  // the home title (same as `[slug]`).
+  if (!name) return notFoundMetadata;
 
   const siteUrl = getSiteUrl();
   const title = `${name} — Articles & Notes`;
