@@ -1,8 +1,9 @@
 name: Release
 
-# Safety net for version tags pushed without a release: publish one with auto-generated
-# notes, sectioned by .github/release.yml. A release that already exists (for example one
-# created with curated notes via `gh release create <tag> --target <sha>`) is left untouched.
+# Safety net for version tags pushed without a release: open a draft with auto-generated
+# notes, sectioned by .github/release.yml, to rewrite in the release-notes template before
+# publishing (generated items carry PR references, which published notes omit). A release
+# that already exists is left untouched.
 on:
   push:
     tags: ['v*']
@@ -24,5 +25,6 @@ jobs:
             echo "Release $TAG already exists; leaving its notes untouched."
             exit 0
           fi
-          if [[ "$TAG" == *-* ]]; then kind=--prerelease; else kind=--latest; fi
-          gh release create "$TAG" --repo "$REPO" --verify-tag --generate-notes --title "$TAG" "$kind"
+          flags=(--draft --verify-tag --generate-notes --title "$TAG")
+          if [[ "$TAG" == *-* ]]; then flags+=(--prerelease); fi
+          gh release create "$TAG" --repo "$REPO" "${flags[@]}"
