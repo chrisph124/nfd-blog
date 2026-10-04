@@ -3,7 +3,7 @@
 import { memo } from 'react';
 import dynamic from 'next/dynamic';
 import { renderRichText } from '@storyblok/react';
-import { StoryblokServerComponent, type SbRichTextNode } from '@storyblok/react/rsc';
+import { StoryblokServerComponent, type StoryblokRichTextNode } from '@storyblok/react/rsc';
 import { makeStoryblokEditable } from '@/lib/storyblok-utils';
 import type { ContentCardBlockBlok } from '@/types/storyblok';
 import { cn } from '@/lib/utils';
@@ -58,7 +58,7 @@ const ContentCardBlock = memo(({ blok }: ContentCardBlockProps) => {
         <div
           className="prose prose-lg max-w-none prose-headings:font-bold prose-p:text-gray-700 dark:prose-p:text-gray-200"
           dangerouslySetInnerHTML={{
-            __html: renderRichText(description as unknown as SbRichTextNode<string>),
+            __html: renderRichText(description as unknown as StoryblokRichTextNode),
           }}
         />
       )}
