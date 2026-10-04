@@ -1,0 +1,37 @@
+name: PR labels
+
+# Labels each PR from its conventional-commit title so .github/release.yml can sort it
+# into a release-notes section. Dependabot PRs already carry `dependencies`.
+on:
+  pull_request:
+    types: [opened, edited, reopened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  label:
+    if: github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Label from title
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          shopt -s nocasematch
+          case "$TITLE" in
+            Promote*|'chore(release)'*)                  label=release ;;
+            *'!:'*|*'BREAKING CHANGE'*)                  label=breaking-change ;;
+            *'(security)'*)                              label=security ;;
+            feat*)                                       label=enhancement ;;
+            fix*)                                        label=bug ;;
+            perf*)                                       label=performance ;;
+            'chore(deps'*|'build(deps'*)                 label=dependencies ;;
+            docs*)                                       label=documentation ;;
+            chore*|refactor*|ci*|build*|test*|style*)    label=maintenance ;;
+            *) echo "No conventional prefix in title; leaving labels as they are."; exit 0 ;;
+          esac
+          gh pr edit "$PR" --repo "$REPO" --add-label "$label"
