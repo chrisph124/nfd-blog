@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render } from '@testing-library/react';
 import type { RichtextBlok } from '@/types/storyblok';
-import type { SbRichTextNode } from '@storyblok/react/rsc';
+import type { StoryblokRichTextNode } from '@storyblok/react/rsc';
 
 // Mock renderRichText from @storyblok/react/rsc
 vi.mock('@storyblok/react/rsc', () => ({
@@ -71,7 +71,7 @@ describe('Richtext Component', () => {
           ]
         }
       ]
-    } as unknown as SbRichTextNode<string>,
+    } as unknown as StoryblokRichTextNode,
   };
 
   describe('Rendering', () => {
@@ -138,7 +138,7 @@ describe('Richtext Component', () => {
       const blokWithEmptyContent: RichtextBlok = {
         _uid: 'test-richtext-empty-content',
         component: 'richtext',
-        content: {} as unknown as SbRichTextNode<string>,
+        content: {} as unknown as StoryblokRichTextNode,
       };
 
       const { container } = render(<Richtext blok={blokWithEmptyContent} />);
@@ -167,7 +167,7 @@ describe('Richtext Component', () => {
       const blokWithDocContent: RichtextBlok = {
         _uid: 'test-richtext-empty-render',
         component: 'richtext',
-        content: { type: 'doc', content: [] } as unknown as SbRichTextNode<string>,
+        content: { type: 'doc', content: [] } as unknown as StoryblokRichTextNode,
       };
 
       const { container } = render(<Richtext blok={blokWithDocContent} />);
@@ -191,7 +191,7 @@ describe('Richtext Component', () => {
               ]
             }
           ]
-        } as unknown as SbRichTextNode<string>
+        } as unknown as StoryblokRichTextNode
       };
 
       render(<Richtext blok={blokWithRenderableContent} />);
@@ -206,7 +206,7 @@ describe('Richtext Component', () => {
     it('applies storyblokEditable props to the element', () => {
       const customBlok = createTestRichtextBlok({
         _uid: 'custom-richtext-uid',
-        content: mockBlok.content as unknown as SbRichTextNode<string>,
+        content: mockBlok.content as unknown as StoryblokRichTextNode,
       });
 
       render(<Richtext blok={customBlok} />);
@@ -219,7 +219,7 @@ describe('Richtext Component', () => {
     it('handles different blok UIDs correctly', () => {
       const anotherBlok = createTestRichtextBlok({
         _uid: 'another-richtext-uid',
-        content: mockBlok.content as unknown as SbRichTextNode<string>,
+        content: mockBlok.content as unknown as StoryblokRichTextNode,
       });
 
       render(<Richtext blok={anotherBlok} />);
@@ -266,7 +266,7 @@ describe('Richtext Component', () => {
               ]
             }
           ]
-        } as unknown as SbRichTextNode<string>
+        } as unknown as StoryblokRichTextNode
       };
 
       expect(() => render(<Richtext blok={complexContentBlok} />)).not.toThrow();
@@ -291,7 +291,7 @@ describe('Richtext Component', () => {
               ]
             }
           ]
-        } as unknown as SbRichTextNode<string>
+        } as unknown as StoryblokRichTextNode
       };
 
       expect(() => render(<Richtext blok={blokWithSpecialChars} />)).not.toThrow();
@@ -324,7 +324,7 @@ describe('Richtext Component', () => {
               ]
             }
           ]
-        } as unknown as SbRichTextNode<string>
+        } as unknown as StoryblokRichTextNode
       };
 
       expect(() => render(<Richtext blok={deepNestedBlok} />)).not.toThrow();
@@ -350,7 +350,7 @@ describe('Richtext Component', () => {
                 ]
               }
             ]
-          } as unknown as SbRichTextNode<string>,
+          } as unknown as StoryblokRichTextNode,
         };
 
         const { container } = render(<Richtext blok={blok} />);
@@ -368,7 +368,7 @@ describe('Richtext Component', () => {
           content: {
             type: 'doc',
             content: []
-          } as unknown as SbRichTextNode<string>,
+          } as unknown as StoryblokRichTextNode,
         };
 
         expect(() => render(<Richtext blok={blok} />)).not.toThrow();
@@ -391,7 +391,7 @@ describe('Richtext Component', () => {
                 ]
               }
             ]
-          } as unknown as SbRichTextNode<string>,
+          } as unknown as StoryblokRichTextNode,
         };
 
         render(<Richtext blok={blok} />);
@@ -417,7 +417,7 @@ describe('Richtext Component', () => {
                 ]
               }
             ]
-          } as unknown as SbRichTextNode<string>,
+          } as unknown as StoryblokRichTextNode,
         };
 
         const { container } = render(<Richtext blok={blok} />);
@@ -447,7 +447,7 @@ describe('Richtext Component', () => {
                 ]
               }
             ]
-          } as unknown as SbRichTextNode<string>,
+          } as unknown as StoryblokRichTextNode,
         };
 
         const { container } = render(<Richtext blok={blok} />);
@@ -473,7 +473,7 @@ describe('Richtext Component', () => {
                 ]
               }
             ]
-          } as unknown as SbRichTextNode<string>,
+          } as unknown as StoryblokRichTextNode,
         };
 
         render(<Richtext blok={blok} />);
@@ -501,7 +501,7 @@ describe('Richtext Component', () => {
                 ]
               }
             ]
-          } as unknown as SbRichTextNode<string>,
+          } as unknown as StoryblokRichTextNode,
         };
 
         const { container } = render(<Richtext blok={blok} />);
@@ -529,7 +529,7 @@ describe('Richtext Component', () => {
                 ]
               }
             ]
-          } as unknown as SbRichTextNode<string>,
+          } as unknown as StoryblokRichTextNode,
         };
 
         const { container } = render(<Richtext blok={blok} />);
@@ -559,7 +559,7 @@ describe('Richtext Component', () => {
                 ]
               }
             ]
-          } as unknown as SbRichTextNode<string>,
+          } as unknown as StoryblokRichTextNode,
         };
 
         render(<Richtext blok={blok} />);
@@ -596,7 +596,7 @@ describe('Richtext Component', () => {
                 ]
               }
             ]
-          } as unknown as SbRichTextNode<string>,
+          } as unknown as StoryblokRichTextNode,
         };
 
         const { container } = render(<Richtext blok={blok} />);
