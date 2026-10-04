@@ -1,23 +1,23 @@
-# Sections for GitHub's auto-generated release notes. Titles and order match the
-# release-notes template; .github/workflows/pr-labels.yml labels each PR from its
-# conventional-commit title. A PR lands in the first category whose label it has.
+# Sections for GitHub's auto-generated release notes, matching the release-notes template.
+# .github/workflows/pr-labels.yml labels each PR from its conventional-commit title;
+# a PR lands in the first category whose label it has.
 changelog:
   exclude:
     labels:
       - release
       - skip-changelog
   categories:
-    - title: 💥 Breaking Changes
+    - title: ⚠️ Breaking changes
       labels: [breaking-change]
-    - title: ✨ Features & Improvements
+    - title: ✨ Added
       labels: [enhancement]
-    - title: 🐛 Bug Fixes
-      labels: [bug]
-    - title: ⚡ Performance
+    - title: ⚡ Improved
       labels: [performance]
+    - title: 🐛 Fixed
+      labels: [bug]
     - title: 🔒 Security
       labels: [security]
-    - title: ⚙️ Maintenance & Dependencies
+    - title: 🧰 Under the hood
       labels: [maintenance, dependencies, documentation, github_actions, javascript]
-    - title: 📦 Other Changes
+    - title: 📦 Other changes
       labels: ['*']
