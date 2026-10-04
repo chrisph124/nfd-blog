@@ -11,7 +11,10 @@ export default function NotFound() {
         </p>
         <Link
           href="/"
-          className="inline-block bg-primary-600 hover:bg-primary-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+          // `!` beats the unlayered global `a:not(...)` link color/underline (same
+          // pattern as TAG_PILL_CLASSES). The brand scale inverts in dark theme, so
+          // dark:bg-primary-200 is the dark fill there.
+          className="inline-block bg-primary-600 hover:bg-primary-700 dark:bg-primary-200 dark:hover:bg-primary-200/90 text-white! no-underline! font-semibold px-6 py-3 rounded-lg transition-colors"
         >
           Go back home
         </Link>

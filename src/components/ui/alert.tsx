@@ -10,10 +10,12 @@ const alertVariants = cva(
       // Filled accent card: a colored fill + matching border, with white
       // text/icon/title on top. The brand scale inverts across themes, so the
       // *-600 (light theme) / dark:*-200 (dark theme) fill stays a dark-enough
-      // surface for white text to keep contrast in both modes.
+      // surface for white text to keep contrast in both modes. Emerald is the
+      // exception: white on emerald-600 measures 3.77:1 (fails AA), so its light
+      // fill is emerald-700 (5.48:1).
       color: {
         emerald:
-          "border-emerald-600 text-white bg-emerald-600 dark:bg-emerald-200 dark:border-emerald-200",
+          "border-emerald-700 text-white bg-emerald-700 dark:bg-emerald-200 dark:border-emerald-200",
         primary:
           "border-primary-600 text-white bg-primary-600 dark:bg-primary-200 dark:border-primary-200",
         secondary:

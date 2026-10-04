@@ -674,14 +674,18 @@ h6, .h6 {
     transition: opacity 0.35s ease;
   }
 
-  /* Hover: overlay slides up to cover; excerpt row expands, pushing title+date up. */
-  .post-poster:hover .post-poster__overlay {
+  /* Hover or keyboard focus: overlay slides up to cover; excerpt row expands,
+     pushing title+date up. */
+  .post-poster:hover .post-poster__overlay,
+  .post-poster:focus-within .post-poster__overlay {
     transform: translateY(0);
   }
-  .post-poster:hover .post-poster__excerpt-reveal {
+  .post-poster:hover .post-poster__excerpt-reveal,
+  .post-poster:focus-within .post-poster__excerpt-reveal {
     grid-template-rows: 1fr;
   }
-  .post-poster:hover .post-poster__excerpt {
+  .post-poster:hover .post-poster__excerpt,
+  .post-poster:focus-within .post-poster__excerpt {
     opacity: 1;
   }
 }
