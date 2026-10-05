@@ -18,6 +18,7 @@ import {
 import { codeTabsToCodeSamples, codeTabsToMarkdown } from './code-tabs-to-markdown';
 import { AUTHOR_NAME } from '@/lib/seo/author';
 import { stripEntities } from '@/lib/seo/strip-entities';
+import { getModifiedDate, getPublishedDate } from '@/lib/post-dates';
 import { isYouTubeUrl } from '@/lib/youtube';
 
 type PostBodyBlok =
@@ -51,8 +52,8 @@ function yamlScalar(value: string): string {
 export function buildFrontMatter(story: StoryblokStory<PostBlok>, siteUrl: string): string {
   const content = story.content;
   const slug = story.full_slug.replace(/^posts\//, '');
-  const datePublished = story.first_published_at || story.created_at;
-  const dateModified = story.published_at || datePublished;
+  const datePublished = getPublishedDate(story);
+  const dateModified = getModifiedDate(story);
   const title = stripEntities(content.title?.trim() || story.name);
   const excerpt = stripEntities(content.excerpt?.trim() || '');
   const tags = (story.tag_list ?? []).map((tag) => yamlScalar(stripEntities(tag)));

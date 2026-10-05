@@ -2,6 +2,7 @@ import { fetchAllPosts, getSiteUrl, getStoryblokApi, storyblokVersion } from '@/
 import { buildSitemap, type SitemapEntry } from '@/lib/sitemap/build-sitemap';
 import type { StoryblokLinksResponse, StoryblokStoryLink } from '@/types/storyblok';
 import { stripEntities } from '@/lib/seo/strip-entities';
+import { getModifiedDate } from '@/lib/post-dates';
 
 export const revalidate = 3600;
 
@@ -29,9 +30,7 @@ export async function GET() {
     const newestPostDate = posts[0]?.first_published_at ?? undefined;
     home.lastmod = newestPostDate;
 
-    const firstPublishedByFullSlug = new Map(
-      posts.map((story) => [story.full_slug, story.first_published_at ?? undefined])
-    );
+    const modifiedByFullSlug = new Map(posts.map((story) => [story.full_slug, getModifiedDate(story)]));
     const heroBySlug = new Map<string, { loc: string; title?: string }>();
     for (const story of posts) {
       const slug = story.full_slug.replace(/^posts\//, '');
@@ -58,7 +57,7 @@ export async function GET() {
         const hero = heroBySlug.get(slug);
         return {
           loc: `${siteUrl}/${slug}`,
-          lastmod: firstPublishedByFullSlug.get(link.slug),
+          lastmod: modifiedByFullSlug.get(link.slug),
           changefreq: 'monthly',
           images: hero ? [hero] : undefined,
         };

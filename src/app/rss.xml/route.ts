@@ -1,6 +1,7 @@
 import { fetchAllPosts, getSiteUrl } from '@/lib/storyblok';
 import { buildRssFeed, type FeedItem } from '@/lib/rss/build-feed';
 import { stripEntities } from '@/lib/seo/strip-entities';
+import { getModifiedDate, getPublishedDate } from '@/lib/post-dates';
 
 export const revalidate = 3600;
 
@@ -13,8 +14,8 @@ export async function GET() {
     const content = story.content;
     const title = content.title?.trim() || story.name;
     const description = content.excerpt?.trim() || content.og_description?.trim() || '';
-    const publishedAt = story.first_published_at || story.published_at || story.created_at;
-    const modifiedAt = story.published_at || publishedAt;
+    const publishedAt = getPublishedDate(story);
+    const modifiedAt = getModifiedDate(story);
     return {
       title: stripEntities(title),
       slug,

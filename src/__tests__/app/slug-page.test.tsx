@@ -341,6 +341,35 @@ describe('generateMetadata — date fallback branches', () => {
   });
 });
 
+describe('post modified date ignores a later republish', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGetSiteUrl.mockReturnValue('https://example.com');
+  });
+
+  it.each([
+    ['without updated_on, the first publish', undefined, '2026-04-08T00:00:00.000Z'],
+    ['with updated_on, the revision date', '2026-09-01 00:00', '2026-09-01T00:00:00.000Z'],
+  ])('%s', async (_label, updatedOn, expected) => {
+    const base = createMockPostStory();
+    const story = {
+      ...base,
+      published_at: '2026-08-05T07:04:35.000Z',
+      first_published_at: '2026-04-08T00:00:00.000Z',
+      content: { ...base.content, updated_on: updatedOn },
+    };
+    mockFetchStoryBySlug.mockResolvedValue({ story, source: 'posts' });
+
+    const metadata = await generateMetadata({ params: makeParams('my-post') });
+    const { container } = render(await DynamicPage({ params: makeParams('my-post') }));
+    const script = container.querySelector('script[type="application/ld+json"]');
+    const jsonLd = JSON.parse(script!.innerHTML.replaceAll(String.raw`\u003c`, '<'));
+
+    expect(metadata.other?.['article:modified_time']).toBe(expected);
+    expect(jsonLd.dateModified).toBe(expected);
+  });
+});
+
 describe('DynamicPage — title/description fallbacks in post JSON-LD', () => {
   beforeEach(() => {
     vi.clearAllMocks();

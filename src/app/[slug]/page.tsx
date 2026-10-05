@@ -15,6 +15,7 @@ import { getTagCensus, buildTagLinks } from '@/lib/tags';
 import { escapeJsonLd } from '@/lib/seo/json-ld-escape';
 import { AUTHOR_NAME, AUTHOR_SAME_AS } from '@/lib/seo/author';
 import { stripEntities } from '@/lib/seo/strip-entities';
+import { getModifiedDate, getPublishedDate } from '@/lib/post-dates';
 
 export const revalidate = 86400; // Revalidate every 24 hours as fallback; webhook (/api/revalidate) handles real-time updates on publish
 
@@ -79,8 +80,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 
   if (isPost) {
-    const datePublished = story.first_published_at || story.created_at;
-    const dateModified = story.published_at || datePublished;
+    const datePublished = getPublishedDate(story);
+    const dateModified = getModifiedDate(story);
     const articleOther: Record<string, string | string[]> = {
       'article:published_time': datePublished,
       'article:modified_time': dateModified,
@@ -108,8 +109,8 @@ export default async function DynamicPage({ params }: Readonly<PageProps>) {
   const siteUrl = getSiteUrl();
 
   if (source === 'posts' && story.content.component === 'post') {
-    const datePublished = story.first_published_at || story.created_at;
-    const dateModified = story.published_at || datePublished;
+    const datePublished = getPublishedDate(story);
+    const dateModified = getModifiedDate(story);
     const title = stripEntities(story.content.title?.trim() || story.name);
     const description = stripEntities(story.content.excerpt?.trim() || '');
 

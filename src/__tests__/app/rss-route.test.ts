@@ -130,16 +130,16 @@ describe('GET /rss.xml', () => {
     expect(body).toContain('<item>');
   });
 
-  it('uses first_published_at as modifiedAt when published_at is null (line 17 || branch)', async () => {
+  it('dates lastBuildDate by the first publish, not a later republish', async () => {
     mockFetchAllPosts.mockResolvedValue([
       createPost({
         first_published_at: '2024-03-01T00:00:00.000Z',
-        published_at: null as unknown as string,
+        published_at: '2024-08-05T07:04:35.000Z',
         created_at: '2024-02-01T00:00:00.000Z',
       }),
     ]);
 
     const body = await (await GET()).text();
-    expect(body).toContain('<item>');
+    expect(body).toContain('<lastBuildDate>Fri, 01 Mar 2024 00:00:00 GMT</lastBuildDate>');
   });
 });
