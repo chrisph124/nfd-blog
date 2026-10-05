@@ -59,7 +59,7 @@
     "@vitejs/plugin-react": "~6.1.1",
     "@vitest/coverage-v8": "~4.1.11",
     "concurrently": "^10.0.5",
-    "dotenv": "~17.4.2",
+    "dotenv": "~18.0.4",
     "eslint": "~9",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
