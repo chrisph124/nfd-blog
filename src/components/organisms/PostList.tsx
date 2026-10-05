@@ -1,6 +1,7 @@
 import { getStoryblokApi, storyblokVersion } from '@/lib/storyblok';
 import PostListClient from './PostListClient';
 import type { PostListBlok, StoryblokStory, PostBlok } from '@/types/storyblok';
+import { toPostCard } from '@/lib/post-card';
 
 interface PostListProps {
   blok: PostListBlok;
@@ -51,7 +52,7 @@ export default async function PostList({ blok }: Readonly<PostListProps>) {
 
   return (
     <PostListClient
-      initialPosts={result.stories}
+      initialPosts={result.stories.map(toPostCard)}
       perPage={perPage}
       hasMore={result.hasMore}
     />

@@ -2,20 +2,23 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import PostList from '@/components/organisms/PostList';
 import type { PostListBlok, StoryblokStory, PostBlok } from '@/types/storyblok';
+import type { PostCardData } from '@/lib/post-card';
+
+const mockClientProps = vi.fn();
 
 // Mock PostListClient
 vi.mock('@/components/organisms/PostListClient', () => ({
-  default: ({ initialPosts, perPage, hasMore }: {
-    initialPosts: StoryblokStory<PostBlok>[];
-    perPage: number;
-    hasMore: boolean;
-  }) => (
-    <div data-testid="post-list-client">
-      <div data-testid="initial-posts-count">{initialPosts.length}</div>
-      <div data-testid="per-page">{perPage}</div>
-      <div data-testid="has-more">{hasMore.toString()}</div>
-    </div>
-  ),
+  default: (props: { initialPosts: PostCardData[]; perPage: number; hasMore: boolean }) => {
+    mockClientProps(props);
+    const { initialPosts, perPage, hasMore } = props;
+    return (
+      <div data-testid="post-list-client">
+        <div data-testid="initial-posts-count">{initialPosts.length}</div>
+        <div data-testid="per-page">{perPage}</div>
+        <div data-testid="has-more">{hasMore.toString()}</div>
+      </div>
+    );
+  },
 }));
 
 // Mock Storyblok API
@@ -107,6 +110,19 @@ describe('PostList Server Component', () => {
         page: 1,
       });
     });
+  });
+
+  it('hands the client card data without post bodies', async () => {
+    const post = createMockPost(1);
+    post.content.body = [{ _uid: 'm', component: 'markdown', content: 'word '.repeat(450) }];
+    mockGet.mockResolvedValue({ data: { stories: [post] }, headers: { total: '1' } });
+
+    render(await PostList({ blok: { _uid: 'test-uid', component: 'post_list' } }));
+
+    const [{ initialPosts }] = mockClientProps.mock.calls[0] as [{ initialPosts: PostCardData[] }];
+    expect(initialPosts[0]).not.toHaveProperty('content');
+    expect(JSON.stringify(initialPosts)).not.toContain('markdown');
+    expect(initialPosts[0]).toMatchObject({ href: '/post-1', readingTime: '3 min read' });
   });
 
   describe('Custom posts_per_page', () => {

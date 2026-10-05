@@ -2,12 +2,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import CardList from '@/components/organisms/CardList';
 import type { StoryblokStory, PostBlok } from '@/types/storyblok';
+import type { PostCardData } from '@/lib/post-card';
 
 // Mock the Card component
 vi.mock('@/components/molecules/Card', () => ({
-  default: ({ story }: { story: StoryblokStory<PostBlok> }) => (
-    <div data-testid={`card-${story.uuid}`}>
-      {story.content.title}
+  default: ({ post }: { post: PostCardData }) => (
+    <div data-testid={`card-${post.uuid}`}>
+      {post.title}
     </div>
   ),
 }));

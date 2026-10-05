@@ -3,24 +3,23 @@
 import { memo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import type { StoryblokStory, PostBlok } from '@/types/storyblok';
-import { cn, getStoryReadingTime, formatDate } from '@/lib/utils';
+import type { PostCardData } from '@/lib/post-card';
+import { cn, formatDate } from '@/lib/utils';
 
 interface CardProps {
-  story: StoryblokStory<PostBlok>;
+  post: PostCardData;
   priority?: boolean;
   className?: string;
   style?: React.CSSProperties;
 }
 
 interface CardMetaProps {
-  createdAt?: string;
-  body?: unknown[];
+  date: string;
+  readingTime: string;
 }
 
-const CardMeta = memo(({ createdAt, body }: CardMetaProps) => {
-  const formattedDate = createdAt ? formatDate(createdAt) : '';
-  const readingTime = getStoryReadingTime(body);
+const CardMeta = memo(({ date, readingTime }: CardMetaProps) => {
+  const formattedDate = formatDate(date);
 
   if (!formattedDate && !readingTime) return null;
 
@@ -35,12 +34,8 @@ const CardMeta = memo(({ createdAt, body }: CardMetaProps) => {
 
 CardMeta.displayName = 'CardMeta';
 
-const Card = memo(({ story, priority = false, className, style }: CardProps) => {
-  const { content, full_slug, created_at } = story;
-  const { featured_image, title = '', excerpt, body } = content;
-
-  // Strip "posts/" prefix to get root-level URL (e.g., "posts/my-post" -> "my-post")
-  const postSlug = full_slug.replace(/^posts\//, '');
+const Card = memo(({ post, priority = false, className, style }: CardProps) => {
+  const { href, title, excerpt, image, date, readingTime } = post;
 
   // Black image-poster: image fills the card, content overlays the bottom; the
   // whole card is one link and content stays in the DOM (a11y + SEO). Reveal and
@@ -58,15 +53,15 @@ const Card = memo(({ story, priority = false, className, style }: CardProps) => 
       style={style} // carries --reveal-i
     >
       <Link
-        href={`/${postSlug}`}
+        href={href}
         aria-label={title || 'Read post'}
         className="absolute inset-0 z-30 focus-visible:outline-none"
       />
 
-      {featured_image?.filename && (
+      {image && (
         <Image
-          src={featured_image.filename}
-          alt={featured_image.alt || title}
+          src={image.src}
+          alt={image.alt}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-105"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 25vw"
@@ -88,7 +83,7 @@ const Card = memo(({ story, priority = false, className, style }: CardProps) => 
             {title}
           </h2>
 
-          <CardMeta createdAt={created_at} body={body} />
+          <CardMeta date={date} readingTime={readingTime} />
         </div>
 
         {excerpt && (

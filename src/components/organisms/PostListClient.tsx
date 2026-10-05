@@ -2,16 +2,16 @@
 
 import { useState } from 'react';
 import Card from '@/components/molecules/Card';
-import type { StoryblokStory, PostBlok } from '@/types/storyblok';
+import type { PostCardData } from '@/lib/post-card';
 
 interface PostListClientProps {
-  initialPosts: StoryblokStory<PostBlok>[];
+  initialPosts: PostCardData[];
   perPage: number;
   hasMore: boolean;
 }
 
 interface ApiResponse {
-  stories: StoryblokStory<PostBlok>[];
+  posts: PostCardData[];
   total: number;
 }
 
@@ -20,7 +20,7 @@ export default function PostListClient({
   perPage,
   hasMore: initialHasMore,
 }: Readonly<PostListClientProps>) {
-  const [posts, setPosts] = useState<StoryblokStory<PostBlok>[]>(initialPosts);
+  const [posts, setPosts] = useState<PostCardData[]>(initialPosts);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
@@ -42,7 +42,7 @@ export default function PostListClient({
       const data: ApiResponse = await response.json();
 
       setPosts((prev) => {
-        const newPosts = [...prev, ...data.stories];
+        const newPosts = [...prev, ...data.posts];
         setHasMore(newPosts.length < data.total);
         return newPosts;
       });
@@ -59,10 +59,10 @@ export default function PostListClient({
   return (
     <div className="flex flex-col gap-6 max-w-[1280px] px-4 md:px-8 lg:px-12 xl:px-5 mx-auto">
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {posts.map((story, index) => (
+        {posts.map((post, index) => (
           <Card
-            key={story.uuid}
-            story={story}
+            key={post.uuid}
+            post={post}
             priority={index === 0}
             // First card is the LCP element: transform-only reveal, no opacity gate.
             className={index === 0 ? 'post-card-reveal-lcp' : 'post-card-reveal'}

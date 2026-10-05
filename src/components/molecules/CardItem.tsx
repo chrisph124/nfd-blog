@@ -5,6 +5,7 @@ import { makeStoryblokEditable } from '@/lib/storyblok-utils';
 import { getStoryblokApi, storyblokVersion } from '@/lib/storyblok';
 import type { CardItemBlok, StoryblokStory, PostBlok } from '@/types/storyblok';
 import Card from './Card';
+import { toPostCard } from '@/lib/post-card';
 import { CardSkeleton } from '@/components/atoms/Skeleton';
 
 interface CardItemProps {
@@ -84,7 +85,7 @@ export default function CardItem({ blok }: Readonly<CardItemProps>) {
 
   return (
     <div {...makeStoryblokEditable(blok)}>
-      <Card story={story} />
+      <Card post={toPostCard(story)} />
     </div>
   );
 }

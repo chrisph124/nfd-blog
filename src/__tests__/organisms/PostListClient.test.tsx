@@ -1,44 +1,24 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import PostListClient from '@/components/organisms/PostListClient';
-import type { StoryblokStory, PostBlok } from '@/types/storyblok';
+import type { PostCardData } from '@/lib/post-card';
 
 // Mock Card component
 vi.mock('@/components/molecules/Card', () => ({
-  default: ({ story }: { story: StoryblokStory<PostBlok> }) => (
-    <div data-testid={`card-${story.uuid}`}>{story.name}</div>
+  default: ({ post }: { post: PostCardData }) => (
+    <div data-testid={`card-${post.uuid}`}>{post.title}</div>
   ),
 }));
 
 // Mock fetch
 global.fetch = vi.fn();
 
-const createMockPost = (id: number): StoryblokStory<PostBlok> => ({
-  id,
+const createMockPost = (id: number): PostCardData => ({
   uuid: `uuid-${id}`,
-  name: `Post ${id}`,
-  slug: `post-${id}`,
-  full_slug: `posts/post-${id}`,
-  created_at: '2025-01-01T00:00:00.000Z',
-  published_at: '2025-01-01T00:00:00.000Z',
-  first_published_at: '2025-01-01T00:00:00.000Z',
-  content: {
-    _uid: `content-${id}`,
-    component: 'post',
-    title: `Post ${id} Title`,
-  },
-  position: 0,
-  tag_list: ['test'],
-  is_startpage: false,
-  parent_id: null,
-  meta_data: null,
-  group_id: 'group-1',
-  release_id: null,
-  lang: 'en',
-  path: `/posts/post-${id}`,
-  alternates: [],
-  default_full_slug: null,
-  translated_slugs: null,
+  href: `/post-${id}`,
+  title: `Post ${id}`,
+  date: '2025-01-01T00:00:00.000Z',
+  readingTime: '1 min read',
 });
 
 describe('PostListClient', () => {
@@ -100,7 +80,7 @@ describe('PostListClient', () => {
       (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
         ok: true,
         json: async () => ({
-          stories: nextPagePosts,
+          posts: nextPagePosts,
           total: 10,
         }),
       });
@@ -133,7 +113,7 @@ describe('PostListClient', () => {
       (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
         ok: true,
         json: async () => ({
-          stories: nextPagePosts,
+          posts: nextPagePosts,
           total: 10,
         }),
       });
@@ -183,7 +163,7 @@ describe('PostListClient', () => {
       (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
         ok: true,
         json: async () => ({
-          stories: nextPagePosts,
+          posts: nextPagePosts,
           total: 2,
         }),
       });
@@ -268,7 +248,7 @@ describe('PostListClient', () => {
         .mockResolvedValueOnce({
           ok: true,
           json: async () => ({
-            stories: [createMockPost(2)],
+            posts: [createMockPost(2)],
             total: 10,
           }),
         });

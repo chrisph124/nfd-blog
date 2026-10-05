@@ -1,5 +1,6 @@
 import Card from '@/components/molecules/Card';
 import type { PostBlok, StoryblokStory } from '@/types/storyblok';
+import { toPostCard } from '@/lib/post-card';
 
 interface PostGridProps {
   posts: StoryblokStory<PostBlok>[];
@@ -25,7 +26,7 @@ export default function PostGrid({ posts }: Readonly<PostGridProps>) {
       {posts.map((story, index) => (
         <Card
           key={story.uuid}
-          story={story}
+          post={toPostCard(story)}
           priority={index === 0}
           // First card is the LCP element: transform-only reveal, no opacity gate.
           className={index === 0 ? 'post-card-reveal-lcp' : 'post-card-reveal'}

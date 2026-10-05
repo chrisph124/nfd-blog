@@ -2,11 +2,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import CardItem from '@/components/molecules/CardItem';
 import type { CardItemBlok, StoryblokStory, PostBlok } from '@/types/storyblok';
+import type { PostCardData } from '@/lib/post-card';
 
 // Mock Card component
 vi.mock('@/components/molecules/Card', () => ({
-  default: ({ story }: { story: StoryblokStory<PostBlok> }) => (
-    <div data-testid="mock-card">{story.content.title}</div>
+  default: ({ post }: { post: PostCardData }) => (
+    <div data-testid="mock-card">{post.title}</div>
   ),
 }));
 
