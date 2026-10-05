@@ -3,6 +3,8 @@ import Link from "next/link";
 import { StoryblokServerComponent } from "@/lib/storyblok-utils";
 import { getStoryReadingTime, formatDate } from "@/lib/utils";
 import ReadingProgressBar from "@/components/atoms/ReadingProgress";
+import PostEndings, { type RelatedPostCards } from "@/components/organisms/PostEndings";
+import { AUTHOR_NAME } from "@/lib/seo/author";
 import type { PostBlok } from "@/types/storyblok";
 import type { TagLink } from "@/lib/tags";
 
@@ -23,12 +25,52 @@ interface PostProps {
    */
   tagLinks?: Map<string, TagLink>;
   createdAt?: string;
+  /** Set only when the editor recorded a real revision; shares JSON-LD's value. */
+  updatedAt?: string;
+  related?: RelatedPostCards;
 }
 
-export default function Post({ blok, tags = [], tagLinks, createdAt }: Readonly<PostProps>) {
+interface PostBylineProps {
+  createdAt?: string;
+  updatedAt?: string;
+  readingTime: string;
+}
+
+const PostByline = ({ createdAt, updatedAt, readingTime }: PostBylineProps) => {
+  const items = [
+    <span key="author">
+      By <Link href="/about">{AUTHOR_NAME}</Link>
+    </span>,
+    createdAt && (
+      <time key="published" dateTime={createdAt}>
+        {formatDate(createdAt)}
+      </time>
+    ),
+    updatedAt && (
+      <span key="updated">
+        Updated <time dateTime={updatedAt}>{formatDate(updatedAt)}</time>
+      </span>
+    ),
+    <span key="reading">{readingTime}</span>,
+  ].filter(Boolean);
+
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm font-medium text-gray-500 dark:text-gray-600">
+      {items.map((item, index) => [
+        index > 0 && (
+          <span key={`separator-${index}`} aria-hidden="true">
+            •
+          </span>
+        ),
+        item,
+      ])}
+    </div>
+  );
+};
+
+export default function Post({ blok, tags = [], tagLinks, createdAt, updatedAt, related }: Readonly<PostProps>) {
   const { title = "", featured_image, excerpt, body } = blok;
   const readingTime = getStoryReadingTime(body);
-  const formattedDate = createdAt ? formatDate(createdAt) : '';
 
   // Normalize to trimmed, de-duplicated display names so the pill lookup key
   // matches the census map (keyed by trimmed name in `buildTagLinks`) and a
@@ -69,13 +111,7 @@ export default function Post({ blok, tags = [], tagLinks, createdAt }: Readonly<
             </h1>
           )}
 
-          {(formattedDate || readingTime) && (
-            <div className="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-600">
-              {formattedDate && <span>{formattedDate}</span>}
-              {formattedDate && readingTime && <span>•</span>}
-              {readingTime && <span>{readingTime}</span>}
-            </div>
-          )}
+          <PostByline createdAt={createdAt} updatedAt={updatedAt} readingTime={readingTime} />
         </header>
 
         {featured_image?.filename && (
@@ -112,6 +148,7 @@ export default function Post({ blok, tags = [], tagLinks, createdAt }: Readonly<
           )}
         </div>
       </article>
+      <PostEndings related={related} />
     </>
   );
 }

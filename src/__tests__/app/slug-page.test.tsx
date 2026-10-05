@@ -6,14 +6,16 @@ const mockFetchStoryBySlug = vi.fn();
 const mockGetSiteUrl = vi.fn<() => string>();
 const mockGetStoryblokApi = vi.fn();
 const mockNotFound = vi.fn();
+const mockFetchAllPosts = vi.fn();
+const mockPostProps = vi.fn();
 
 vi.mock('@/lib/storyblok', () => ({
   fetchStoryBySlug: (...args: unknown[]) => mockFetchStoryBySlug(...args),
   getSiteUrl: () => mockGetSiteUrl(),
   getStoryblokApi: () => mockGetStoryblokApi(),
-  // The post branch now reads the tag census (via getTagCensus → fetchAllPosts).
-  // An empty result yields ok:false, so pills fail open to plain spans.
-  fetchAllPosts: () => Promise.resolve([]),
+  // The post branch reads the tag census (via getTagCensus → fetchAllPosts).
+  // The default empty result yields ok:false, so pills fail open to plain spans.
+  fetchAllPosts: () => mockFetchAllPosts(),
   storyblokVersion: 'published',
 }));
 
@@ -26,9 +28,10 @@ vi.mock('@storyblok/react/rsc', () => ({
 }));
 
 vi.mock('@/components/templates/Post', () => ({
-  default: ({ blok }: { blok: PostBlok }) => (
-    <div data-testid="post-template">{blok.title}</div>
-  ),
+  default: (props: { blok: PostBlok }) => {
+    mockPostProps(props);
+    return <div data-testid="post-template">{props.blok.title}</div>;
+  },
 }));
 
 vi.mock('next/navigation', () => ({
@@ -104,6 +107,10 @@ const createMockPostStory = (): StoryblokStory<PostBlok> => ({
 });
 
 const makeParams = (slug: string) => Promise.resolve({ slug });
+
+beforeEach(() => {
+  mockFetchAllPosts.mockResolvedValue([]);
+});
 
 describe('DynamicPage', () => {
   beforeEach(() => {
@@ -367,6 +374,31 @@ describe('post modified date ignores a later republish', () => {
 
     expect(metadata.other?.['article:modified_time']).toBe(expected);
     expect(jsonLd.dateModified).toBe(expected);
+  });
+});
+
+describe('post page hands Post one updated date and related posts', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGetSiteUrl.mockReturnValue('https://example.com');
+  });
+
+  it('passes the JSON-LD modified date as updatedAt and never relates the post to itself', async () => {
+    const base = createMockPostStory();
+    const story = { ...base, content: { ...base.content, updated_on: '2024-09-01 00:00' } };
+    const sibling = { ...createMockPostStory(), uuid: 'uuid-sibling', full_slug: 'posts/sibling' };
+    mockFetchStoryBySlug.mockResolvedValue({ story, source: 'posts' });
+    mockFetchAllPosts.mockResolvedValue([story, sibling]);
+
+    const { container } = render(await DynamicPage({ params: makeParams('my-post') }));
+    const script = container.querySelector('script[type="application/ld+json"]');
+    const jsonLd = JSON.parse(script!.innerHTML.replaceAll(String.raw`\u003c`, '<'));
+    const props = mockPostProps.mock.calls[0][0];
+
+    expect(props.updatedAt).toBe(jsonLd.dateModified);
+    expect(props.updatedAt).toBe('2024-09-01T00:00:00.000Z');
+    expect(props.related.tag).toEqual({ name: 'tech', slug: 'tech' });
+    expect(props.related.posts.map((post: { href: string }) => post.href)).toEqual(['/sibling']);
   });
 });
 

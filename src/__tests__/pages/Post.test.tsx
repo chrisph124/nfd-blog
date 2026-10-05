@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, within } from '@testing-library/react';
 import Post from '@/components/templates/Post';
 import type { PostBlok } from '@/types/storyblok';
 
@@ -162,7 +162,7 @@ describe('Post', () => {
       const blok = createMockBlok();
       render(<Post blok={blok} />);
 
-      const image = screen.getByRole('img');
+      const image = within(screen.getByRole('article')).getByRole('img');
       expect(image).toBeInTheDocument();
       expect(image).toHaveAttribute('alt', 'Test featured image');
       expect(image).toHaveAttribute('data-src', 'https://a.storyblok.com/f/test.jpg');
@@ -172,7 +172,7 @@ describe('Post', () => {
       const blok = createMockBlok({ featured_image: undefined });
       render(<Post blok={blok} />);
 
-      const images = screen.queryAllByRole('img');
+      const images = within(screen.getByRole('article')).queryAllByRole('img');
       expect(images).toHaveLength(0);
     });
   });
@@ -407,7 +407,7 @@ describe('Post', () => {
       });
       render(<Post blok={blok} />);
 
-      const image = screen.getByRole('img');
+      const image = within(screen.getByRole('article')).getByRole('img');
       expect(image).toBeInTheDocument();
       expect(image).toHaveAttribute('alt', 'Fallback Alt Text');
       expect(image).toHaveAttribute('data-src', 'https://a.storyblok.com/f/test.jpg');
@@ -557,6 +557,69 @@ describe('Post', () => {
     });
   });
 
+  describe('Byline and post endings', () => {
+    const relatedPosts = ['one', 'two', 'three'].map((slug) => ({
+      uuid: `uuid-${slug}`,
+      href: `/${slug}`,
+      title: `Post ${slug}`,
+      date: '2025-02-01T00:00:00.000Z',
+      readingTime: '5 min read',
+    }));
+
+    it('credits the author with a link to the About page', () => {
+      render(<Post blok={createMockBlok()} />);
+
+      expect(screen.getByRole('link', { name: 'Hieu (Chris) Pham' })).toHaveAttribute('href', '/about');
+    });
+
+    it('shows no Updated date unless the post was revised', () => {
+      render(<Post blok={createMockBlok()} createdAt="2025-01-15T10:00:00.000Z" />);
+
+      expect(screen.queryByText(/Updated/)).not.toBeInTheDocument();
+    });
+
+    it('shows the Updated date from the same value as the structured data', () => {
+      const { container } = render(
+        <Post blok={createMockBlok()} createdAt="2025-01-15T10:00:00.000Z" updatedAt="2025-09-01T00:00:00.000Z" />
+      );
+
+      expect(screen.getByText(/Updated/)).toBeInTheDocument();
+      expect(container.querySelector('time[datetime="2025-09-01T00:00:00.000Z"]')).toBeInTheDocument();
+    });
+
+    it('ends with an author card and an RSS link', () => {
+      render(<Post blok={createMockBlok()} />);
+
+      const authorCard = screen.getByRole('complementary', { name: 'About the author' });
+      expect(within(authorCard).getByRole('link', { name: 'About me' })).toHaveAttribute('href', '/about');
+      expect(screen.getByRole('link', { name: 'Follow via RSS' })).toHaveAttribute('href', '/rss.xml');
+    });
+
+    it('lists related posts under the shared tag', () => {
+      render(<Post blok={createMockBlok()} related={{ tag: { name: 'AI Agents', slug: 'ai-agents' }, posts: relatedPosts }} />);
+
+      const section = screen.getByRole('region', { name: 'More on AI Agents' });
+      expect(within(section).getByRole('link', { name: 'AI Agents' })).toHaveAttribute('href', '/tags/ai-agents');
+      expect(within(within(section).getByRole('list')).getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual([
+        '/one',
+        '/two',
+        '/three',
+      ]);
+    });
+
+    it('titles the list Latest posts when no tag has another post', () => {
+      render(<Post blok={createMockBlok()} related={{ posts: relatedPosts }} />);
+
+      expect(screen.getByRole('heading', { level: 2, name: 'Latest posts' })).toBeInTheDocument();
+    });
+
+    it('omits the related list without related posts', () => {
+      render(<Post blok={createMockBlok()} />);
+
+      expect(screen.queryByRole('region')).not.toBeInTheDocument();
+    });
+  });
+
   // ============================================================================
   // ReadingProgress Integration Tests
   // ============================================================================
@@ -673,7 +736,7 @@ describe('Post', () => {
 
       // All elements should be present
       expect(screen.getByTestId('reading-progress')).toBeInTheDocument();
-      expect(screen.getByRole('img')).toBeInTheDocument();
+      expect(within(screen.getByRole('article')).getByRole('img')).toBeInTheDocument();
       expect(screen.getByTestId('blok-block-1')).toBeInTheDocument();
     });
 
@@ -717,7 +780,7 @@ describe('Post', () => {
       });
       render(<Post blok={blok} />);
 
-      const image = screen.getByRole('img');
+      const image = within(screen.getByRole('article')).getByRole('img');
       expect(image).toHaveAttribute('aria-label', 'Descriptive alt text for accessibility');
       expect(screen.getByTestId('reading-progress')).toBeInTheDocument();
     });
