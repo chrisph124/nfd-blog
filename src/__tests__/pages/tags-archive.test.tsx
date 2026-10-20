@@ -132,6 +132,7 @@ describe('generateMetadata (tags/[tag])', () => {
 
     expect(metadata.title).toBe('AI — Articles & Notes');
     expect(metadata.alternates?.canonical).toBe('/tags/ai');
+    expect(metadata.robots).toEqual({ index: false, follow: true });
     expect(metadata.openGraph?.url).toBe('https://example.com/tags/ai');
     expect(metadata.openGraph?.type).toBe('website');
   });

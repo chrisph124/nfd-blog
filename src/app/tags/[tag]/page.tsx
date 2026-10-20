@@ -38,6 +38,7 @@ export async function generateMetadata({ params }: TagPageProps): Promise<Metada
     title,
     description,
     alternates: { canonical: `/tags/${tag}` },
+    robots: { index: false, follow: true },
     openGraph: {
       type: 'website',
       url: `${siteUrl}/tags/${tag}`,
