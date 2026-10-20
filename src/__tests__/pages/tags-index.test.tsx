@@ -108,6 +108,7 @@ describe('generateMetadata (tags index)', () => {
 
     expect(metadata.title).toBe('Tags — Browse by Topic');
     expect(metadata.alternates?.canonical).toBe('/tags');
+    expect(metadata.robots).toEqual({ index: false, follow: true });
     expect(metadata.openGraph?.url).toBe('https://example.com/tags');
     expect(metadata.openGraph?.type).toBe('website');
   });
