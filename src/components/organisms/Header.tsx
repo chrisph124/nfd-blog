@@ -17,7 +17,6 @@ import {
   AccordionContent,
 } from "@/components/ui/accordion";
 
-// Mobile nav item text classes
 const MOBILE_NAV_ITEM_TEXT_BASE = "font-medium text-[24px] leading-[28px]";
 const MOBILE_NAV_ITEM_ACTIVE_TEXT = "text-primary-800";
 const MOBILE_NAV_ITEM_INACTIVE_TEXT = "text-gray-800";
@@ -25,10 +24,11 @@ const MOBILE_NAV_ITEM_INACTIVE_TEXT = "text-gray-800";
 const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) => {
   const title = blok.title ?? "The Folio";
   const navItems = blok.nav_items ?? [];
+  // Up to two flat links fit the bar from 360px, so the sheet only serves narrower phones.
+  const inlineNav = navItems.length <= 2 && navItems.every((item) => !item.sub_items?.length);
 
   const pathname = usePathname();
-  // Radix Sheet (Dialog) owns focus-trap, scroll-lock, Escape and backdrop; we
-  // only track open state so the burger animates and links can close the sheet.
+  // Radix Sheet owns focus trap, scroll lock and Escape; we only track open state.
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const getIsActive = (itemUrl: string) =>
@@ -41,40 +41,35 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
         {...makeStoryblokEditable(blok)}
         className="w-full sticky top-0 bg-background z-50 shadow-sm dark:shadow-white/20"
       >
-        <div className="flex h-[70px] lg:h-[90px] items-center w-full max-w-[1280px] px-4 md:px-8 lg:px-12 xl:px-5 mx-auto">
-          {/* Logo Section — while the Sheet is open it is covered by the modal
-              overlay; navigating home unmounts the Header and closes the menu. */}
+        <div className="flex h-[70px] lg:h-[90px] items-center w-full max-w-7xl px-4 md:px-8 lg:px-12 xl:px-5 mx-auto">
+          {/* No SheetClose needed: the open Sheet's overlay covers the logo. */}
           <Link href="/">
             <span className="h4 logo-font text-transparent bg-linear-to-r from-primary-700 to-secondary-900 bg-clip-text">
               {title}
             </span>
           </Link>
 
-          {/* Navigation - Desktop only */}
-          <NavBar navItems={navItems} />
+          <NavBar navItems={navItems} inline={inlineNav} />
 
-          {/* Mobile/Tablet: Spacer */}
-          <div className="flex-grow lg:hidden" />
+          <div className={cn("flex-grow lg:hidden", inlineNav && "min-[360px]:hidden")} />
 
-          {/* Theme Toggle - Mobile, next to burger */}
-          <div className="lg:hidden flex items-center mr-4">
+          <div className={cn("lg:hidden flex items-center mr-4", inlineNav && "min-[360px]:mr-0 min-[360px]:ml-2")}>
             <ThemeToggle />
           </div>
 
-          {/* Mobile Menu Toggle */}
-          <MenuToggle
-            onClick={() => setIsMenuOpen((open) => !open)}
-            isOpen={isMenuOpen}
-          />
+          <div className={cn("flex lg:hidden", inlineNav && "min-[360px]:hidden")}>
+            <MenuToggle
+              onClick={() => setIsMenuOpen((open) => !open)}
+              isOpen={isMenuOpen}
+            />
+          </div>
 
-          {/* Theme Toggle - Desktop only */}
           <div className="hidden lg:flex ml-6 items-center shrink-0">
             <ThemeToggle />
           </div>
         </div>
       </header>
 
-      {/* Mobile Menu — Radix Sheet (Dialog) */}
       <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
         <SheetContent
           side="right"
@@ -92,7 +87,6 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
               return (
                 <div key={item._uid}>
                   {hasSubItems ? (
-                    // Item with sub-items → Accordion (single, collapsible)
                     <Accordion type="single" collapsible>
                       <AccordionItem value={item._uid} className="border-b-0">
                         <AccordionTrigger
@@ -133,7 +127,6 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
                       </AccordionItem>
                     </Accordion>
                   ) : (
-                    // Regular item → link that closes the sheet on navigation
                     <SheetClose asChild>
                       <Link
                         href={itemUrl}
@@ -153,7 +146,6 @@ const Header = memo(({ blok }: Readonly<StoryblokComponentProps<HeaderBlok>>) =>
                     </SheetClose>
                   )}
 
-                  {/* Divider after each item */}
                   {index < navItems.length - 1 && (
                     <div className="bg-gray-300 h-[1px] w-full" />
                   )}
