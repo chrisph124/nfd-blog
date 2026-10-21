@@ -1,14 +1,14 @@
 "use client";
 
 import { ReactNode } from "react";
-import { getStoryblokApi } from "@/lib/storyblok";
+import { initStoryblokClient } from "@/lib/storyblok-client";
 
 interface StoryblokProviderProps {
   children: ReactNode;
 }
 
 export default function StoryblokProvider({ children }: StoryblokProviderProps) {
-  // Initialize Storyblok for client-side (visual editor support)
-  getStoryblokApi();
+  // Registers the few components client components render as nested bloks.
+  initStoryblokClient();
   return children;
 }
