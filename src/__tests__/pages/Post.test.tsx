@@ -566,6 +566,15 @@ describe('Post', () => {
       readingTime: '5 min read',
     }));
 
+    it('shows page actions under the title and again after the body only when the URL is known', () => {
+      const { unmount } = render(<Post blok={createMockBlok()} url="https://www.notesof.dev/my-post" />);
+      expect(screen.getAllByRole('button', { name: 'Copy prompt' })).toHaveLength(2);
+      unmount();
+
+      render(<Post blok={createMockBlok()} />);
+      expect(screen.queryByRole('button', { name: 'Copy prompt' })).not.toBeInTheDocument();
+    });
+
     it('shows the published date and no Updated date', () => {
       const { container } = render(<Post blok={createMockBlok()} createdAt="2025-01-15T10:00:00.000Z" />);
 

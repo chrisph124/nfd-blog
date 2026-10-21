@@ -130,6 +130,12 @@ export default function Post({ blok, tags = [], tagLinks, createdAt, related, ur
               ))}
             </section>
           )}
+
+          {url && (
+            <div className="w-full max-w-5xl">
+              <PostActions url={url} title={title} align="start" />
+            </div>
+          )}
         </div>
       </article>
       <PostEndings related={related} />
