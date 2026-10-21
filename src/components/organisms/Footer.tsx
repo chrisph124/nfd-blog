@@ -34,7 +34,8 @@ const Footer = memo(({ blok }: StoryblokComponentProps<FooterBlok>) => {
                 key={link.name}
                 href={link.url}
                 target={link.url.startsWith('http') ? '_blank' : undefined}
-                rel={link.url.startsWith('http') ? 'noopener noreferrer' : undefined}
+                // `me` ties the profiles to the author for search engines; JSON-LD `sameAs` lists the same URLs.
+                rel={link.url.startsWith('http') ? 'me noopener noreferrer' : undefined}
                 // Padding with a matching negative margin gives a 44px tap area without changing the spacing.
                 className="-m-2.5 p-2.5 text-foreground! hover:text-primary-700! transition-colors"
                 aria-label={link.name}

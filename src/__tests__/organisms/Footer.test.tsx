@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import Footer from '@/components/organisms/Footer';
 import type { SVGProps } from 'react';
 import type { FooterBlok } from '@/types/storyblok';
+import { AUTHOR_SAME_AS } from '@/lib/seo/author';
 
 vi.mock('@storyblok/react/rsc', () => ({
   storyblokEditable: vi.fn(() => ({ 'data-testid': 'storyblok-editable' })),
@@ -101,13 +102,16 @@ describe('Footer', () => {
       expect(githubLink).toHaveAttribute('href', 'https://github.com/chrisph124');
     });
 
-    it('adds security attributes to external links', () => {
+    it('marks the JSON-LD sameAs profiles as the author\'s own, opened safely in a new tab', () => {
       const blok = createMockBlok();
       render(<Footer blok={blok} />);
 
-      const githubLink = screen.getByLabelText('GitHub');
-      expect(githubLink).toHaveAttribute('target', '_blank');
-      expect(githubLink).toHaveAttribute('rel', 'noopener noreferrer');
+      const profiles = ['GitHub', 'LinkedIn'].map((name) => screen.getByLabelText(name));
+      expect(profiles.map((link) => link.getAttribute('href'))).toEqual(AUTHOR_SAME_AS);
+      for (const link of profiles) {
+        expect(link).toHaveAttribute('target', '_blank');
+        expect(link).toHaveAttribute('rel', 'me noopener noreferrer');
+      }
     });
 
     it('mailto link does not have target or rel', () => {

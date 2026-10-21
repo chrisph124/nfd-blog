@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import type { StoryblokStory, PageBlok, PostBlok, HeroBlockBlok } from '@/types/storyblok';
-import { AUTHOR_EMAIL, AUTHOR_JOB_TITLES, AUTHOR_TOPICS } from '@/lib/seo/author';
+import { AUTHOR_EMAIL, AUTHOR_JOB_TITLES, AUTHOR_NAME, AUTHOR_SAME_AS, AUTHOR_TOPICS } from '@/lib/seo/author';
 
 const mockFetchStoryBySlug = vi.fn();
 const mockGetSiteUrl = vi.fn<() => string>();
@@ -217,12 +217,8 @@ describe('DynamicPage — about slug (personJsonLd path)', () => {
     expect(parsed.image).toBe('https://a.storyblok.com/f/1/author.png');
     expect(script!.innerHTML).not.toContain(AUTHOR_EMAIL);
 
-    // The visible profile links and the JSON-LD sameAs come from one list.
-    const profileHrefs = screen
-      .getAllByRole('link')
-      .map((link) => link.getAttribute('href'))
-      .filter((href) => href?.startsWith('http'));
-    expect(profileHrefs).toEqual(parsed.sameAs);
+    expect(parsed.sameAs).toEqual(AUTHOR_SAME_AS);
+    expect(screen.getByRole('region', { name: 'About the author' })).toHaveTextContent(AUTHOR_NAME);
   });
 });
 
