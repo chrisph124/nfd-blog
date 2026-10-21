@@ -115,6 +115,7 @@ describe('Revalidate API Route', () => {
       expect(revalidatePath).toHaveBeenCalledWith('/api/md/when-the-interface-starts-with-intent');
       // Other posts list this one under related posts, so they must not keep a dead link.
       expect(revalidatePath).toHaveBeenCalledWith('/[slug]', 'page');
+      expect(revalidatePath).toHaveBeenCalledWith('/tags/[tag]', 'page');
       // The public /sitemap.xml is a proxy rewrite; its cache key is the destination.
       expect(revalidatePath).toHaveBeenCalledWith('/xml-sitemap');
       expect(consoleSpy).toHaveBeenCalledWith(

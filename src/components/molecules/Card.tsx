@@ -41,7 +41,7 @@ const Card = memo(({ post, priority = false, className, style }: CardProps) => {
   return (
     <article
       className={cn(
-        'post-poster group relative w-full aspect-16/10 overflow-hidden rounded-xl bg-black',
+        'post-poster group relative w-full overflow-hidden rounded-xl bg-black',
         'transition-shadow duration-200 hover:shadow-md',
         // overflow-hidden clips the overlay link's outline, so the focus ring is drawn on the article.
         'has-[a:focus-visible]:ring-[3px] has-[a:focus-visible]:ring-ring has-[a:focus-visible]:ring-offset-2 has-[a:focus-visible]:ring-offset-background',

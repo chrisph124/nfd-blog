@@ -887,7 +887,7 @@ pre.shiki code {
   border: none;
   border-radius: 0.4rem;
   cursor: pointer;
-  transition: opacity 0.15s ease, color 0.15s ease, transform 0.15s ease;
+  transition: color 0.15s ease, transform 0.15s ease;
 }
 
 [data-copy-btn]:hover,

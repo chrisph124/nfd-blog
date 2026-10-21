@@ -6,7 +6,7 @@ Use this for every pull request that changes UI, content rendering or discovery 
 
 - [ ] Captures at 1440×900, 768×1024 and 375×812, in **both** light and dark mode, for every changed page.
 - [ ] Reflow at 320 px: no horizontal scroll, no clipped or overlapping text.
-- [ ] `node ~/.claude/skills/ak-frontend-design/scripts/render-check.mjs <url>` (or an equivalent) reports no overflow, clipping or small targets.
+- [ ] a render check at 375, 768 and 1440 px (for example the AgentKit `render-check.mjs` script, or an equivalent) reports no overflow, clipping or small targets.
 
 ## Rubric
 
@@ -31,7 +31,7 @@ Score each area 0–3 with evidence and keep it at 2 or above:
 
 ## Discovery surfaces
 
-- [ ] `node ~/.claude/skills/ak-enhance-ux-ax/scripts/check-discovery-surfaces.mjs <base-url> --site-origin https://www.notesof.dev --sample 10` exits 0.
+- [ ] the discovery-surface check (AgentKit `check-discovery-surfaces.mjs <base-url> --site-origin https://www.notesof.dev --sample 10`, or an equivalent) exits 0.
 - [ ] A new public route appears in the sitemap (`/xml-sitemap`) and has a canonical. Revalidation (`src/app/api/revalidate/route.ts`) covers it.
 - [ ] Post changes keep the markdown twin (`/{slug}.md`), `llms.txt`, `llms-full.txt` and RSS in sync.
 - [ ] Modified dates come from `src/lib/post-dates.ts`, never `published_at`.
