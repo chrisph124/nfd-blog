@@ -602,20 +602,35 @@ h6, .h6 {
   }
 }
 
-/* Post poster card: image background + overlaid content.
-   Mobile (<768) & tablet (768–1279), plus any no-hover device = static end-state:
-   a single flat 85% overlay (scrim hidden), title+date+excerpt all visible.
-   Desktop (>=1280 + hover):
-     default = image visible; only the bottom scrim gradient darkens the title band;
+/* Post card.
+   Static state (below 1280, and any no-hover device): a stacked card, the full
+   16:9 cover on top and title+date+excerpt on the black panel below it, so the
+   cover is never hidden behind text.
+   Desktop (>=1280 + hover) = poster: the cover fills the 16:10 card,
+     default = only the bottom scrim gradient darkens the title band;
      hover   = a flat 75% overlay slides up to cover, the excerpt row expands and
                title+date slide up to reveal it; reverses on mouse-out.
-   The reveal threshold (1280px) matches the grid/clamp breakpoint so tablet width
-   never collapses content, even on a hover-capable (desktop-resized) browser. */
+   The 1280px threshold matches the grid/clamp breakpoint, so tablet width never
+   collapses content, even on a hover-capable (desktop-resized) browser. */
 
-/* Scrim is desktop-only: in the pre-hover state the sliding overlay is parked away,
-   so this bottom gradient is what keeps the title/date legible over the image. It
-   is hidden on mobile/tablet, where the single 85% overlay already darkens the card
-   — rendering both there stacked to ~99% opaque. */
+.post-poster {
+  display: flex;
+  flex-direction: column;
+  aspect-ratio: auto;
+}
+
+.post-poster__media {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+
+.post-poster__content {
+  position: relative;
+  flex-grow: 1;
+}
+
+/* Scrim and sliding overlay belong to the desktop poster only. */
 .post-poster__scrim {
   display: none;
   background: linear-gradient(
@@ -628,8 +643,12 @@ h6, .h6 {
 }
 
 .post-poster__overlay {
-  background: rgba(0, 0, 0, 1); /* mobile/tablet: single flat 85% layer */
-  opacity: 85%;
+  display: none;
+}
+
+/* Dark page and dark card panels would otherwise merge at the card edge. */
+[data-theme="dark"] .post-poster {
+  border: 1px solid rgb(255 255 255 / 0.12);
 }
 
 /* Excerpt reveal wrapper: height animates via grid-template-rows (0fr<->1fr).
@@ -647,19 +666,34 @@ h6, .h6 {
   opacity: 1;
 }
 
-@media (min-width: 768px) {
-  .post-poster__overlay {
-    background: rgba(0, 0, 0, 0.85); /* tablet static 85% */
+/* No-hover screens at 1280+ keep the stacked card; three excerpt lines match
+   the other static widths. */
+@media (hover: none) and (min-width: 1280px) {
+  .post-poster__excerpt {
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
   }
 }
 
 @media (hover: hover) and (min-width: 1280px) {
   /* Desktop: reveal the scrim (pre-hover legibility) and park the full overlay
      below the card, sliding it up on hover to a flat 75% cover. */
+  .post-poster {
+    display: block;
+    aspect-ratio: 16 / 10;
+  }
+  .post-poster__media,
+  .post-poster__content {
+    position: absolute;
+  }
+  .post-poster__media {
+    aspect-ratio: auto;
+  }
   .post-poster__scrim {
     display: block;
   }
   .post-poster__overlay {
+    display: block;
     background: rgba(0, 0, 0, 0.75);
     opacity: 1;
     transform: translateY(100%);
