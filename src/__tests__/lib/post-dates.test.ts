@@ -42,6 +42,7 @@ describe('post dates never follow published_at', () => {
     ['ISO value with an offset', '2026-09-01T12:30:00+07:00', FIRST_PUBLISHED, '2026-09-01T05:30:00.000Z', '2026-09-01T05:30:00.000Z'],
     ['unparseable value', 'next week', FIRST_PUBLISHED, undefined, FIRST_PUBLISHED],
     ['value before the first publish', '2026-04-01 00:00', FIRST_PUBLISHED, undefined, FIRST_PUBLISHED],
+    ['future value, likely a typo', '2999-01-01 00:00', FIRST_PUBLISHED, undefined, FIRST_PUBLISHED],
     ['never published, unset', undefined, null, undefined, CREATED],
   ])('%s', (_label, updatedOn, firstPublished, expectedUpdated, expectedModified) => {
     const story = createStory(updatedOn, firstPublished);
