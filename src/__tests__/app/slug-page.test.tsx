@@ -402,7 +402,7 @@ describe('post page hands Post one updated date and related posts', () => {
     mockGetSiteUrl.mockReturnValue('https://example.com');
   });
 
-  it('passes the JSON-LD modified date as updatedAt and never relates the post to itself', async () => {
+  it('keeps the revision date in JSON-LD only and never relates the post to itself', async () => {
     const base = createMockPostStory();
     const story = { ...base, content: { ...base.content, updated_on: '2024-09-01 00:00' } };
     const sibling = { ...createMockPostStory(), uuid: 'uuid-sibling', full_slug: 'posts/sibling' };
@@ -414,8 +414,8 @@ describe('post page hands Post one updated date and related posts', () => {
     const jsonLd = JSON.parse(script!.innerHTML.replaceAll(String.raw`\u003c`, '<'));
     const props = mockPostProps.mock.calls[0][0];
 
-    expect(props.updatedAt).toBe(jsonLd.dateModified);
-    expect(props.updatedAt).toBe('2024-09-01T00:00:00.000Z');
+    expect(jsonLd.dateModified).toBe('2024-09-01T00:00:00.000Z');
+    expect(props).not.toHaveProperty('updatedAt');
     expect(props.url).toBe('https://example.com/my-post');
     expect(props.related.tag).toEqual({ name: 'tech', slug: 'tech' });
     expect(props.related.posts.map((post: { href: string }) => post.href)).toEqual(['/sibling']);

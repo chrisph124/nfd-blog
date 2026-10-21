@@ -18,8 +18,6 @@ interface PostProps {
   /** Precomputed by the page so Post stays synchronous and never reads the tag census. */
   tagLinks?: Map<string, TagLink>;
   createdAt?: string;
-  /** Set only when the editor recorded a real revision; shares JSON-LD's value. */
-  updatedAt?: string;
   related?: RelatedPostCards;
   /** Absolute canonical URL; page actions render only when it is known. */
   url?: string;
@@ -27,21 +25,15 @@ interface PostProps {
 
 interface PostMetaProps {
   createdAt?: string;
-  updatedAt?: string;
   readingTime: string;
 }
 
-const PostMeta = ({ createdAt, updatedAt, readingTime }: PostMetaProps) => {
+const PostMeta = ({ createdAt, readingTime }: PostMetaProps) => {
   const items = [
     createdAt && (
       <time key="published" dateTime={createdAt}>
         {formatDate(createdAt)}
       </time>
-    ),
-    updatedAt && (
-      <span key="updated">
-        Updated <time dateTime={updatedAt}>{formatDate(updatedAt)}</time>
-      </span>
     ),
     <span key="reading">{readingTime}</span>,
   ].filter(Boolean);
@@ -60,7 +52,7 @@ const PostMeta = ({ createdAt, updatedAt, readingTime }: PostMetaProps) => {
   );
 };
 
-export default function Post({ blok, tags = [], tagLinks, createdAt, updatedAt, related, url }: Readonly<PostProps>) {
+export default function Post({ blok, tags = [], tagLinks, createdAt, related, url }: Readonly<PostProps>) {
   const { title = "", featured_image, excerpt, body } = blok;
   const readingTime = getStoryReadingTime(body);
 
@@ -101,7 +93,7 @@ export default function Post({ blok, tags = [], tagLinks, createdAt, updatedAt, 
             </h1>
           )}
 
-          <PostMeta createdAt={createdAt} updatedAt={updatedAt} readingTime={readingTime} />
+          <PostMeta createdAt={createdAt} readingTime={readingTime} />
 
           {url && <PostActions url={url} title={title} />}
         </header>

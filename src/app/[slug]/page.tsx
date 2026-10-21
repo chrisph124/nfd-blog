@@ -22,7 +22,7 @@ import {
   AUTHOR_TOPICS,
 } from '@/lib/seo/author';
 import { stripEntities } from '@/lib/seo/strip-entities';
-import { getModifiedDate, getPublishedDate, getUpdatedDate } from '@/lib/post-dates';
+import { getModifiedDate, getPublishedDate } from '@/lib/post-dates';
 import { toPostCard } from '@/lib/post-card';
 
 export const revalidate = 86400; // Revalidate every 24 hours as fallback; webhook (/api/revalidate) handles real-time updates on publish
@@ -118,8 +118,7 @@ export default async function DynamicPage({ params }: Readonly<PageProps>) {
 
   if (source === 'posts' && story.content.component === 'post') {
     const datePublished = getPublishedDate(story);
-    const dateUpdated = getUpdatedDate(story);
-    const dateModified = dateUpdated ?? datePublished;
+    const dateModified = getModifiedDate(story);
     const title = stripEntities(story.content.title?.trim() || story.name);
     const description = stripEntities(story.content.excerpt?.trim() || '');
 
@@ -167,7 +166,6 @@ export default async function DynamicPage({ params }: Readonly<PageProps>) {
           tags={story.tag_list}
           tagLinks={tagLinks}
           createdAt={datePublished}
-          updatedAt={dateUpdated}
           related={related}
           url={`${siteUrl}/${slug}`}
         />
