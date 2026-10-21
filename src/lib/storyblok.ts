@@ -27,6 +27,7 @@ import { apiPlugin, storyblokInit } from '@storyblok/react/rsc';
 import type { PostBlok, PageBlok, StoryblokStory } from '@/types/storyblok';
 import { cache } from 'react';
 import { storyblokVersion } from './storyblok-version';
+import { storyblokApiOptions } from './storyblok-cache';
 
 // Re-export so existing imports from '@/lib/storyblok' keep working.
 export { storyblokVersion } from './storyblok-version';
@@ -64,9 +65,7 @@ export const getStoryblokApi = storyblokInit({
   accessToken: process.env.NEXT_PUBLIC_STORYBLOK_CONTENT_API_ACCESS_TOKEN as string,
   use: [apiPlugin],
   components,
-  apiOptions: {
-    region: 'eu'
-  },
+  apiOptions: storyblokApiOptions,
 });
 
 // ============================================================================
