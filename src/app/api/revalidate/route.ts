@@ -1,6 +1,7 @@
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 import { STORYBLOK_CACHE_TAG } from '@/lib/storyblok-cache';
+import { notifyIndexNow } from '@/lib/indexnow';
 
 export async function POST(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -85,6 +86,8 @@ export async function POST(request: NextRequest) {
     if (reload) {
       revalidateTag('posts', 'page');
     }
+
+    await notifyIndexNow(fullSlug);
 
     console.log('[revalidate]', {
       slug: fullSlug ?? null,
