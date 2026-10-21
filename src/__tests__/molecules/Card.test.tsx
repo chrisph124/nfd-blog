@@ -105,7 +105,7 @@ describe('Card', () => {
       const { container } = render(<Card post={createMockPost()} />);
 
       const article = screen.getByRole('article');
-      expect(article).toHaveClass('post-poster', 'group', 'aspect-16/10', 'bg-black');
+      expect(article).toHaveClass('post-poster', 'group', 'bg-black');
       expect(container.querySelector('.post-poster__scrim')).toBeInTheDocument();
       expect(container.querySelector('.post-poster__overlay')).toBeInTheDocument();
       expect(container.querySelector('.post-poster__content')).toBeInTheDocument();

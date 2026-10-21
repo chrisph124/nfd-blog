@@ -24,7 +24,7 @@ const Footer = memo(({ blok }: StoryblokComponentProps<FooterBlok>) => {
             notesof.dev
           </p>
 
-          {/* Hardcoded on purpose (ignores blok.copyright); ISR refreshes the year. */}
+          {/* Hardcoded on purpose (ignores blok.copyright). The year refreshes when a page regenerates; prerendered pages such as the 404 keep the build year until the next deploy. */}
           <p className="text-sm text-gray-500 text-balance">© {years} Hieu (Chris) Pham. All rights reserved.</p>
 
           <div className="flex gap-6 justify-center lg:justify-end">
