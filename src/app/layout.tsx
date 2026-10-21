@@ -38,7 +38,7 @@ const lora = Lora({
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
-  title: { default: SITE_TITLE, template: '%s | Notes of Dev' },
+  title: SITE_TITLE,
   description: SITE_DESCRIPTION,
   openGraph: {
     type: 'website',
