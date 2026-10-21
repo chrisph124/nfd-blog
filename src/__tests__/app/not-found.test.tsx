@@ -3,8 +3,8 @@ import { render, screen } from '@testing-library/react';
 import NotFound, { metadata } from '@/app/not-found';
 
 describe('NotFound', () => {
-  // Without its own title the 404 inherits the home page <title>; the layout
-  // template renders this as "Page not found | Notes of Dev".
+  // Without its own title the 404 inherits the home page <title>; the layout has no
+  // title template, so the tab reads "Page not found".
   it('exports its own page title', () => {
     expect(metadata.title).toBe('Page not found');
   });
