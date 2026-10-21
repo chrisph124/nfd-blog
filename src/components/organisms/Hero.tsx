@@ -31,8 +31,11 @@ interface HeroContentProps {
   hasImage: boolean;
 }
 
-const HeroImage = memo(({ image, position, imageType = "auto" }: HeroImageProps) => {
+const HeroImage = memo(({ image, position, imageType: rawImageType }: HeroImageProps) => {
   const { width, height } = getDimensionsFromStoryblokUrl(image.filename);
+  // Storyblok saves an untouched option as "", which must behave like the default, or the
+  // figure gets no width, reserves no space and the hero text jumps when the image loads.
+  const imageType = rawImageType || "auto";
 
   const isHorizontal = position === "horizontal" || position === "horizontal-reverse";
 
@@ -61,7 +64,8 @@ const HeroImage = memo(({ image, position, imageType = "auto" }: HeroImageProps)
   const getImageClasses = (): string => {
     return cn(
       "h-auto object-cover",
-      imageType === "auto" ? `w-[${width}px] max-w-full` : "w-full"
+      // `auto` keeps the intrinsic width from the `width` attribute, capped by the container.
+      imageType === "auto" ? "max-w-full" : "w-full"
     );
   };
 
@@ -232,7 +236,9 @@ const Hero = memo(({ blok }: HeroProps) => {
               alt={background_image.alt || ""}
               fill
               className="object-cover"
-              priority
+              preload
+              loading="eager"
+              fetchPriority="high"
               sizes="100vw"
             />
           </div>

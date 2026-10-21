@@ -321,6 +321,17 @@ describe('Hero', () => {
       expect(figure).toHaveClass('w-auto');
     });
 
+    it('treats the empty image_type Storyblok saves as auto, so the figure reserves its width', () => {
+      const blok = createMockBlok({
+        image: { id: 1, filename: 'https://a.storyblok.com/f/1/400x400/abc/portrait.webp', alt: 'Portrait' },
+        image_type: '' as HeroBlockBlok['image_type'],
+      });
+      render(<Hero blok={blok} />);
+
+      expect(screen.getByRole('figure')).toHaveClass('w-auto');
+      expect(screen.getByRole('img', { name: 'Portrait' })).not.toHaveClass('w-full');
+    });
+
     it('applies full width to content in horizontal layout with auto image type', () => {
       const blok = createMockBlok({
         position: 'horizontal',
@@ -408,7 +419,7 @@ describe('Hero', () => {
         const { container } = render(<Hero blok={blok} />);
 
         const img = container.querySelector('[data-testid="next-image"]');
-        expect(img).toHaveClass('h-auto', 'max-w-full', 'object-cover', 'w-[300px]');
+        expect(img).toHaveClass('h-auto', 'max-w-full', 'object-cover');
       });
 
       it('uses native dimensions for sizes attribute', () => {
