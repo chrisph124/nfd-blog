@@ -1,5 +1,3 @@
-"use client";
-
 import { memo } from "react";
 import { makeStoryblokEditable, StoryblokServerComponent } from "@/lib/storyblok-utils";
 import Image from "next/image";
