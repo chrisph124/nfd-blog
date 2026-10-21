@@ -37,20 +37,17 @@ CardMeta.displayName = 'CardMeta';
 const Card = memo(({ post, priority = false, className, style }: CardProps) => {
   const { href, title, excerpt, image, date, readingTime } = post;
 
-  // Black image-poster: image fills the card, content overlays the bottom; the
-  // whole card is one link and content stays in the DOM (a11y + SEO). Reveal and
-  // overlay behavior live in globals.css (.post-poster*).
+  // Reveal and overlay styles live in globals.css (.post-poster*); content stays in the DOM for a11y and SEO.
   return (
     <article
       className={cn(
         'post-poster group relative w-full aspect-16/10 overflow-hidden rounded-xl bg-black',
         'transition-shadow duration-200 hover:shadow-md',
-        // The overlay link's own outline is clipped by overflow-hidden, so the
-        // keyboard focus ring is drawn on the article as a box-shadow instead.
+        // overflow-hidden clips the overlay link's outline, so the focus ring is drawn on the article.
         'has-[a:focus-visible]:ring-[3px] has-[a:focus-visible]:ring-ring has-[a:focus-visible]:ring-offset-2 has-[a:focus-visible]:ring-offset-background',
-        className // carries post-card-reveal from the parent
+        className
       )}
-      style={style} // carries --reveal-i
+      style={style}
     >
       <Link
         href={href}
@@ -59,26 +56,25 @@ const Card = memo(({ post, priority = false, className, style }: CardProps) => {
       />
 
       {image && (
-        <Image
-          src={image.src}
-          alt={image.alt}
-          fill
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 25vw"
-          priority={priority}
-        />
+        <div className="post-poster__media absolute inset-0">
+          <Image
+            src={image.src}
+            alt={image.alt}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            sizes="(max-width: 767px) 100vw, (max-width: 1279px) 50vw, 400px"
+            priority={priority}
+          />
+        </div>
       )}
 
       <div className="post-poster__scrim absolute inset-x-0 bottom-0 h-2/3 pointer-events-none" />
       <div className="post-poster__overlay absolute inset-0 pointer-events-none" />
 
-      {/* No container `gap`: a collapsed excerpt reveal must reserve no space so
-          title+date stay flush at the bottom; the meta↔excerpt gap lives in the
-          excerpt's `pt-2`, inside the reveal, so it collapses too. */}
+      {/* No `gap` here: the collapsed excerpt must reserve no space, so its spacing is its own `pt-2`. */}
       <div className="post-poster__content absolute inset-x-0 bottom-0 z-20 p-4 flex flex-col pointer-events-none">
         <div className="flex flex-col gap-2">
-          {/* Important variant: the unlayered global `.h3` rule sets primary-900, which
-              a layered utility can't beat — so `!` holds primary-400 in light mode. */}
+          {/* `!` beats the unlayered global `.h3` color rule. */}
           <h2 className="h3 body-1 font-semibold line-clamp-3 text-primary-400!">
             {title}
           </h2>
@@ -87,8 +83,7 @@ const Card = memo(({ post, priority = false, className, style }: CardProps) => {
         </div>
 
         {excerpt && (
-          // text-white/90 is theme-invariant: `.subtitle-2` sets no color, so the
-          // excerpt would otherwise inherit black `--foreground` and vanish on the poster.
+          // `.subtitle-2` sets no color; without text-white/90 the excerpt inherits --foreground and vanishes.
           <div className="post-poster__excerpt-reveal">
             <p className="post-poster__excerpt subtitle-2 line-clamp-3 xl:line-clamp-5 text-white/90 pt-2">
               {excerpt}
