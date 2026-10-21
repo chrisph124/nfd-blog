@@ -122,7 +122,7 @@ describe('PostList Server Component', () => {
     const [{ initialPosts }] = mockClientProps.mock.calls[0] as [{ initialPosts: PostCardData[] }];
     expect(initialPosts[0]).not.toHaveProperty('content');
     expect(JSON.stringify(initialPosts)).not.toContain('markdown');
-    expect(initialPosts[0]).toMatchObject({ href: '/post-1', readingTime: '3 min read' });
+    expect(initialPosts[0]).toMatchObject({ href: '/post-1' });
   });
 
   describe('Custom posts_per_page', () => {

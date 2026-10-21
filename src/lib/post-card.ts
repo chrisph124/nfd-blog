@@ -15,7 +15,8 @@ export interface PostCardData {
 // Listings serialize this record instead of the story, so post bodies never
 // reach the client payload.
 export function toPostCard(story: StoryblokStory<PostBlok>): PostCardData {
-  const { title = '', excerpt, featured_image, body } = story.content;
+  const { excerpt, featured_image, body } = story.content;
+  const title = story.content.title?.trim() || story.name;
 
   return {
     uuid: story.uuid,

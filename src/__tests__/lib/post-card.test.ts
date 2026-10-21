@@ -60,6 +60,7 @@ describe('toPostCard', () => {
 
   it.each([
     ['root-level slug stays as is', createStory({ full_slug: 'my-post' }), { href: '/my-post' }],
+    ['missing title falls back to the story name', createStory({}, { title: '  ' }), { title: 'Story name' }],
     [
       'image alt falls back to the title',
       createStory({}, { featured_image: { id: 1, filename: 'https://a.storyblok.com/f/hero.jpg', alt: '' } }),
