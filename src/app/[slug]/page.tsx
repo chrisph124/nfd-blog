@@ -3,8 +3,9 @@ import { StoryblokStory } from '@storyblok/react/rsc';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { metadata as notFoundMetadata } from '@/app/not-found';
-import type { StoryblokLinksResponse, StoryblokStoryLink } from '@/types/storyblok';
+import type { HeroBlockBlok, StoryblokBlok, StoryblokLinksResponse, StoryblokStoryLink } from '@/types/storyblok';
 import Post from '@/components/templates/Post';
+import AuthorProfile from '@/components/organisms/AuthorProfile';
 import {
   buildBlogPostingJsonLd,
   buildPersonJsonLd,
@@ -13,7 +14,13 @@ import {
 import { extractPostContent } from '@/lib/llms/post-to-markdown';
 import { getTagCensus, buildTagLinks, selectRelatedPosts } from '@/lib/tags';
 import { escapeJsonLd } from '@/lib/seo/json-ld-escape';
-import { AUTHOR_BIO, AUTHOR_NAME, AUTHOR_SAME_AS } from '@/lib/seo/author';
+import {
+  AUTHOR_BIO,
+  AUTHOR_JOB_TITLES,
+  AUTHOR_NAME,
+  AUTHOR_SAME_AS,
+  AUTHOR_TOPICS,
+} from '@/lib/seo/author';
 import { stripEntities } from '@/lib/seo/strip-entities';
 import { getModifiedDate, getPublishedDate, getUpdatedDate } from '@/lib/post-dates';
 import { toPostCard } from '@/lib/post-card';
@@ -168,10 +175,16 @@ export default async function DynamicPage({ params }: Readonly<PageProps>) {
   }
 
   if (slug === 'about') {
+    const blocks: StoryblokBlok[] = story.content.body ?? [];
+    const hero = blocks.find((blok): blok is HeroBlockBlok => blok.component === 'hero_block');
+
     const personJsonLd = buildPersonJsonLd({
       siteUrl,
       name: AUTHOR_NAME,
       description: AUTHOR_BIO,
+      jobTitle: AUTHOR_JOB_TITLES,
+      imageUrl: hero?.image?.filename || undefined,
+      knowsAbout: AUTHOR_TOPICS,
       sameAs: AUTHOR_SAME_AS,
     });
 
@@ -182,6 +195,7 @@ export default async function DynamicPage({ params }: Readonly<PageProps>) {
           dangerouslySetInnerHTML={{ __html: escapeJsonLd(personJsonLd) }}
         />
         <StoryblokStory story={story} />
+        <AuthorProfile />
       </div>
     );
   }

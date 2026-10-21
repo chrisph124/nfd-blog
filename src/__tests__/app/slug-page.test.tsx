@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import type { StoryblokStory, PageBlok, PostBlok } from '@/types/storyblok';
+import type { StoryblokStory, PageBlok, PostBlok, HeroBlockBlok } from '@/types/storyblok';
+import { AUTHOR_JOB_TITLES, AUTHOR_TOPICS } from '@/lib/seo/author';
 
 const mockFetchStoryBySlug = vi.fn();
 const mockGetSiteUrl = vi.fn<() => string>();
@@ -194,6 +195,13 @@ describe('DynamicPage — about slug (personJsonLd path)', () => {
 
   it('renders StoryblokStory with personJsonLd script for about slug', async () => {
     const story = createMockPageStory();
+    const hero: HeroBlockBlok = {
+      _uid: 'hero-uid',
+      component: 'hero_block',
+      heading: 'About',
+      image: { id: 1, filename: 'https://a.storyblok.com/f/1/author.png' },
+    };
+    story.content.body = [hero];
     mockFetchStoryBySlug.mockResolvedValue({ story, source: 'pages' });
 
     const Component = await DynamicPage({ params: makeParams('about') });
@@ -204,6 +212,17 @@ describe('DynamicPage — about slug (personJsonLd path)', () => {
     expect(script).toBeInTheDocument();
     const parsed = JSON.parse(script!.innerHTML.replaceAll(String.raw`\u003c`, '<'));
     expect(parsed['@type']).toBe('Person');
+    expect(parsed.jobTitle).toEqual(AUTHOR_JOB_TITLES);
+    expect(parsed.knowsAbout).toEqual(AUTHOR_TOPICS);
+    expect(parsed.image).toBe('https://a.storyblok.com/f/1/author.png');
+    expect(parsed).not.toHaveProperty('email');
+
+    // The visible profile links and the JSON-LD sameAs come from one list.
+    const profileHrefs = screen
+      .getAllByRole('link')
+      .map((link) => link.getAttribute('href'))
+      .filter((href) => href?.startsWith('http'));
+    expect(profileHrefs).toEqual(parsed.sameAs);
   });
 });
 
