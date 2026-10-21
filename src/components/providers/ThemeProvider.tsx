@@ -4,7 +4,7 @@ import { ThemeProvider as NextThemeProvider } from 'next-themes';
 
 export default function ThemeProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <NextThemeProvider attribute="data-theme" defaultTheme="light" themes={['light', 'dark']}>
+    <NextThemeProvider attribute="data-theme" defaultTheme="system" enableSystem themes={['light', 'dark']}>
       {children}
     </NextThemeProvider>
   );
