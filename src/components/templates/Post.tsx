@@ -4,6 +4,7 @@ import { StoryblokServerComponent } from "@/lib/storyblok-utils";
 import { getStoryReadingTime, formatDate } from "@/lib/utils";
 import ReadingProgressBar from "@/components/atoms/ReadingProgress";
 import PostEndings, { type RelatedPostCards } from "@/components/organisms/PostEndings";
+import PostActions from "@/components/molecules/PostActions";
 import type { PostBlok } from "@/types/storyblok";
 import type { TagLink } from "@/lib/tags";
 
@@ -20,6 +21,8 @@ interface PostProps {
   /** Set only when the editor recorded a real revision; shares JSON-LD's value. */
   updatedAt?: string;
   related?: RelatedPostCards;
+  /** Absolute canonical URL; page actions render only when it is known. */
+  url?: string;
 }
 
 interface PostMetaProps {
@@ -57,7 +60,7 @@ const PostMeta = ({ createdAt, updatedAt, readingTime }: PostMetaProps) => {
   );
 };
 
-export default function Post({ blok, tags = [], tagLinks, createdAt, updatedAt, related }: Readonly<PostProps>) {
+export default function Post({ blok, tags = [], tagLinks, createdAt, updatedAt, related, url }: Readonly<PostProps>) {
   const { title = "", featured_image, excerpt, body } = blok;
   const readingTime = getStoryReadingTime(body);
 
@@ -99,6 +102,8 @@ export default function Post({ blok, tags = [], tagLinks, createdAt, updatedAt, 
           )}
 
           <PostMeta createdAt={createdAt} updatedAt={updatedAt} readingTime={readingTime} />
+
+          {url && <PostActions url={url} title={title} />}
         </header>
 
         {featured_image?.filename && (

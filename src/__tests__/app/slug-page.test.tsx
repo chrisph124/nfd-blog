@@ -416,6 +416,7 @@ describe('post page hands Post one updated date and related posts', () => {
 
     expect(props.updatedAt).toBe(jsonLd.dateModified);
     expect(props.updatedAt).toBe('2024-09-01T00:00:00.000Z');
+    expect(props.url).toBe('https://example.com/my-post');
     expect(props.related.tag).toEqual({ name: 'tech', slug: 'tech' });
     expect(props.related.posts.map((post: { href: string }) => post.href)).toEqual(['/sibling']);
   });

@@ -169,6 +169,7 @@ export default async function DynamicPage({ params }: Readonly<PageProps>) {
           createdAt={datePublished}
           updatedAt={dateUpdated}
           related={related}
+          url={`${siteUrl}/${slug}`}
         />
       </div>
     );
