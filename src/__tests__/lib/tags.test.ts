@@ -17,6 +17,7 @@ import {
   isTagLinkable,
   buildTagLinks,
   getTagCensus,
+  selectRelatedPosts,
 } from '@/lib/tags';
 import type { TagCensus } from '@/lib/tags';
 
@@ -312,6 +313,40 @@ describe('buildTagLinks', () => {
     const links = buildTagLinks(collided, ['C++']);
     expect(links.get('C++')).toEqual({ slug: 'c', linkable: false });
     warn.mockRestore();
+  });
+});
+
+describe('selectRelatedPosts', () => {
+  // Newest first, as fetchAllPosts returns them.
+  const g = mkPost('g', ['Unique']);
+  const a = mkPost('a', ['Solo', 'AI']);
+  const b = mkPost('b', ['AI', 'Next.js']);
+  const c = mkPost('c', ['AI', 'Pair']);
+  const d = mkPost('d', ['AI', 'Next.js']);
+  const e = mkPost('e', ['Lonely', 'Pair']);
+  const site = [g, a, b, c, d, e];
+  const x = mkPost('x', ['T']);
+  const y = mkPost('y', ['T']);
+  const h = mkPost('h', ['C++', 'AI']);
+  const i = mkPost('i', ['C']);
+  const j = mkPost('j', ['AI']);
+
+  it.each([
+    ['takes three siblings from a well-used tag', site, d, { name: 'AI', slug: 'ai' }, ['a', 'b', 'c']],
+    ['skips a first tag no other post carries', site, a, { name: 'AI', slug: 'ai' }, ['b', 'c', 'd']],
+    ['fills one sibling with the newest posts', site, e, { name: 'Pair', slug: 'pair' }, ['c', 'g', 'a']],
+    ['falls back to the newest posts when no tag has a sibling, even for the newest post', site, g, undefined, ['a', 'b', 'c']],
+    ['returns what exists when the site has fewer than four posts', [x, y], x, { name: 'T', slug: 't' }, ['y']],
+    ['skips a collided tag', [h, i, j], h, { name: 'AI', slug: 'ai' }, ['j', 'i']],
+  ])('%s', (_label, posts, current, expectedTag, expectedUuids) => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const related = selectRelatedPosts(buildTagCensus(posts), posts, current);
+    warn.mockRestore();
+
+    expect(related.tag).toEqual(expectedTag);
+    expect(related.posts.map((post) => post.uuid)).toEqual(expectedUuids);
+    expect(related.posts).not.toContain(current);
   });
 });
 

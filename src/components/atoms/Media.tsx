@@ -4,10 +4,6 @@ import type { MediaBlok, StoryblokLink } from '@/types/storyblok';
 import { makeStoryblokEditable } from '@/lib/storyblok-utils';
 import { getYouTubeId, isYouTubeUrl } from '@/lib/youtube';
 
-// ============================================================================
-// Constants
-// ============================================================================
-
 const VIDEO_EXTENSIONS = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv'] as const;
 const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.avif', '.bmp'] as const;
 
@@ -21,10 +17,6 @@ const ASPECT_RATIO_CLASSES = {
 
 type AspectRatio = keyof typeof ASPECT_RATIO_CLASSES;
 
-// ============================================================================
-// Utility Functions
-// ============================================================================
-
 const isVideoFile = (filename: string): boolean =>
   VIDEO_EXTENSIONS.some(ext => filename.toLowerCase().endsWith(ext));
 
@@ -32,7 +24,6 @@ const isImageFile = (filename: string): boolean =>
   IMAGE_EXTENSIONS.some(ext => filename.toLowerCase().endsWith(ext));
 
 const getAspectRatioClass = (aspectRatio: string, defaultClass = ''): string => {
-  // Safe object access with type validation
   if (aspectRatio in ASPECT_RATIO_CLASSES) {
     return ASPECT_RATIO_CLASSES[aspectRatio as AspectRatio];
   }
@@ -41,10 +32,6 @@ const getAspectRatioClass = (aspectRatio: string, defaultClass = ''): string => 
 
 const buildEmbedParams = (autoplay: boolean, loop: boolean, muted: boolean, controls: boolean): string =>
   `autoplay=${autoplay ? 1 : 0}&loop=${loop ? 1 : 0}&muted=${muted ? 1 : 0}&controls=${controls ? 1 : 0}`;
-
-// ============================================================================
-// Sub-Components
-// ============================================================================
 
 interface CaptionProps {
   caption: string;
@@ -185,10 +172,6 @@ const ImageFile = ({ filename, altText, caption, aspectRatio, isExternalUrl, lin
   return <MediaWrapper link={link}>{imageContent}</MediaWrapper>;
 };
 
-// ============================================================================
-// Main Component
-// ============================================================================
-
 interface MediaProps {
   blok: MediaBlok;
 }
@@ -205,7 +188,6 @@ export default function Media({ blok }: Readonly<MediaProps>) {
     aspect_ratio = 'auto',
   } = blok;
 
-  // Guard clause for missing media file
   if (!media_file?.filename) return null;
 
   const { filename, alt, title } = media_file;
@@ -213,7 +195,6 @@ export default function Media({ blok }: Readonly<MediaProps>) {
   const altText = alt || title || 'Media';
   const caption = title || undefined;
 
-  // Check if it's a YouTube URL
   if (is_external_url && isYouTubeUrl(filename)) {
 
     return (
@@ -233,7 +214,6 @@ export default function Media({ blok }: Readonly<MediaProps>) {
     );
   }
 
-  // Render video file
   if (isVideoFile(filename)) {
     return (
       <VideoFile
@@ -251,7 +231,6 @@ export default function Media({ blok }: Readonly<MediaProps>) {
     );
   }
 
-  // Render image file
   if (isImageFile(filename)) {
     return (
       <ImageFile

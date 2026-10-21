@@ -36,7 +36,6 @@ const HeroImage = memo(({ image, position, imageType = "auto" }: HeroImageProps)
 
   const isHorizontal = position === "horizontal" || position === "horizontal-reverse";
 
-  // Width class calculation using mobile-first approach
   const getWidthClasses = (): string => {
     const widthClassMap: Record<NonNullable<HeroBlockBlok["image_type"]>, string> = {
       auto: "w-auto",
@@ -47,7 +46,6 @@ const HeroImage = memo(({ image, position, imageType = "auto" }: HeroImageProps)
     return widthClassMap[imageType];
   };
 
-  // Image sizes attribute for Next.js optimization
   const getImageSizes = (): string => {
     const sizesMap: Record<NonNullable<HeroBlockBlok["image_type"]>, string> = {
       auto: `${width}px`,
@@ -60,7 +58,6 @@ const HeroImage = memo(({ image, position, imageType = "auto" }: HeroImageProps)
     return sizesMap[imageType];
   };
 
-  // Image className - different for auto vs full/half
   const getImageClasses = (): string => {
     return cn(
       "h-auto object-cover",
@@ -218,7 +215,7 @@ const Hero = memo(({ blok }: HeroProps) => {
   };
 
   const containerClasses = cn(
-    "relative z-10 w-full max-w-[1280px] h-full min-h-[250px] gap-10 px-10 py-12 lg:px-15 xl:px-5 lg:py-15 mx-auto",
+    "relative z-10 w-full max-w-7xl h-full min-h-[250px] gap-10 px-10 py-12 lg:px-15 xl:px-5 lg:py-15 mx-auto",
     getContainerClasses()
   );
 

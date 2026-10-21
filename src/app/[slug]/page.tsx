@@ -11,10 +11,12 @@ import {
   estimateWordCount,
 } from '@/lib/seo-structured-data';
 import { extractPostContent } from '@/lib/llms/post-to-markdown';
-import { getTagCensus, buildTagLinks } from '@/lib/tags';
+import { getTagCensus, buildTagLinks, selectRelatedPosts } from '@/lib/tags';
 import { escapeJsonLd } from '@/lib/seo/json-ld-escape';
-import { AUTHOR_NAME, AUTHOR_SAME_AS } from '@/lib/seo/author';
+import { AUTHOR_BIO, AUTHOR_NAME, AUTHOR_SAME_AS } from '@/lib/seo/author';
 import { stripEntities } from '@/lib/seo/strip-entities';
+import { getModifiedDate, getPublishedDate, getUpdatedDate } from '@/lib/post-dates';
+import { toPostCard } from '@/lib/post-card';
 
 export const revalidate = 86400; // Revalidate every 24 hours as fallback; webhook (/api/revalidate) handles real-time updates on publish
 
@@ -79,8 +81,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 
   if (isPost) {
-    const datePublished = story.first_published_at || story.created_at;
-    const dateModified = story.published_at || datePublished;
+    const datePublished = getPublishedDate(story);
+    const dateModified = getModifiedDate(story);
     const articleOther: Record<string, string | string[]> = {
       'article:published_time': datePublished,
       'article:modified_time': dateModified,
@@ -108,8 +110,9 @@ export default async function DynamicPage({ params }: Readonly<PageProps>) {
   const siteUrl = getSiteUrl();
 
   if (source === 'posts' && story.content.component === 'post') {
-    const datePublished = story.first_published_at || story.created_at;
-    const dateModified = story.published_at || datePublished;
+    const datePublished = getPublishedDate(story);
+    const dateUpdated = getUpdatedDate(story);
+    const dateModified = dateUpdated ?? datePublished;
     const title = stripEntities(story.content.title?.trim() || story.name);
     const description = stripEntities(story.content.excerpt?.trim() || '');
 
@@ -141,6 +144,10 @@ export default async function DynamicPage({ params }: Readonly<PageProps>) {
     const tagLinks = censusResult.ok
       ? buildTagLinks(censusResult.census, story.tag_list ?? [])
       : undefined;
+    const relatedPosts = censusResult.ok
+      ? selectRelatedPosts(censusResult.census, censusResult.posts, story)
+      : undefined;
+    const related = relatedPosts && { tag: relatedPosts.tag, posts: relatedPosts.posts.map(toPostCard) };
 
     return (
       <div className="page">
@@ -153,6 +160,8 @@ export default async function DynamicPage({ params }: Readonly<PageProps>) {
           tags={story.tag_list}
           tagLinks={tagLinks}
           createdAt={datePublished}
+          updatedAt={dateUpdated}
+          related={related}
         />
       </div>
     );
@@ -162,7 +171,7 @@ export default async function DynamicPage({ params }: Readonly<PageProps>) {
     const personJsonLd = buildPersonJsonLd({
       siteUrl,
       name: AUTHOR_NAME,
-      description: 'Frontend engineer writing about software, AI, and building interfaces.',
+      description: AUTHOR_BIO,
       sameAs: AUTHOR_SAME_AS,
     });
 

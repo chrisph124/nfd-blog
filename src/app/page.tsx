@@ -6,6 +6,7 @@ import { buildHomeJsonLdGraph } from '@/lib/seo-structured-data';
 import { escapeJsonLd } from '@/lib/seo/json-ld-escape';
 import { AUTHOR_SAME_AS } from '@/lib/seo/author';
 import { stripEntities } from '@/lib/seo/strip-entities';
+import { SITE_DESCRIPTION, SITE_TITLE } from '@/lib/seo/site';
 
 export const revalidate = 86400; // Revalidate every 24 hours as fallback; webhook (/api/revalidate) handles real-time updates on publish
 
@@ -14,10 +15,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const siteUrl = getSiteUrl();
   const content = story?.content;
 
-  const title = stripEntities(content?.og_title?.trim()) || 'Notes of Dev — Frontend Engineering, AI & CMS Notes';
+  const title = stripEntities(content?.og_title?.trim()) || SITE_TITLE;
   const description =
     stripEntities(content?.og_description?.trim()) ||
-    'A working notebook on frontend engineering, AI workflows, and headless CMS architecture — research, experiments, and patterns from building real interfaces.';
+    SITE_DESCRIPTION;
 
   return {
     title,
@@ -54,7 +55,7 @@ export default async function Home() {
   const siteUrl = getSiteUrl();
   const description =
     stripEntities(story.content?.og_description?.trim()) ||
-    'A working notebook on frontend engineering, AI workflows, and headless CMS architecture — research, experiments, and patterns from building real interfaces.';
+    SITE_DESCRIPTION;
 
   const homeJsonLd = buildHomeJsonLdGraph({
     siteUrl,
@@ -65,7 +66,17 @@ export default async function Home() {
 
   return (
     <div className="page">
-      <h1 className="sr-only">Notes of Dev — frontend engineering, AI, and building interfaces</h1>
+      <section
+        aria-labelledby="home-masthead-title"
+        className="max-w-7xl px-4 md:px-8 lg:px-12 xl:px-5 mx-auto mb-8 md:mb-10 flex flex-col gap-3"
+      >
+        <h1 id="home-masthead-title" className="display-1 font-bold text-foreground text-balance">
+          Developer notes on AI, software and the tools we build with
+        </h1>
+        <p className="max-w-3xl text-gray-600">
+          Research, experiments and working patterns by Hieu (Chris) Pham.
+        </p>
+      </section>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: escapeJsonLd(homeJsonLd) }}

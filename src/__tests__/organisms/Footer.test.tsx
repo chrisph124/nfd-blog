@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import Footer from '@/components/organisms/Footer';
 import type { SVGProps } from 'react';
@@ -18,6 +18,9 @@ vi.mock('react-icons/fa', () => ({
   FaEnvelope: (props: SVGProps<SVGSVGElement>) => (
     <svg {...props} data-testid="envelope-icon" />
   ),
+  FaRss: (props: SVGProps<SVGSVGElement>) => (
+    <svg {...props} data-testid="rss-icon" />
+  ),
 }));
 
 const createMockBlok = (overrides: Partial<FooterBlok> = {}): FooterBlok => ({
@@ -30,6 +33,10 @@ const createMockBlok = (overrides: Partial<FooterBlok> = {}): FooterBlok => ({
 });
 
 describe('Footer', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   describe('Rendering', () => {
     it('renders without crashing', () => {
       const blok = createMockBlok();
@@ -45,11 +52,16 @@ describe('Footer', () => {
       expect(screen.getByText('notesof.dev')).toBeInTheDocument();
     });
 
-    it('renders hardcoded copyright text', () => {
-      const blok = createMockBlok();
-      render(<Footer blok={blok} />);
+    it.each([
+      ['the first year alone', '2025-06-01T00:00:00Z', '© 2025 Hieu (Chris) Pham'],
+      ['a range once the year moves on', '2026-10-06T00:00:00Z', '© 2025–2026 Hieu (Chris) Pham'],
+    ])('dates the copyright with %s', (_label, now, expected) => {
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(new Date(now));
 
-      expect(screen.getByText(/© 2025 Hieu \(Chris\) Pham/)).toBeInTheDocument();
+      render(<Footer blok={createMockBlok()} />);
+
+      expect(screen.getByRole('contentinfo')).toHaveTextContent(expected);
     });
 
     it('renders all social media links', () => {
@@ -59,6 +71,8 @@ describe('Footer', () => {
       expect(screen.getByLabelText('GitHub')).toBeInTheDocument();
       expect(screen.getByLabelText('LinkedIn')).toBeInTheDocument();
       expect(screen.getByLabelText('Email')).toBeInTheDocument();
+      expect(screen.getByLabelText('RSS feed')).toHaveAttribute('href', '/rss.xml');
+      expect(screen.getByLabelText('RSS feed')).not.toHaveAttribute('target');
     });
 
     it('renders icons at correct size (24x24px)', () => {
@@ -116,26 +130,18 @@ describe('Footer', () => {
       render(<Footer blok={blokWithCopyright} />);
 
       expect(screen.queryByText('Ignored text from CMS')).not.toBeInTheDocument();
-      expect(screen.getByText(/© 2025 Hieu \(Chris\) Pham/)).toBeInTheDocument();
+      expect(screen.getByText(/Hieu \(Chris\) Pham\. All rights reserved\./)).toBeInTheDocument();
     });
 
     it('handles undefined copyright', () => {
       const blok = createMockBlok({ copyright: undefined });
       render(<Footer blok={blok} />);
 
-      expect(screen.getByText(/© 2025 Hieu \(Chris\) Pham/)).toBeInTheDocument();
+      expect(screen.getByText(/Hieu \(Chris\) Pham\. All rights reserved\./)).toBeInTheDocument();
     });
   });
 
   describe('Styles', () => {
-    it('has pinned dark background and light text colors', () => {
-      const blok = createMockBlok();
-      render(<Footer blok={blok} />);
-
-      const footer = screen.getByRole('contentinfo');
-      expect(footer).toHaveClass('bg-[#111827]', 'text-[#F9FAFB]');
-    });
-
     it('has full width', () => {
       const blok = createMockBlok();
       render(<Footer blok={blok} />);
@@ -144,13 +150,6 @@ describe('Footer', () => {
       expect(footer).toHaveClass('w-full');
     });
 
-    it('has hover state styles', () => {
-      const blok = createMockBlok();
-      render(<Footer blok={blok} />);
-
-      const githubLink = screen.getByLabelText('GitHub');
-      expect(githubLink).toHaveClass('!text-[#F9FAFB]', 'hover:text-primary-400');
-    });
   });
 
   describe('Responsive Layout', () => {

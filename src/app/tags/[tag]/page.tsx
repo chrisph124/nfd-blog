@@ -8,6 +8,7 @@ import PostGrid from '@/components/organisms/PostGrid';
 import { buildCollectionPageJsonLd } from '@/lib/seo-structured-data';
 import { escapeJsonLd } from '@/lib/seo/json-ld-escape';
 import type { PostBlok, StoryblokStory } from '@/types/storyblok';
+import { SITE_TOPICS } from '@/lib/seo/site';
 
 // ISR house style. Note (RT#10): this is lazy regenerate-on-next-request, not a
 // background hourly timer — a zero-traffic archive can stay stale until hit.
@@ -32,7 +33,7 @@ export async function generateMetadata({ params }: TagPageProps): Promise<Metada
 
   const siteUrl = getSiteUrl();
   const title = `${name} — Articles & Notes`;
-  const description = `Every post tagged ${name} on Notes of Dev — frontend engineering, AI, and headless CMS notes.`;
+  const description = `Every post tagged ${name} on Notes of Dev, a working notebook on ${SITE_TOPICS}.`;
 
   return {
     title,
@@ -82,7 +83,7 @@ export default async function TagArchivePage({ params }: Readonly<TagPageProps>)
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: escapeJsonLd(jsonLd) }}
       />
-      <section className="w-full max-w-[1280px] px-4 md:px-8 lg:px-12 xl:px-5 mx-auto py-10 md:py-15 flex flex-col gap-8">
+      <section className="w-full max-w-7xl px-4 md:px-8 lg:px-12 xl:px-5 mx-auto flex flex-col gap-8">
         <nav aria-label="Breadcrumb">
           <ol className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
             <li>

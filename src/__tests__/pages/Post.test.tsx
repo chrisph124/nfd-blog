@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, within } from '@testing-library/react';
 import Post from '@/components/templates/Post';
 import type { PostBlok } from '@/types/storyblok';
 
@@ -162,7 +162,7 @@ describe('Post', () => {
       const blok = createMockBlok();
       render(<Post blok={blok} />);
 
-      const image = screen.getByRole('img');
+      const image = within(screen.getByRole('article')).getByRole('img');
       expect(image).toBeInTheDocument();
       expect(image).toHaveAttribute('alt', 'Test featured image');
       expect(image).toHaveAttribute('data-src', 'https://a.storyblok.com/f/test.jpg');
@@ -172,7 +172,7 @@ describe('Post', () => {
       const blok = createMockBlok({ featured_image: undefined });
       render(<Post blok={blok} />);
 
-      const images = screen.queryAllByRole('img');
+      const images = within(screen.getByRole('article')).queryAllByRole('img');
       expect(images).toHaveLength(0);
     });
   });
@@ -407,7 +407,7 @@ describe('Post', () => {
       });
       render(<Post blok={blok} />);
 
-      const image = screen.getByRole('img');
+      const image = within(screen.getByRole('article')).getByRole('img');
       expect(image).toBeInTheDocument();
       expect(image).toHaveAttribute('alt', 'Fallback Alt Text');
       expect(image).toHaveAttribute('data-src', 'https://a.storyblok.com/f/test.jpg');
@@ -420,7 +420,7 @@ describe('Post', () => {
       const { container } = render(<Post blok={blok} />);
 
       const article = container.querySelector('article');
-      expect(article).toHaveClass('flex', 'flex-col', 'items-center', 'gap-y-6', 'md:gap-y-10', 'pt-4');
+      expect(article).toHaveClass('flex', 'flex-col', 'items-center', 'gap-y-6', 'md:gap-y-10');
     });
 
     it('applies prose styling to body content', () => {
@@ -439,7 +439,7 @@ describe('Post', () => {
 
       const header = container.querySelector('header');
       expect(header).toBeInTheDocument();
-      expect(header).toHaveClass('w-full', 'max-w-[1280px]', 'flex', 'flex-col', 'items-center', 'text-center');
+      expect(header).toHaveClass('w-full', 'max-w-7xl', 'flex', 'flex-col', 'items-center', 'text-center');
     });
 
     it('renders featured image inside aspect-video figure with rounded corners', () => {
@@ -511,7 +511,7 @@ describe('Post', () => {
       });
       const { container } = render(<Post blok={blok} />);
 
-      const contentSection = container.querySelector(String.raw`.max-w-\[1280px\]`);
+      const contentSection = container.querySelector('.max-w-7xl');
       expect(contentSection).toBeInTheDocument();
     });
   });
@@ -554,6 +554,65 @@ describe('Post', () => {
       expect(screen.getByText('1 min read')).toBeInTheDocument();
       // Invalid date should not crash or display malformed content
       expect(screen.queryByText('invalid-date')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Post meta and related posts', () => {
+    const relatedPosts = ['one', 'two', 'three'].map((slug) => ({
+      uuid: `uuid-${slug}`,
+      href: `/${slug}`,
+      title: `Post ${slug}`,
+      date: '2025-02-01T00:00:00.000Z',
+      readingTime: '5 min read',
+    }));
+
+    it('shows no Updated date unless the post was revised', () => {
+      render(<Post blok={createMockBlok()} createdAt="2025-01-15T10:00:00.000Z" />);
+
+      expect(screen.queryByText(/Updated/)).not.toBeInTheDocument();
+    });
+
+    it('shows the Updated date with a machine-readable time', () => {
+      const { container } = render(
+        <Post blok={createMockBlok()} createdAt="2025-01-15T10:00:00.000Z" updatedAt="2025-09-01T00:00:00.000Z" />
+      );
+
+      expect(screen.getByText(/Updated/)).toBeInTheDocument();
+      expect(container.querySelector('time[datetime="2025-09-01T00:00:00.000Z"]')).toBeInTheDocument();
+    });
+
+    it('lists related posts under the shared tag', () => {
+      render(<Post blok={createMockBlok()} related={{ tag: { name: 'AI Agents', slug: 'ai-agents' }, posts: relatedPosts }} />);
+
+      const section = screen.getByRole('region', { name: 'More on AI Agents' });
+      expect(within(section).getByRole('link', { name: 'AI Agents' })).toHaveAttribute('href', '/tags/ai-agents');
+      expect(within(within(section).getByRole('list')).getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual([
+        '/one',
+        '/two',
+        '/three',
+      ]);
+    });
+
+    it('shows a related cover as a decorative thumbnail only when the post has one', () => {
+      const withCover = { ...relatedPosts[0], image: { src: 'https://a.storyblok.com/f/one.jpg', alt: 'Cover' } };
+      render(<Post blok={createMockBlok({ featured_image: undefined })} related={{ posts: [withCover, relatedPosts[1]] }} />);
+
+      const thumbnails = within(screen.getByRole('list')).getAllByTestId('next-image');
+      expect(thumbnails).toHaveLength(1);
+      expect(thumbnails[0]).toHaveAttribute('data-src', 'https://a.storyblok.com/f/one.jpg');
+      expect(thumbnails[0]).toHaveAttribute('data-alt', '');
+    });
+
+    it('titles the list Latest posts when no tag has another post', () => {
+      render(<Post blok={createMockBlok()} related={{ posts: relatedPosts }} />);
+
+      expect(screen.getByRole('heading', { level: 3, name: 'Latest posts' })).toBeInTheDocument();
+    });
+
+    it('omits the related list without related posts', () => {
+      render(<Post blok={createMockBlok()} />);
+
+      expect(screen.queryByRole('region')).not.toBeInTheDocument();
     });
   });
 
@@ -673,7 +732,7 @@ describe('Post', () => {
 
       // All elements should be present
       expect(screen.getByTestId('reading-progress')).toBeInTheDocument();
-      expect(screen.getByRole('img')).toBeInTheDocument();
+      expect(within(screen.getByRole('article')).getByRole('img')).toBeInTheDocument();
       expect(screen.getByTestId('blok-block-1')).toBeInTheDocument();
     });
 
@@ -717,7 +776,7 @@ describe('Post', () => {
       });
       render(<Post blok={blok} />);
 
-      const image = screen.getByRole('img');
+      const image = within(screen.getByRole('article')).getByRole('img');
       expect(image).toHaveAttribute('aria-label', 'Descriptive alt text for accessibility');
       expect(screen.getByTestId('reading-progress')).toBeInTheDocument();
     });
@@ -797,7 +856,7 @@ describe('Post', () => {
 
       // Check responsive classes are maintained
       const article = container.querySelector('article');
-      expect(article).toHaveClass('gap-y-6', 'md:gap-y-10', 'pt-4');
+      expect(article).toHaveClass('gap-y-6', 'md:gap-y-10');
 
       const figure = container.querySelector('figure');
       expect(figure).toHaveClass('max-w-[1080px]');
@@ -812,7 +871,7 @@ describe('Post', () => {
       render(<Post blok={blok} />);
 
       // Check content containers have correct max-width
-      const contentContainers = document.querySelectorAll(String.raw`.max-w-\[1280px\]`);
+      const contentContainers = document.querySelectorAll('.max-w-7xl');
       expect(contentContainers.length).toBeGreaterThan(0);
 
       expect(screen.getByTestId('reading-progress')).toBeInTheDocument();

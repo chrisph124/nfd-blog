@@ -18,7 +18,7 @@ vi.mock('@storyblok/react/rsc', () => ({
 
 // Keep NavBar (desktop) opaque — Header tests exercise the mobile Sheet.
 vi.mock('@/components/organisms/NavBar', () => ({
-  default: () => <nav data-testid="navbar" />,
+  default: ({ inline }: { inline?: boolean }) => <nav data-testid="navbar" data-inline={String(Boolean(inline))} />,
 }));
 
 vi.mock('@/components/atoms/ThemeToggle', () => ({
@@ -100,6 +100,20 @@ describe('Header', () => {
     it('defaults nav_items to [] when undefined', () => {
       render(<Header blok={createMockBlok({ nav_items: undefined })} />);
       expect(screen.getByTestId('navbar')).toBeInTheDocument();
+    });
+  });
+
+  describe('Inline nav on phones', () => {
+    const flat = (n: number) => Array.from({ length: n }, (_, i) => createMockNavItem(`f${i}`, `Item${i}`));
+
+    it.each([
+      ['no items', [], true],
+      ['two flat items', flat(2), true],
+      ['three flat items', flat(3), false],
+      ['two items where one has sub-items', [createMockNavItem('a', 'A', [createMockSubNavItem('s', 'S')]), ...flat(1)], false],
+    ])('%s: inline is %s', (_label, navItems, expected) => {
+      render(<Header blok={createMockBlok({ nav_items: navItems })} />);
+      expect(screen.getByTestId('navbar')).toHaveAttribute('data-inline', String(expected));
     });
   });
 

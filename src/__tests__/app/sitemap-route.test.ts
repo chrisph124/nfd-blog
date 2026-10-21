@@ -137,16 +137,20 @@ describe('GET /sitemap.xml', () => {
         links: {
           '1': link({ slug: 'about', published_at: '2024-07-04T12:00:00.000Z' }),
           '2': link({ id: 2, slug: 'posts/hello', published_at: '2024-06-01T00:00:00.000Z' }),
+          '3': link({ id: 3, slug: 'posts/revised', published_at: '2024-10-01T00:00:00.000Z' }),
         },
       } as StoryblokLinksResponse,
     });
+    const revised = post({ uuid: 'u-3', full_slug: 'posts/revised', first_published_at: '2024-05-01T00:00:00.000Z' });
     mockFetchAllPosts.mockResolvedValue([
       post({ published_at: '2024-06-01T00:00:00.000Z', first_published_at: '2024-05-15T00:00:00.000Z' }),
+      { ...revised, content: { ...revised.content, updated_on: '2024-09-01 00:00' } },
     ]);
 
     const body = await (await GET()).text();
 
     expect(body).toContain('<loc>https://example.com/hello</loc>\n    <lastmod>2024-05-15T00:00:00.000Z</lastmod>');
+    expect(body).toContain('<loc>https://example.com/revised</loc>\n    <lastmod>2024-09-01T00:00:00.000Z</lastmod>');
     expect(body).toContain('<loc>https://example.com/about</loc>\n    <changefreq>monthly</changefreq>');
   });
 

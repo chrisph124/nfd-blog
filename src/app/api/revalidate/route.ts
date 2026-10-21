@@ -31,10 +31,17 @@ export async function POST(request: NextRequest) {
     revalidatePath('/llms.txt');
     revalidatePath('/llms-full.txt');
 
-    // Tags index — its counts/membership can shift on any publish/unpublish.
-    // Individual /tags/<slug> archives are NOT enumerated here (the webhook is
-    // tag-unaware); they rely on lazy ISR (revalidate = 3600).
+    // Tags index and every tag archive — counts and membership can shift on any
+    // publish/unpublish, and an archive must not keep a link to a removed post.
+    // The webhook is tag-unaware, so all archives are marked stale; each
+    // rebuilds on its next visit.
     revalidatePath('/tags');
+    revalidatePath('/tags/[tag]', 'page');
+
+    // Every post page lists related and latest posts, so an unpublish or a slug
+    // move must not leave dead links there. A route handler only marks the
+    // pages stale; each rebuilds on its next visit.
+    revalidatePath('/[slug]', 'page');
 
     // Revalidate specific story path if provided
     if (fullSlug) {

@@ -50,7 +50,7 @@ describe('ThemeProvider', () => {
   });
 
   describe('Props Configuration', () => {
-    it('passes attribute="data-theme" to ThemeProvider', () => {
+    it('follows the OS color scheme and writes the data-theme attribute', () => {
       const { container } = render(
         <ThemeProvider>
           <div>Test Child</div>
@@ -58,62 +58,13 @@ describe('ThemeProvider', () => {
       );
 
       const mockProvider = container.querySelector('[data-testid="theme-provider-mock"]');
-      expect(mockProvider).toBeInTheDocument();
-
-      const propsAttr = mockProvider?.getAttribute('data-props');
-      if (propsAttr) {
-        const props = JSON.parse(propsAttr);
-        expect(props.attribute).toBe('data-theme');
-      }
-    });
-
-    it('passes defaultTheme="light" to ThemeProvider', () => {
-      const { container } = render(
-        <ThemeProvider>
-          <div>Test Child</div>
-        </ThemeProvider>
-      );
-
-      const mockProvider = container.querySelector('[data-testid="theme-provider-mock"]');
-      const propsAttr = mockProvider?.getAttribute('data-props');
-      if (propsAttr) {
-        const props = JSON.parse(propsAttr);
-        expect(props.defaultTheme).toBe('light');
-      }
-    });
-
-    it('passes themes=["light","dark"] to ThemeProvider', () => {
-      const { container } = render(
-        <ThemeProvider>
-          <div>Test Child</div>
-        </ThemeProvider>
-      );
-
-      const mockProvider = container.querySelector('[data-testid="theme-provider-mock"]');
-      const propsAttr = mockProvider?.getAttribute('data-props');
-      if (propsAttr) {
-        const props = JSON.parse(propsAttr);
-        expect(props.themes).toEqual(['light', 'dark']);
-      }
-    });
-
-    it('passes all required props together', () => {
-      const { container } = render(
-        <ThemeProvider>
-          <div>Test Child</div>
-        </ThemeProvider>
-      );
-
-      const mockProvider = container.querySelector('[data-testid="theme-provider-mock"]');
-      const propsAttr = mockProvider?.getAttribute('data-props');
-      if (propsAttr) {
-        const props = JSON.parse(propsAttr);
-        expect(props).toEqual({
-          attribute: 'data-theme',
-          defaultTheme: 'light',
-          themes: ['light', 'dark'],
-        });
-      }
+      const props = JSON.parse(mockProvider?.getAttribute('data-props') ?? 'null');
+      expect(props).toEqual({
+        attribute: 'data-theme',
+        defaultTheme: 'system',
+        enableSystem: true,
+        themes: ['light', 'dark'],
+      });
     });
   });
 

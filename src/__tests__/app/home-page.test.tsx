@@ -77,6 +77,22 @@ describe('Home Page', () => {
     expect(screen.getByTestId('storyblok-story')).toHaveTextContent('Home');
   });
 
+  it('shows one visible masthead heading with the author line', async () => {
+    mockFetchHomeStory.mockResolvedValue(createMockStory());
+
+    render(await Home());
+
+    const headings = screen.getAllByRole('heading', { level: 1 });
+    expect(headings).toHaveLength(1);
+    expect(headings[0]).toHaveTextContent('Developer notes on AI, software and the tools we build with');
+    expect(headings[0]).not.toHaveClass('sr-only');
+    expect(
+      screen.getByText(
+        'Research, experiments and working patterns by Hieu (Chris) Pham.'
+      )
+    ).toBeInTheDocument();
+  });
+
   it('emits a single JSON-LD script with @graph containing WebSite + Organization', async () => {
     const story = createMockStory();
     mockFetchHomeStory.mockResolvedValue(story);
@@ -145,7 +161,9 @@ describe('Home generateMetadata', () => {
 
     const metadata = await generateMetadata();
 
-    expect(metadata.title).toBe('Notes of Dev — Frontend Engineering, AI & CMS Notes');
-    expect(metadata.description).toBe('A working notebook on frontend engineering, AI workflows, and headless CMS architecture — research, experiments, and patterns from building real interfaces.');
+    expect(metadata.title).toBe('Notes of Dev | AI, Software Engineering and Developer Tools');
+    expect(metadata.description).toBe(
+      'A working notebook on AI, software engineering and developer tools, with research, experiments and patterns from day-to-day work.'
+    );
   });
 });

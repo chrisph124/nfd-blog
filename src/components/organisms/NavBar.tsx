@@ -16,32 +16,34 @@ import {
 
 interface NavBarProps {
   navItems: NavItemBlok[];
+  inline?: boolean;
 }
 
-// Brand link/trigger look, preserved from the bespoke nav. Neutralises the
-// shadcn trigger's button chrome (bg/height/rounding/text-sm) so the desktop
-// nav keeps its text-link appearance and brand active/inactive states.
+// Neutralises the shadcn trigger's button chrome so items look like text links.
 const NAV_LINK_BASE =
   'flex gap-[4px] items-center text-[18px] leading-[24px] p-1 h-auto bg-transparent hover:bg-transparent focus:bg-transparent rounded-none transition-colors';
 const NAV_LINK_ACTIVE = 'border-b border-primary-700 text-primary-800 font-bold';
 const NAV_LINK_INACTIVE = 'text-foreground font-normal hover:text-primary-700';
+// 44px tap targets below lg.
+const NAV_LINK_INLINE = 'max-lg:min-h-11 max-lg:justify-center max-lg:px-2 max-lg:text-base';
 
-const NavBar = memo(({ navItems }: NavBarProps) => {
+const NavBar = memo(({ navItems, inline = false }: NavBarProps) => {
   const pathname = usePathname();
 
-  // Active state for navigation item (unchanged logic).
   const getIsActive = (itemUrl: string) =>
     (pathname === '/' && (itemUrl === '/' || itemUrl.includes('home'))) ||
     (pathname !== '/' && itemUrl !== '/' && pathname === itemUrl);
 
   return (
-    // viewport={false} positions each dropdown directly under its item (like the
-    // previous absolute dropdown). Radix opens sub-menus on hover/focus.
+    // viewport={false} positions each dropdown directly under its own item.
     <NavigationMenu
       viewport={false}
-      className="hidden lg:flex flex-grow max-w-none items-center justify-end"
+      className={cn(
+        'hidden flex-grow max-w-none items-center justify-end',
+        inline ? 'min-[360px]:flex' : 'lg:flex'
+      )}
     >
-      <NavigationMenuList className="gap-[20px]">
+      <NavigationMenuList className={inline ? 'gap-1 lg:gap-[20px]' : 'gap-[20px]'}>
         {navItems.map((item) => {
           const itemUrl = normalizeStoryblokUrl(item.link?.cached_url ?? item.link?.url);
           const isActive = getIsActive(itemUrl);
@@ -75,6 +77,7 @@ const NavBar = memo(({ navItems }: NavBarProps) => {
                     href={itemUrl}
                     className={cn(
                       NAV_LINK_BASE,
+                      inline && NAV_LINK_INLINE,
                       isActive ? NAV_LINK_ACTIVE : NAV_LINK_INACTIVE,
                       'no-underline!'
                     )}

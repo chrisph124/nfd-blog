@@ -1,6 +1,8 @@
 import { fetchAllPosts, getSiteUrl } from '@/lib/storyblok';
 import { buildRssFeed, type FeedItem } from '@/lib/rss/build-feed';
 import { stripEntities } from '@/lib/seo/strip-entities';
+import { getModifiedDate, getPublishedDate } from '@/lib/post-dates';
+import { SITE_DESCRIPTION } from '@/lib/seo/site';
 
 export const revalidate = 3600;
 
@@ -13,8 +15,8 @@ export async function GET() {
     const content = story.content;
     const title = content.title?.trim() || story.name;
     const description = content.excerpt?.trim() || content.og_description?.trim() || '';
-    const publishedAt = story.first_published_at || story.published_at || story.created_at;
-    const modifiedAt = story.published_at || publishedAt;
+    const publishedAt = getPublishedDate(story);
+    const modifiedAt = getModifiedDate(story);
     return {
       title: stripEntities(title),
       slug,
@@ -30,7 +32,7 @@ export async function GET() {
     siteUrl,
     siteName: 'Notes of Dev',
     siteDescription:
-      'A working notebook on frontend engineering, AI workflows, and headless CMS architecture — research, experiments, and patterns from building real interfaces.',
+      SITE_DESCRIPTION,
     authorName: 'Hieu (Chris) Pham',
     posts,
   });

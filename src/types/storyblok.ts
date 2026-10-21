@@ -257,6 +257,7 @@ export interface PostBlok extends StoryblokBlok {
   og_title?: string;
   og_description?: string;
   og_image?: StoryblokAsset;
+  updated_on?: string;
 }
 
 /**

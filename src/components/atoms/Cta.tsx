@@ -18,11 +18,9 @@ const Cta = memo(({ blok }: CTAProps) => {
     cta_size = 'hug',
   } = blok;
 
-  // Base styles
   const baseWrapperStyles = 'group rounded-2xl transition-all duration-300 transition-opacity';
   const baseTextStyles = 'box-border flex gap-2 items-center justify-center font-semibold rounded-2xl tracking-wide text-transparent bg-clip-text bg-linear-to-r transition-all duration-300 transition-opacity';
 
-  // Size variants
   const sizeStyles = {
     hug: 'px-4 py-3',
     large: 'px-12 py-6',
@@ -34,7 +32,6 @@ const Cta = memo(({ blok }: CTAProps) => {
   const primaryHoverStyles = `group-hover:from-primary-700 group-hover:to-secondary-900`
   const secondaryHoverStyles = `group-hover:from-secondary-700 group-hover:to-secondary-900`
 
-  // Type variants
   const textStyles = {
     'primary': `from-primary-50 to-primary-50 ${primaryHoverStyles}`,
     'primary-reverse': `from-primary-700 to-primary-700 ${primaryHoverStyles}`,
@@ -58,7 +55,6 @@ const Cta = memo(({ blok }: CTAProps) => {
   const textClasses = `${baseTextStyles} ${sizeStyles[cta_size || 'hug']} ${textStyles[cta_type || 'primary']}`;
   const wrapperClasses = `${wrapperStyles[cta_type || 'primary']}`;
 
-  // Handle link navigation
   const rawUrl = navigate_to?.cached_url || navigate_to?.url;
   const href = normalizeStoryblokUrl(rawUrl);
   const target = navigate_to?.target || '_self';
@@ -73,7 +69,6 @@ const Cta = memo(({ blok }: CTAProps) => {
     </>
   );
 
-  // Render as external link
   if (isExternal) {
     return (
       <Link
@@ -87,7 +82,6 @@ const Cta = memo(({ blok }: CTAProps) => {
     );
   }
 
-  // Render as Next.js Link for internal navigation
   return (
     <Link href={href} className={cn(baseWrapperStyles, wrapperClasses)}>
       <span className={cn(textClasses, "cta-text")}>{content}</span>

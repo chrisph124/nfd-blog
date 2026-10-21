@@ -13,7 +13,7 @@ export default function RichtextReveal({ children }: Readonly<RichtextRevealProp
     const container = containerRef.current;
     if (!container) return;
 
-    // Select media elements but skip img/video inside figure (figure handles reveal for its children)
+    // Skip img/video inside a figure; the figure reveals its own children.
     const mediaElements = container.querySelectorAll(
       'figure, img:not(figure img), video:not(figure video), iframe'
     );

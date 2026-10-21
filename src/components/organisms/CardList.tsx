@@ -1,6 +1,7 @@
 import { getStoryblokApi, storyblokVersion } from '@/lib/storyblok';
 import type { StoryblokStory, PostBlok } from '@/types/storyblok';
 import Card from '@/components/molecules/Card';
+import { toPostCard } from '@/lib/post-card';
 
 interface CardListProps {
   filterByTag?: string;
@@ -42,7 +43,7 @@ export default async function CardList({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {data.stories.map((story) => (
-        <Card key={story.uuid} story={story} />
+        <Card key={story.uuid} post={toPostCard(story)} />
       ))}
     </div>
   );
