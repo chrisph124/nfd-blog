@@ -135,7 +135,8 @@ interface PersonJsonLdParams {
   description?: string;
   imageUrl?: string;
   sameAs?: string[];
-  jobTitle?: string;
+  jobTitle?: string | string[];
+  knowsAbout?: string[];
 }
 
 export function buildPersonJsonLd({
@@ -145,6 +146,7 @@ export function buildPersonJsonLd({
   imageUrl,
   sameAs,
   jobTitle,
+  knowsAbout,
 }: PersonJsonLdParams) {
   return {
     '@context': 'https://schema.org',
@@ -152,8 +154,9 @@ export function buildPersonJsonLd({
     name,
     url: `${siteUrl}/about`,
     ...(description && { description }),
-    ...(jobTitle && { jobTitle }),
+    ...(jobTitle && jobTitle.length > 0 && { jobTitle }),
     ...(imageUrl && { image: imageUrl }),
+    ...(knowsAbout && knowsAbout.length > 0 && { knowsAbout }),
     ...(sameAs && sameAs.length > 0 && { sameAs }),
   };
 }

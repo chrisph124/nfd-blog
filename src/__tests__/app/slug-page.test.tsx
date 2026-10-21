@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import type { StoryblokStory, PageBlok, PostBlok } from '@/types/storyblok';
+import type { StoryblokStory, PageBlok, PostBlok, HeroBlockBlok } from '@/types/storyblok';
+import { AUTHOR_EMAIL, AUTHOR_JOB_TITLES, AUTHOR_NAME, AUTHOR_SAME_AS, AUTHOR_TOPICS } from '@/lib/seo/author';
 
 const mockFetchStoryBySlug = vi.fn();
 const mockGetSiteUrl = vi.fn<() => string>();
@@ -194,6 +195,13 @@ describe('DynamicPage — about slug (personJsonLd path)', () => {
 
   it('renders StoryblokStory with personJsonLd script for about slug', async () => {
     const story = createMockPageStory();
+    const hero: HeroBlockBlok = {
+      _uid: 'hero-uid',
+      component: 'hero_block',
+      heading: 'About',
+      image: { id: 1, filename: 'https://a.storyblok.com/f/1/author.png' },
+    };
+    story.content.body = [hero];
     mockFetchStoryBySlug.mockResolvedValue({ story, source: 'pages' });
 
     const Component = await DynamicPage({ params: makeParams('about') });
@@ -204,6 +212,13 @@ describe('DynamicPage — about slug (personJsonLd path)', () => {
     expect(script).toBeInTheDocument();
     const parsed = JSON.parse(script!.innerHTML.replaceAll(String.raw`\u003c`, '<'));
     expect(parsed['@type']).toBe('Person');
+    expect(parsed.jobTitle).toEqual(AUTHOR_JOB_TITLES);
+    expect(parsed.knowsAbout).toEqual(AUTHOR_TOPICS);
+    expect(parsed.image).toBe('https://a.storyblok.com/f/1/author.png');
+    expect(script!.innerHTML).not.toContain(AUTHOR_EMAIL);
+
+    expect(parsed.sameAs).toEqual(AUTHOR_SAME_AS);
+    expect(screen.getByRole('region', { name: 'About the author' })).toHaveTextContent(AUTHOR_NAME);
   });
 });
 
@@ -383,7 +398,7 @@ describe('post page hands Post one updated date and related posts', () => {
     mockGetSiteUrl.mockReturnValue('https://example.com');
   });
 
-  it('passes the JSON-LD modified date as updatedAt and never relates the post to itself', async () => {
+  it('keeps the revision date in JSON-LD only and never relates the post to itself', async () => {
     const base = createMockPostStory();
     const story = { ...base, content: { ...base.content, updated_on: '2024-09-01 00:00' } };
     const sibling = { ...createMockPostStory(), uuid: 'uuid-sibling', full_slug: 'posts/sibling' };
@@ -395,8 +410,9 @@ describe('post page hands Post one updated date and related posts', () => {
     const jsonLd = JSON.parse(script!.innerHTML.replaceAll(String.raw`\u003c`, '<'));
     const props = mockPostProps.mock.calls[0][0];
 
-    expect(props.updatedAt).toBe(jsonLd.dateModified);
-    expect(props.updatedAt).toBe('2024-09-01T00:00:00.000Z');
+    expect(jsonLd.dateModified).toBe('2024-09-01T00:00:00.000Z');
+    expect(props).not.toHaveProperty('updatedAt');
+    expect(props.url).toBe('https://example.com/my-post');
     expect(props.related.tag).toEqual({ name: 'tech', slug: 'tech' });
     expect(props.related.posts.map((post: { href: string }) => post.href)).toEqual(['/sibling']);
   });

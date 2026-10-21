@@ -309,14 +309,20 @@ describe('buildPersonJsonLd', () => {
 });
 
 describe('buildPersonJsonLd — extended', () => {
-  it('includes jobTitle when provided', () => {
+  it('includes jobTitle and knowsAbout when provided, and omits empty lists', () => {
     const result = buildPersonJsonLd({
       siteUrl: 'https://example.com',
       name: 'Chris Pham',
       sameAs: [],
-      jobTitle: 'Frontend Engineer',
+      jobTitle: ['Solution Architect', 'Software Engineer'],
+      knowsAbout: ['DevSecOps'],
     });
-    expect(result).toHaveProperty('jobTitle', 'Frontend Engineer');
+    expect(result).toHaveProperty('jobTitle', ['Solution Architect', 'Software Engineer']);
+    expect(result).toHaveProperty('knowsAbout', ['DevSecOps']);
+
+    const empty = buildPersonJsonLd({ siteUrl: 'https://example.com', name: 'Chris Pham', jobTitle: [], knowsAbout: [] });
+    expect(empty).not.toHaveProperty('jobTitle');
+    expect(empty).not.toHaveProperty('knowsAbout');
   });
 
   it('includes imageUrl when provided', () => {

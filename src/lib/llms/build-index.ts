@@ -15,11 +15,15 @@ export interface LlmsIndexOptions {
   aboutUrl?: string;
 }
 
-function compactDescription(input: string, max = 160): string {
+function compactDescription(input: string, max = 200): string {
   const clean = stripEntities(input).replaceAll(/\s+/g, ' ').trim();
   if (!clean) return '';
   if (clean.length <= max) return clean;
-  return `${clean.slice(0, max - 1).trimEnd()}…`;
+  // Cut at the last space so no word is split; a single over-long word falls back to a hard cut.
+  const window = clean.slice(0, max);
+  const lastSpace = window.lastIndexOf(' ');
+  const head = lastSpace > 0 ? window.slice(0, lastSpace) : window.slice(0, max - 1);
+  return `${head.replace(/[,;:.]$/, '')}…`;
 }
 
 export function buildLlmsIndex(opts: LlmsIndexOptions): string {

@@ -1,5 +1,6 @@
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
+import { STORYBLOK_CACHE_TAG } from '@/lib/storyblok-cache';
 
 export async function POST(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -19,6 +20,10 @@ export async function POST(request: NextRequest) {
     // Storyblok's webhook sends `full_slug` at the top level; `story.full_slug`
     // is kept for manual calls that use the older nested shape.
     const fullSlug: string | undefined = body.full_slug ?? body.story?.full_slug;
+
+    // Expire every cached Storyblok response first, so the pages marked stale below
+    // re-fetch the published content instead of the cached copy.
+    revalidateTag(STORYBLOK_CACHE_TAG, { expire: 0 });
 
     // Revalidate homepage
     revalidatePath('/');

@@ -566,19 +566,21 @@ describe('Post', () => {
       readingTime: '5 min read',
     }));
 
-    it('shows no Updated date unless the post was revised', () => {
-      render(<Post blok={createMockBlok()} createdAt="2025-01-15T10:00:00.000Z" />);
+    it('shows page actions under the title and again after the body only when the URL is known', () => {
+      const { unmount } = render(<Post blok={createMockBlok()} url="https://www.notesof.dev/my-post" />);
+      expect(screen.getAllByRole('button', { name: 'Copy prompt' })).toHaveLength(2);
+      unmount();
 
-      expect(screen.queryByText(/Updated/)).not.toBeInTheDocument();
+      render(<Post blok={createMockBlok()} />);
+      expect(screen.queryByRole('button', { name: 'Copy prompt' })).not.toBeInTheDocument();
     });
 
-    it('shows the Updated date with a machine-readable time', () => {
-      const { container } = render(
-        <Post blok={createMockBlok()} createdAt="2025-01-15T10:00:00.000Z" updatedAt="2025-09-01T00:00:00.000Z" />
-      );
+    it('shows the published date and no Updated date', () => {
+      const { container } = render(<Post blok={createMockBlok()} createdAt="2025-01-15T10:00:00.000Z" />);
 
-      expect(screen.getByText(/Updated/)).toBeInTheDocument();
-      expect(container.querySelector('time[datetime="2025-09-01T00:00:00.000Z"]')).toBeInTheDocument();
+      expect(container.querySelectorAll('time')).toHaveLength(1);
+      expect(container.querySelector('time[datetime="2025-01-15T10:00:00.000Z"]')).toBeInTheDocument();
+      expect(screen.queryByText(/Updated/)).not.toBeInTheDocument();
     });
 
     it('lists related posts under the shared tag', () => {
