@@ -97,7 +97,7 @@ describe('Revalidate API Route', () => {
       expect(calls).not.toContain('');
     });
 
-    it('revalidates the post, its markdown and the sitemap for a Storyblok webhook payload', async () => {
+    it('revalidates the post, every post page, its markdown and the sitemap for a Storyblok webhook payload', async () => {
       const { revalidatePath } = await import('next/cache');
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
       // Storyblok's documented webhook body carries `full_slug` at the top level.
@@ -113,6 +113,8 @@ describe('Revalidate API Route', () => {
 
       expect(revalidatePath).toHaveBeenCalledWith('/when-the-interface-starts-with-intent');
       expect(revalidatePath).toHaveBeenCalledWith('/api/md/when-the-interface-starts-with-intent');
+      // Other posts list this one under related posts, so they must not keep a dead link.
+      expect(revalidatePath).toHaveBeenCalledWith('/[slug]', 'page');
       // The public /sitemap.xml is a proxy rewrite; its cache key is the destination.
       expect(revalidatePath).toHaveBeenCalledWith('/xml-sitemap');
       expect(consoleSpy).toHaveBeenCalledWith(
