@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import type { StoryblokStory, PageBlok, PostBlok, HeroBlockBlok } from '@/types/storyblok';
-import { AUTHOR_JOB_TITLES, AUTHOR_TOPICS } from '@/lib/seo/author';
+import { AUTHOR_EMAIL, AUTHOR_JOB_TITLES, AUTHOR_TOPICS } from '@/lib/seo/author';
 
 const mockFetchStoryBySlug = vi.fn();
 const mockGetSiteUrl = vi.fn<() => string>();
@@ -215,7 +215,7 @@ describe('DynamicPage — about slug (personJsonLd path)', () => {
     expect(parsed.jobTitle).toEqual(AUTHOR_JOB_TITLES);
     expect(parsed.knowsAbout).toEqual(AUTHOR_TOPICS);
     expect(parsed.image).toBe('https://a.storyblok.com/f/1/author.png');
-    expect(parsed).not.toHaveProperty('email');
+    expect(script!.innerHTML).not.toContain(AUTHOR_EMAIL);
 
     // The visible profile links and the JSON-LD sameAs come from one list.
     const profileHrefs = screen

@@ -97,6 +97,9 @@ describe('buildLlmsIndex', () => {
     expect(desc.length).toBeLessThanOrEqual(200);
     expect(desc).toMatch(/word\d+…$/);
     expect(long.startsWith(`${desc.slice(0, -1)} `)).toBe(true);
+
+    const oneWord = buildLlmsIndex({ siteName: 'Notes', siteUrl: 'https://example.com', description: '', posts: [{ ...base, description: 'x'.repeat(500) }] });
+    expect(oneWord).toContain(`: ${'x'.repeat(199)}…\n`);
   });
 
   it('renders empty-posts placeholder', () => {

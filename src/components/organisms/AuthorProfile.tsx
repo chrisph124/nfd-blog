@@ -1,6 +1,6 @@
 import type { IconType } from 'react-icons';
 import { FaEnvelope, FaGithub, FaLinkedin } from 'react-icons/fa';
-import { AUTHOR_EMAIL, AUTHOR_GITHUB_URL, AUTHOR_LINKEDIN_URL } from '@/lib/seo/author';
+import { AUTHOR_EMAIL, AUTHOR_GITHUB_URL, AUTHOR_LINKEDIN_URL, AUTHOR_NAME } from '@/lib/seo/author';
 
 interface AuthorLink {
   label: string;
@@ -16,7 +16,7 @@ const AUTHOR_LINKS: AuthorLink[] = [
 
 // `!` beats the unlayered global `a:not(...)` link color and underline rule.
 const LINK_CLASSES =
-  'inline-flex min-h-11 items-center gap-2 rounded-full border border-gray-200 px-4 py-2 font-semibold no-underline! text-foreground! transition-colors hover:border-primary-700 hover:text-primary-700!';
+  'inline-flex min-h-11 max-w-full items-center gap-2 rounded-full border border-gray-200 px-4 py-2 font-semibold no-underline! text-foreground! transition-colors hover:border-primary-700 hover:text-primary-700!';
 
 const AuthorLinks = () => (
   <ul className="flex flex-wrap gap-3">
@@ -31,7 +31,8 @@ const AuthorLinks = () => (
             rel={isExternal ? 'me noopener noreferrer' : undefined}
           >
             <Icon aria-hidden="true" className="h-5 w-5 shrink-0" />
-            {label}
+            {/* The email may wrap on 320px screens instead of overflowing the pill. */}
+            <span className="min-w-0 [overflow-wrap:anywhere]">{label}</span>
           </a>
         </li>
       );
@@ -48,7 +49,7 @@ export default function AuthorProfile() {
       <div className="flex flex-col gap-4">
         <h2>Who writes this</h2>
         <p>
-          I&apos;m Hieu (Chris) Pham, a solution architect and software engineer. My home turf is the modern
+          I&apos;m {AUTHOR_NAME}, a solution architect and software engineer. My home turf is the modern
           JavaScript ecosystem, though I rarely stay inside it, and over the years I&apos;ve built on many CMSs,
           from Sitecore to Storyblok.
         </p>
