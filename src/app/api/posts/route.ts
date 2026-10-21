@@ -1,6 +1,7 @@
 import { getStoryblokApi, storyblokVersion } from '@/lib/storyblok';
 import { NextRequest, NextResponse } from 'next/server';
 import type { StoryblokStory, PostBlok } from '@/types/storyblok';
+import { toPostCard } from '@/lib/post-card';
 
 interface StoriesResponse {
   data: {
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
     const total = Number.parseInt(headers.total || '0');
 
     return NextResponse.json({
-      stories: data.stories,
+      posts: data.stories.map(toPostCard),
       total,
       page,
       perPage,

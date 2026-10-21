@@ -1,22 +1,23 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import type { PostBlok, StoryblokStory } from '@/types/storyblok';
+import type { PostCardData } from '@/lib/post-card';
 
 vi.mock('@/components/molecules/Card', () => ({
   default: ({
-    story,
+    post,
     priority,
     className,
     style,
   }: {
-    story: StoryblokStory<PostBlok>;
+    post: PostCardData;
     priority?: boolean;
     className?: string;
     style?: React.CSSProperties;
   }) => (
     <div
       data-testid="card"
-      data-uuid={story.uuid}
+      data-uuid={post.uuid}
       data-priority={String(priority)}
       className={className}
       style={style}
@@ -27,7 +28,7 @@ vi.mock('@/components/molecules/Card', () => ({
 import PostGrid from '@/components/organisms/PostGrid';
 
 const mkPost = (uuid: string): StoryblokStory<PostBlok> =>
-  ({ uuid, content: { component: 'post' } } as unknown as StoryblokStory<PostBlok>);
+  ({ uuid, full_slug: `posts/${uuid}`, created_at: '2025-01-01T00:00:00.000Z', content: { component: 'post' } } as unknown as StoryblokStory<PostBlok>);
 
 describe('PostGrid', () => {
   it('renders one Card per post', () => {

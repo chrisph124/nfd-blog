@@ -7,12 +7,8 @@ const alertVariants = cva(
   "relative w-full rounded-xl border border-2 px-4 py-3 flex items-start gap-3 md:w-3/4 md:m-auto",
   {
     variants: {
-      // Filled accent card: a colored fill + matching border, with white
-      // text/icon/title on top. The brand scale inverts across themes, so the
-      // *-600 (light theme) / dark:*-200 (dark theme) fill stays a dark-enough
-      // surface for white text to keep contrast in both modes. Emerald is the
-      // exception: white on emerald-600 measures 3.77:1 (fails AA), so its light
-      // fill is emerald-700 (5.48:1).
+      // Fills stay dark enough for white text in both themes (the brand scale inverts).
+      // Emerald uses 700: white on emerald-600 is 3.77:1 and fails AA.
       color: {
         emerald:
           "border-emerald-700 text-white bg-emerald-700 dark:bg-emerald-200 dark:border-emerald-200",

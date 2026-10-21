@@ -9,19 +9,15 @@ interface MenuToggleProps {
 }
 
 const MenuToggle = memo(({ onClick, isOpen }: MenuToggleProps) => {
-  // Base classes for all animated lines
   const LINE_BASE_CLASSES = "block h-[2px] w-full bg-gray-700 rounded-full transition-all duration-300 ease-in-out absolute";
 
-  // Top line animation states
   const TOP_LINE_OPEN = "rotate-45 top-[6px]";
   const TOP_LINE_CLOSED = "rotate-0 top-0";
 
-  // Middle line animation states
   const MIDDLE_LINE_BASE = "top-[6px]";
   const MIDDLE_LINE_OPEN = "opacity-0 scale-0";
   const MIDDLE_LINE_CLOSED = "opacity-100 scale-100";
 
-  // Bottom line animation states
   const BOTTOM_LINE_OPEN = "-rotate-45 bottom-[6px]";
   const BOTTOM_LINE_CLOSED = "rotate-0 bottom-0";
 
@@ -32,7 +28,6 @@ const MenuToggle = memo(({ onClick, isOpen }: MenuToggleProps) => {
       aria-label="Toggle menu"
       type="button"
     >
-      {/* Animated hamburger/X icon */}
       <div className="w-[20px] h-[14px] relative flex flex-col justify-between">
         <span
           className={cn(

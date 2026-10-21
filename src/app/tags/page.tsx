@@ -4,12 +4,13 @@ import { getSiteUrl } from '@/lib/storyblok';
 import { getTagCensus, selectArchivedTags } from '@/lib/tags';
 import { buildCollectionPageJsonLd } from '@/lib/seo-structured-data';
 import { escapeJsonLd } from '@/lib/seo/json-ld-escape';
+import { SITE_TOPICS } from '@/lib/seo/site';
 
 export const revalidate = 3600;
 
 const TITLE = 'Tags — Browse by Topic';
 const DESCRIPTION =
-  'Browse every topic on Notes of Dev — frontend engineering, AI, and headless CMS notes, grouped by tag.';
+  `Browse every topic on Notes of Dev (${SITE_TOPICS}), grouped by tag.`;
 
 export async function generateMetadata(): Promise<Metadata> {
   const siteUrl = getSiteUrl();
@@ -56,7 +57,7 @@ export default async function TagsIndexPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: escapeJsonLd(jsonLd) }}
       />
-      <section className="w-full max-w-[1280px] px-4 md:px-8 lg:px-12 xl:px-5 mx-auto py-10 md:py-15 flex flex-col gap-8">
+      <section className="w-full max-w-7xl px-4 md:px-8 lg:px-12 xl:px-5 mx-auto flex flex-col gap-8">
         <nav aria-label="Breadcrumb">
           <ol className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
             <li>
@@ -80,7 +81,7 @@ export default async function TagsIndexPage() {
               <li key={tag.slug}>
                 <Link
                   href={`/tags/${tag.slug}`}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-base font-semibold text-white! no-underline! bg-viva-magenta-500 rounded-full transition-transform hover:-translate-y-0.5"
+                  className="inline-flex items-center gap-2 px-4 py-2 text-base font-semibold text-white! dark:text-black! no-underline! bg-viva-magenta-500 rounded-full transition-transform hover:-translate-y-0.5"
                 >
                   {tag.name}
                   <span className="inline-flex items-center justify-center size-6 rounded-full bg-white text-[#BE3455] text-xs font-bold leading-none tabular-nums">

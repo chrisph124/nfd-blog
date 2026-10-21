@@ -3,36 +3,65 @@ import Link from "next/link";
 import { StoryblokServerComponent } from "@/lib/storyblok-utils";
 import { getStoryReadingTime, formatDate } from "@/lib/utils";
 import ReadingProgressBar from "@/components/atoms/ReadingProgress";
+import PostEndings, { type RelatedPostCards } from "@/components/organisms/PostEndings";
 import type { PostBlok } from "@/types/storyblok";
 import type { TagLink } from "@/lib/tags";
 
-// `text-white!` + `no-underline!` override the unlayered global `a:not(...)` rule
-// in globals.css (link color + underline), which otherwise beats plain utilities
-// on the `<Link>` (an `<a>`); harmless on the `<span>` variant.
+// `!` beats the unlayered global `a:not(...)` link color and underline rule.
 const TAG_PILL_CLASSES =
-  "px-3 py-1 text-sm font-bold text-white! no-underline! bg-viva-magenta-500 rounded-full";
+  "px-3 py-1 text-sm font-bold text-white! dark:text-black! no-underline! bg-viva-magenta-500 rounded-full";
 
 interface PostProps {
   blok: PostBlok;
   tags?: string[];
-  /**
-   * Per-tag link decision, keyed by display name, precomputed once from the
-   * census by `[slug]/page.tsx` and prop-drilled in (RT#5). `Post` stays
-   * synchronous and never consults the census itself. Missing/`linkable: false`
-   * → plain `<span>`; linkable → `<Link>` to the tag archive.
-   */
+  /** Precomputed by the page so Post stays synchronous and never reads the tag census. */
   tagLinks?: Map<string, TagLink>;
   createdAt?: string;
+  /** Set only when the editor recorded a real revision; shares JSON-LD's value. */
+  updatedAt?: string;
+  related?: RelatedPostCards;
 }
 
-export default function Post({ blok, tags = [], tagLinks, createdAt }: Readonly<PostProps>) {
+interface PostMetaProps {
+  createdAt?: string;
+  updatedAt?: string;
+  readingTime: string;
+}
+
+const PostMeta = ({ createdAt, updatedAt, readingTime }: PostMetaProps) => {
+  const items = [
+    createdAt && (
+      <time key="published" dateTime={createdAt}>
+        {formatDate(createdAt)}
+      </time>
+    ),
+    updatedAt && (
+      <span key="updated">
+        Updated <time dateTime={updatedAt}>{formatDate(updatedAt)}</time>
+      </span>
+    ),
+    <span key="reading">{readingTime}</span>,
+  ].filter(Boolean);
+
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm font-medium text-gray-500">
+      {items.map((item, index) => [
+        index > 0 && (
+          <span key={`separator-${index}`} aria-hidden="true">
+            •
+          </span>
+        ),
+        item,
+      ])}
+    </div>
+  );
+};
+
+export default function Post({ blok, tags = [], tagLinks, createdAt, updatedAt, related }: Readonly<PostProps>) {
   const { title = "", featured_image, excerpt, body } = blok;
   const readingTime = getStoryReadingTime(body);
-  const formattedDate = createdAt ? formatDate(createdAt) : '';
 
-  // Normalize to trimmed, de-duplicated display names so the pill lookup key
-  // matches the census map (keyed by trimmed name in `buildTagLinks`) and a
-  // whitespace variant can't render a duplicate pill.
+  // Trim and dedupe so names match tagLinks keys and no duplicate pill renders.
   const displayTags = [
     ...new Set(tags.map((tag) => tag?.trim()).filter((tag): tag is string => Boolean(tag))),
   ];
@@ -44,8 +73,8 @@ export default function Post({ blok, tags = [], tagLinks, createdAt }: Readonly<
         position="fixed"
         zIndex={40}
       />
-      <article className="flex flex-col items-center gap-y-6 md:gap-y-10 pt-4">
-        <header className="w-full max-w-[1280px] mx-auto px-4 md:px-8 lg:px-12 xl:px-5 flex flex-col items-center gap-4 text-center">
+      <article className="flex flex-col items-center gap-y-6 md:gap-y-10">
+        <header className="w-full max-w-7xl mx-auto px-4 md:px-8 lg:px-12 xl:px-5 flex flex-col items-center gap-4 text-center">
           {displayTags.length > 0 && (
             <div className="flex flex-wrap gap-2 justify-center">
               {displayTags.map((tag) => {
@@ -69,13 +98,7 @@ export default function Post({ blok, tags = [], tagLinks, createdAt }: Readonly<
             </h1>
           )}
 
-          {(formattedDate || readingTime) && (
-            <div className="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-600">
-              {formattedDate && <span>{formattedDate}</span>}
-              {formattedDate && readingTime && <span>•</span>}
-              {readingTime && <span>{readingTime}</span>}
-            </div>
-          )}
+          <PostMeta createdAt={createdAt} updatedAt={updatedAt} readingTime={readingTime} />
         </header>
 
         {featured_image?.filename && (
@@ -93,7 +116,7 @@ export default function Post({ blok, tags = [], tagLinks, createdAt }: Readonly<
           </figure>
         )}
 
-        <div className="w-full max-w-[1280px] flex flex-col items-center px-4 md:px-8 lg:px-12 xl:px-5 mx-auto gap-y-6 md:gap-y-12">
+        <div className="w-full max-w-7xl flex flex-col items-center px-4 md:px-8 lg:px-12 xl:px-5 mx-auto gap-y-6 md:gap-y-12">
           {excerpt && (
             <h2 className="h4 italic text-center md:px-2 lg:px-4 xl:px-16">
               {excerpt}
@@ -112,6 +135,7 @@ export default function Post({ blok, tags = [], tagLinks, createdAt }: Readonly<
           )}
         </div>
       </article>
+      <PostEndings related={related} />
     </>
   );
 }

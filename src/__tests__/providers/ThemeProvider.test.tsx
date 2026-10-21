@@ -67,7 +67,7 @@ describe('ThemeProvider', () => {
       }
     });
 
-    it('passes defaultTheme="light" to ThemeProvider', () => {
+    it('follows the OS color scheme by default', () => {
       const { container } = render(
         <ThemeProvider>
           <div>Test Child</div>
@@ -75,11 +75,8 @@ describe('ThemeProvider', () => {
       );
 
       const mockProvider = container.querySelector('[data-testid="theme-provider-mock"]');
-      const propsAttr = mockProvider?.getAttribute('data-props');
-      if (propsAttr) {
-        const props = JSON.parse(propsAttr);
-        expect(props.defaultTheme).toBe('light');
-      }
+      const props = JSON.parse(mockProvider?.getAttribute('data-props') ?? 'null');
+      expect(props).toMatchObject({ defaultTheme: 'system', enableSystem: true });
     });
 
     it('passes themes=["light","dark"] to ThemeProvider', () => {
@@ -110,7 +107,8 @@ describe('ThemeProvider', () => {
         const props = JSON.parse(propsAttr);
         expect(props).toEqual({
           attribute: 'data-theme',
-          defaultTheme: 'light',
+          defaultTheme: 'system',
+          enableSystem: true,
           themes: ['light', 'dark'],
         });
       }

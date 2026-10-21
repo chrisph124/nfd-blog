@@ -7,10 +7,7 @@ const comparisonCardVariants = cva(
   "flex flex-col gap-2 rounded-xl border p-4",
   {
     variants: {
-      // Subtle tint: a low-opacity surface + a colored border, with the tone
-      // color set on the card so the heading inherits it via currentColor. The
-      // body opts back out to text-foreground (below) for readable contrast.
-      // Tailwind v4 built-in palettes — no new tokens needed.
+      // The heading inherits the tone color; ComparisonBody resets to text-foreground for contrast.
       tone: {
         positive:
           "border-emerald-500/40 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400",

@@ -23,14 +23,21 @@ describe('POST API Route', () => {
   });
 
   describe('Valid requests', () => {
-    it('returns posts with default parameters', async () => {
-      const mockPosts = [
-        { id: 1, name: 'Post 1' },
-        { id: 2, name: 'Post 2' },
-      ];
+    it('returns slim card data without post bodies', async () => {
+      const story = {
+        uuid: 'uuid-1',
+        full_slug: 'posts/post-1',
+        created_at: '2025-01-01T00:00:00.000Z',
+        first_published_at: '2025-01-02T00:00:00.000Z',
+        content: {
+          component: 'post',
+          title: 'Post 1',
+          body: [{ _uid: 'm', component: 'markdown', content: 'word '.repeat(450) }],
+        },
+      };
 
       mockGet.mockResolvedValue({
-        data: { stories: mockPosts },
+        data: { stories: [story] },
         headers: { total: '48' },
       });
 
@@ -39,7 +46,16 @@ describe('POST API Route', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.stories).toEqual(mockPosts);
+      expect(data.posts).toEqual([
+        {
+          uuid: 'uuid-1',
+          href: '/post-1',
+          title: 'Post 1',
+          date: '2025-01-02T00:00:00.000Z',
+          readingTime: '3 min read',
+        },
+      ]);
+      expect(data).not.toHaveProperty('stories');
       expect(data.total).toBe(48);
       expect(data.page).toBe(1);
       expect(data.perPage).toBe(12);

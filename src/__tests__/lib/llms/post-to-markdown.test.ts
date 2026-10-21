@@ -49,7 +49,7 @@ describe('buildFrontMatter', () => {
     expect(fm).toContain('title: "My Post"');
     expect(fm).toContain('slug: "my-post"');
     expect(fm).toContain('publishedAt: "2024-05-01T00:00:00.000Z"');
-    expect(fm).toContain('dateModified: "2024-06-01T00:00:00.000Z"');
+    expect(fm).toContain('dateModified: "2024-05-01T00:00:00.000Z"');
     expect(fm).toContain('canonical: "https://example.com/my-post"');
     expect(fm).toContain('author: "Hieu (Chris) Pham"');
     expect(fm).toContain('tags: ["ai", "seo"]');

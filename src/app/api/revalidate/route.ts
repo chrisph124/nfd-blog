@@ -36,6 +36,11 @@ export async function POST(request: NextRequest) {
     // tag-unaware); they rely on lazy ISR (revalidate = 3600).
     revalidatePath('/tags');
 
+    // Every post page lists related and latest posts, so an unpublish or a slug
+    // move must not leave dead links there. A route handler only marks the
+    // pages stale; each rebuilds on its next visit.
+    revalidatePath('/[slug]', 'page');
+
     // Revalidate specific story path if provided
     if (fullSlug) {
       const slug = fullSlug;

@@ -85,6 +85,16 @@ export type CensusResult =
   | { ok: false };
 
 /**
+ * A post's tag names, trimmed and de-duplicated in source order, so a whitespace
+ * variant ("AI" and " AI") can't count the same post twice.
+ */
+function trimmedTagNames(post: StoryblokStory<PostBlok>): string[] {
+  return [
+    ...new Set((post.tag_list ?? []).map((raw) => raw?.trim()).filter((name): name is string => Boolean(name))),
+  ];
+}
+
+/**
  * Tally per-tag counts and membership from the post set. Dedupes tags within a
  * post so a malformed duplicate tag can't inflate a single-post tag over
  * THRESHOLD; trims names and skips empties.
@@ -94,12 +104,7 @@ function tallyTags(posts: StoryblokStory<PostBlok>[]): Pick<TagCensus, 'counts' 
   const membership = new Map<string, StoryblokStory<PostBlok>[]>();
 
   for (const post of posts) {
-    // Dedupe on the TRIMMED name so a whitespace variant ("AI" and " AI") can't
-    // count the same post twice or push it into membership twice.
-    const names = new Set(
-      (post.tag_list ?? []).map((raw) => raw?.trim()).filter((name): name is string => Boolean(name)),
-    );
-    for (const name of names) {
+    for (const name of trimmedTagNames(post)) {
       counts.set(name, (counts.get(name) ?? 0) + 1);
       const bucket = membership.get(name);
       if (bucket) bucket.push(post);
@@ -241,4 +246,38 @@ export function buildTagLinks(
     });
   }
   return links;
+}
+
+/** What a post ending offers next; `tag` is absent when no tag has another post. */
+export interface RelatedPosts {
+  tag?: { name: string; slug: string };
+  posts: StoryblokStory<PostBlok>[];
+}
+
+/**
+ * Up to `limit` posts to read next, never including `current`. Siblings come from
+ * the post's first linkable tag that has another post, so a tag only this post
+ * carries never labels the list; the remainder fills from the newest posts.
+ */
+export function selectRelatedPosts(
+  census: TagCensus,
+  posts: StoryblokStory<PostBlok>[],
+  current: StoryblokStory<PostBlok>,
+  limit = 3,
+): RelatedPosts {
+  const isOther = (post: StoryblokStory<PostBlok>) => post.uuid !== current.uuid;
+  const tagName = trimmedTagNames(current).find(
+    (name) => isTagLinkable(census, name) && (census.membership.get(name) ?? []).some(isOther),
+  );
+
+  const picked = new Map<string, StoryblokStory<PostBlok>>();
+  const siblings = tagName ? (census.membership.get(tagName) ?? []) : [];
+  for (const post of [...siblings, ...posts]) {
+    if (picked.size >= limit) break;
+    if (isOther(post)) picked.set(post.uuid, post);
+  }
+
+  const related: RelatedPosts = { posts: [...picked.values()] };
+  if (tagName) related.tag = { name: tagName, slug: census.nameToSlug.get(tagName) ?? slugify(tagName) };
+  return related;
 }

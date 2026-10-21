@@ -11,18 +11,10 @@ interface MarkdownProps {
   blok: MarkdownBlok;
 }
 
-/** Matches an Astro-style `title="…"` (or single-quoted) in a fence infostring. */
 const CODE_TITLE_META = /\btitle=(?:"([^"]*)"|'([^']*)')/;
 
-/**
- * Render a fenced code block inside the macOS-terminal chrome (traffic-light
- * dots · centered label · copy button). Every fence gets the frame — the label
- * is `filename(language)` when a `title="…"` meta is present (e.g.
- * ```ts title="src/foo.ts" → `src/foo.ts(ts)`), else the language, else `text`.
- * Shiki highlighting runs later in the rehype pipeline; here we only emit
- * escaped HTML + the `language-*` class Shiki reads. Dots are drawn in CSS
- * (`.code-frame__title::before`), so no dot markup is emitted.
- */
+// Shiki highlights later in the rehype pipeline, so emit only escaped HTML plus
+// the `language-*` class it reads. The terminal dots are drawn in CSS.
 function renderCode({ text, lang }: Tokens.Code): string {
   const language = /\S+/.exec(lang ?? '')?.[0] ?? '';
   const langClass = language ? ` class="language-${escapeHtml(language)}"` : '';
