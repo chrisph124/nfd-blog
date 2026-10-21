@@ -26,11 +26,14 @@ const bitcountPropSingle = Bitcount_Prop_Single({
   fallback: ["system-ui", "Arial", "sans-serif"],
 });
 
+// Not preloaded: Lora only styles post titles and display text, and preloading it competed with
+// the hero image for bandwidth on slow mobile connections. `swap` still renders text at once.
 const lora = Lora({
   variable: "--font-lora",
   subsets: ["latin"],
   weight: ["400", "600", "700"],
   display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
