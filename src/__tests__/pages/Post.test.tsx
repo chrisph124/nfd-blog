@@ -420,7 +420,7 @@ describe('Post', () => {
       const { container } = render(<Post blok={blok} />);
 
       const article = container.querySelector('article');
-      expect(article).toHaveClass('flex', 'flex-col', 'items-center', 'gap-y-6', 'md:gap-y-10', 'pt-4');
+      expect(article).toHaveClass('flex', 'flex-col', 'items-center', 'gap-y-6', 'md:gap-y-10');
     });
 
     it('applies prose styling to body content', () => {
@@ -439,7 +439,7 @@ describe('Post', () => {
 
       const header = container.querySelector('header');
       expect(header).toBeInTheDocument();
-      expect(header).toHaveClass('w-full', 'max-w-[1280px]', 'flex', 'flex-col', 'items-center', 'text-center');
+      expect(header).toHaveClass('w-full', 'max-w-7xl', 'flex', 'flex-col', 'items-center', 'text-center');
     });
 
     it('renders featured image inside aspect-video figure with rounded corners', () => {
@@ -511,7 +511,7 @@ describe('Post', () => {
       });
       const { container } = render(<Post blok={blok} />);
 
-      const contentSection = container.querySelector(String.raw`.max-w-\[1280px\]`);
+      const contentSection = container.querySelector('.max-w-7xl');
       expect(contentSection).toBeInTheDocument();
     });
   });
@@ -557,7 +557,7 @@ describe('Post', () => {
     });
   });
 
-  describe('Byline and post endings', () => {
+  describe('Post meta and related posts', () => {
     const relatedPosts = ['one', 'two', 'three'].map((slug) => ({
       uuid: `uuid-${slug}`,
       href: `/${slug}`,
@@ -566,33 +566,19 @@ describe('Post', () => {
       readingTime: '5 min read',
     }));
 
-    it('credits the author with a link to the About page', () => {
-      render(<Post blok={createMockBlok()} />);
-
-      expect(screen.getByRole('link', { name: 'Hieu (Chris) Pham' })).toHaveAttribute('href', '/about');
-    });
-
     it('shows no Updated date unless the post was revised', () => {
       render(<Post blok={createMockBlok()} createdAt="2025-01-15T10:00:00.000Z" />);
 
       expect(screen.queryByText(/Updated/)).not.toBeInTheDocument();
     });
 
-    it('shows the Updated date from the same value as the structured data', () => {
+    it('shows the Updated date with a machine-readable time', () => {
       const { container } = render(
         <Post blok={createMockBlok()} createdAt="2025-01-15T10:00:00.000Z" updatedAt="2025-09-01T00:00:00.000Z" />
       );
 
       expect(screen.getByText(/Updated/)).toBeInTheDocument();
       expect(container.querySelector('time[datetime="2025-09-01T00:00:00.000Z"]')).toBeInTheDocument();
-    });
-
-    it('ends with an author card and an RSS link', () => {
-      render(<Post blok={createMockBlok()} />);
-
-      const authorCard = screen.getByRole('complementary', { name: 'About the author' });
-      expect(within(authorCard).getByRole('link', { name: 'About me' })).toHaveAttribute('href', '/about');
-      expect(screen.getByRole('link', { name: 'Follow via RSS' })).toHaveAttribute('href', '/rss.xml');
     });
 
     it('lists related posts under the shared tag', () => {
@@ -607,10 +593,20 @@ describe('Post', () => {
       ]);
     });
 
+    it('shows a related cover as a decorative thumbnail only when the post has one', () => {
+      const withCover = { ...relatedPosts[0], image: { src: 'https://a.storyblok.com/f/one.jpg', alt: 'Cover' } };
+      render(<Post blok={createMockBlok({ featured_image: undefined })} related={{ posts: [withCover, relatedPosts[1]] }} />);
+
+      const thumbnails = within(screen.getByRole('list')).getAllByTestId('next-image');
+      expect(thumbnails).toHaveLength(1);
+      expect(thumbnails[0]).toHaveAttribute('data-src', 'https://a.storyblok.com/f/one.jpg');
+      expect(thumbnails[0]).toHaveAttribute('data-alt', '');
+    });
+
     it('titles the list Latest posts when no tag has another post', () => {
       render(<Post blok={createMockBlok()} related={{ posts: relatedPosts }} />);
 
-      expect(screen.getByRole('heading', { level: 2, name: 'Latest posts' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { level: 3, name: 'Latest posts' })).toBeInTheDocument();
     });
 
     it('omits the related list without related posts', () => {
@@ -860,7 +856,7 @@ describe('Post', () => {
 
       // Check responsive classes are maintained
       const article = container.querySelector('article');
-      expect(article).toHaveClass('gap-y-6', 'md:gap-y-10', 'pt-4');
+      expect(article).toHaveClass('gap-y-6', 'md:gap-y-10');
 
       const figure = container.querySelector('figure');
       expect(figure).toHaveClass('max-w-[1080px]');
@@ -875,7 +871,7 @@ describe('Post', () => {
       render(<Post blok={blok} />);
 
       // Check content containers have correct max-width
-      const contentContainers = document.querySelectorAll(String.raw`.max-w-\[1280px\]`);
+      const contentContainers = document.querySelectorAll('.max-w-7xl');
       expect(contentContainers.length).toBeGreaterThan(0);
 
       expect(screen.getByTestId('reading-progress')).toBeInTheDocument();
