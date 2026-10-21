@@ -70,7 +70,7 @@ describe('Teaser', () => {
       const blok = createMockBlok();
       const { container } = render(<Teaser blok={blok} />);
 
-      const innerDiv = container.querySelector(String.raw`.max-w-\[1280px\]`);
+      const innerDiv = container.querySelector('.max-w-7xl');
       expect(innerDiv).toBeInTheDocument();
       expect(innerDiv).toHaveClass('px-4', 'md:px-8', 'lg:px-12', 'xl:px-5');
     });
@@ -79,7 +79,7 @@ describe('Teaser', () => {
       const blok = createMockBlok();
       const { container } = render(<Teaser blok={blok} />);
 
-      const innerDiv = container.querySelector(String.raw`.max-w-\[1280px\]`);
+      const innerDiv = container.querySelector('.max-w-7xl');
       expect(innerDiv).toHaveClass('mx-auto', 'my-6');
     });
   });

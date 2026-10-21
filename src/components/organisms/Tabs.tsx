@@ -41,7 +41,6 @@ const TabDropdown = memo(({ tabs, activeTab, onSelect }: DropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Dropdown button and panel classes
   const DROPDOWN_BUTTON_CLASSES = "w-full px-4 py-3 bg-background border-2 border-gray-100 rounded-xl font-normal text-base text-gray-700 flex items-center justify-between";
   const DROPDOWN_PANEL_CLASSES = "absolute z-10 w-full mt-1 bg-background border-2 border-gray-100 rounded-xl shadow-lg overflow-hidden";
 

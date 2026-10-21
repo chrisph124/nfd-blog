@@ -57,7 +57,7 @@ export default async function TagsIndexPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: escapeJsonLd(jsonLd) }}
       />
-      <section className="w-full max-w-[1280px] px-4 md:px-8 lg:px-12 xl:px-5 mx-auto py-10 md:py-15 flex flex-col gap-8">
+      <section className="w-full max-w-7xl px-4 md:px-8 lg:px-12 xl:px-5 mx-auto flex flex-col gap-8">
         <nav aria-label="Breadcrumb">
           <ol className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
             <li>

@@ -57,7 +57,7 @@ export default function PostListClient({
   };
 
   return (
-    <div className="flex flex-col gap-6 max-w-[1280px] px-4 md:px-8 lg:px-12 xl:px-5 mx-auto">
+    <div className="flex flex-col gap-6 max-w-7xl px-4 md:px-8 lg:px-12 xl:px-5 mx-auto">
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {posts.map((post, index) => (
           <Card

@@ -14,22 +14,12 @@ const ICON_MAP = {
   checked: HiOutlineCheckCircle,
 } as const;
 
-/**
- * alert blok — a reusable filled accent card (announcement / alert / post TL;DR).
- * The accent color fills the card; icon, title, and richtext body are white for
- * contrast against the fill. Server component: a short TL;DR needs no client
- * interactivity, so it renders the richtext inline.
- */
 export default function Alert({ blok }: Readonly<{ blok: AlertBlok }>) {
   const Icon = ICON_MAP[blok.icon ?? 'information'];
   const color = blok.color ?? 'emerald';
-  // `??` (not `||`): an unset title defaults to 'TL;DR'; a title the editor
-  // deliberately cleared to '' stays empty and hides the title row (below),
-  // allowing an intentional title-less alert.
+  // `??` not `||`: a title cleared to '' stays empty and hides the title row.
   const title = blok.title ?? 'TL;DR';
-  // body is a richtext object at runtime but typed `string` by generate-types —
-  // the same cast the Richtext atom uses. Guard first so an empty body renders
-  // no description (and renderRichText is never handed undefined).
+  // generate-types types richtext as string, but it is an object at runtime.
   const html = blok.body
     ? renderRichText(blok.body as unknown as StoryblokRichTextNode)
     : '';

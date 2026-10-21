@@ -17,7 +17,7 @@ export default function ContentCards({ blok }: Readonly<ContentCardsProps>) {
   const isSingleBlock = blocks.length <= 1;
 
   const gridClasses = cn(
-    'w-full max-w-[1280px] px-10 py-12 lg:px-15 xl:px-5 lg:py-15 mx-auto grid gap-4 md:gap-6',
+    'w-full max-w-7xl px-10 py-12 lg:px-15 xl:px-5 lg:py-15 mx-auto grid gap-4 md:gap-6',
     isSingleBlock
       ? 'grid-cols-1'
       : cn('grid-cols-1 md:grid-cols-2', GRID_COLS[blok.layout || '5/5'])

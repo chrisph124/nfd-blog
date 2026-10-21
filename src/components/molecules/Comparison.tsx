@@ -8,13 +8,6 @@ import {
 import { makeStoryblokEditable } from '@/lib/storyblok-utils';
 import type { ComparisonBlok } from '@/types/storyblok';
 
-/**
- * comparison blok — side-by-side pros/cons cards (the sanctioned replacement for
- * markdown comparison tables). The parent holds a `columns` array of
- * `comparison_card` children (tone + heading + richtext body) rendered in a
- * responsive grid that stacks on mobile. Server component: static content needs
- * no client interactivity, so richtext renders inline (same cast as Alert).
- */
 export default function Comparison({ blok }: Readonly<{ blok: ComparisonBlok }>) {
   const cards = blok.columns ?? [];
   if (cards.length === 0) return null;
@@ -26,10 +19,7 @@ export default function Comparison({ blok }: Readonly<{ blok: ComparisonBlok }>)
       )}
       <ComparisonRoot>
         {cards.map((card) => {
-          // body is a richtext object at runtime but typed `string` by
-          // generate-types — the same cast Alert uses. Guard first so an empty
-          // body renders no description (and renderRichText is never handed
-          // undefined).
+          // generate-types types richtext as string, but it is an object at runtime.
           const html = card.body
             ? renderRichText(card.body as unknown as StoryblokRichTextNode)
             : '';

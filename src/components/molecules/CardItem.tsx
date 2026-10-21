@@ -27,7 +27,6 @@ export default function CardItem({ blok }: Readonly<CardItemProps>) {
       try {
         const storyblokApi = getStoryblokApi();
 
-        // Determine the correct identifier and API parameters
         let storyIdentifier: string;
         const apiParams: Record<string, string> = { version: storyblokVersion };
 

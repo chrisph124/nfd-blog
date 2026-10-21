@@ -7,11 +7,7 @@ interface CodeTabsProps {
   blok: CodeTabsBlok;
 }
 
-/**
- * code_tabs blok — a first-class sibling in a post body. Highlights each tab's
- * code server-side with Shiki (keeping the highlighter out of the client bundle)
- * and hands plain HTML strings to the interactive client shell.
- */
+/** Highlights on the server so Shiki stays out of the client bundle. */
 export default async function CodeTabs({ blok }: Readonly<CodeTabsProps>) {
   const tabs = blok.tabs ?? [];
   if (tabs.length === 0) return null;

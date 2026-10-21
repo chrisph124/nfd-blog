@@ -28,7 +28,6 @@ const ImageCarousel = memo(({ images, hideOnMobile }: ImageCarouselProps) => {
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
 
   const handleMouseEnter = useCallback(() => {
-    // Pause autoplay on hover — handled via emblaApi for testability
     const autoplay = emblaApi?.plugins?.()?.autoplay;
     if (autoplay) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -37,7 +36,6 @@ const ImageCarousel = memo(({ images, hideOnMobile }: ImageCarouselProps) => {
   }, [emblaApi]);
 
   const handleMouseLeave = useCallback(() => {
-    // Resume autoplay on leave — handled via emblaApi for testability
     const autoplay = emblaApi?.plugins?.()?.autoplay;
     if (autoplay) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -45,7 +43,6 @@ const ImageCarousel = memo(({ images, hideOnMobile }: ImageCarouselProps) => {
     }
   }, [emblaApi]);
 
-  // Single image — static display
   if (images.length === 1) {
     const image = images[0];
     return (
@@ -65,7 +62,6 @@ const ImageCarousel = memo(({ images, hideOnMobile }: ImageCarouselProps) => {
     );
   }
 
-  // Multiple images — Embla carousel
   return (
     <div
       className={cn('mt-auto overflow-hidden border-10 border-white rounded-3xl', hideOnMobile && 'hidden md:block')}
@@ -94,7 +90,6 @@ const ImageCarousel = memo(({ images, hideOnMobile }: ImageCarouselProps) => {
         </div>
       </div>
 
-      {/* Arrow navigation */}
       <div className="absolute inset-0 flex items-center justify-between px-2">
         <button
           type="button"
