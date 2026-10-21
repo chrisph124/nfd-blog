@@ -84,8 +84,8 @@ describe('buildLlmsIndex', () => {
     expect(out).toContain('([md](https://example.com/hello.md))');
   });
 
-  it('truncates long descriptions with ellipsis', () => {
-    const long = 'x'.repeat(500);
+  it('truncates long descriptions at a word boundary within 200 characters', () => {
+    const long = Array.from({ length: 60 }, (_, i) => `word${i}`).join(' ');
     const out = buildLlmsIndex({
       siteName: 'Notes',
       siteUrl: 'https://example.com',
@@ -93,7 +93,10 @@ describe('buildLlmsIndex', () => {
       posts: [{ ...base, description: long }],
     });
 
-    expect(out).toContain('…');
+    const desc = out.split('hello.md)): ')[1].split('\n')[0];
+    expect(desc.length).toBeLessThanOrEqual(200);
+    expect(desc).toMatch(/word\d+…$/);
+    expect(long.startsWith(`${desc.slice(0, -1)} `)).toBe(true);
   });
 
   it('renders empty-posts placeholder', () => {
