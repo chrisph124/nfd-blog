@@ -4,6 +4,7 @@ import { StoryblokServerComponent } from "@/lib/storyblok-utils";
 import { getStoryReadingTime, formatDate } from "@/lib/utils";
 import ReadingProgressBar from "@/components/atoms/ReadingProgress";
 import PostEndings, { type RelatedPostCards } from "@/components/organisms/PostEndings";
+import PostActions from "@/components/molecules/PostActions";
 import type { PostBlok } from "@/types/storyblok";
 import type { TagLink } from "@/lib/tags";
 
@@ -17,28 +18,22 @@ interface PostProps {
   /** Precomputed by the page so Post stays synchronous and never reads the tag census. */
   tagLinks?: Map<string, TagLink>;
   createdAt?: string;
-  /** Set only when the editor recorded a real revision; shares JSON-LD's value. */
-  updatedAt?: string;
   related?: RelatedPostCards;
+  /** Absolute canonical URL; page actions render only when it is known. */
+  url?: string;
 }
 
 interface PostMetaProps {
   createdAt?: string;
-  updatedAt?: string;
   readingTime: string;
 }
 
-const PostMeta = ({ createdAt, updatedAt, readingTime }: PostMetaProps) => {
+const PostMeta = ({ createdAt, readingTime }: PostMetaProps) => {
   const items = [
     createdAt && (
       <time key="published" dateTime={createdAt}>
         {formatDate(createdAt)}
       </time>
-    ),
-    updatedAt && (
-      <span key="updated">
-        Updated <time dateTime={updatedAt}>{formatDate(updatedAt)}</time>
-      </span>
     ),
     <span key="reading">{readingTime}</span>,
   ].filter(Boolean);
@@ -57,7 +52,7 @@ const PostMeta = ({ createdAt, updatedAt, readingTime }: PostMetaProps) => {
   );
 };
 
-export default function Post({ blok, tags = [], tagLinks, createdAt, updatedAt, related }: Readonly<PostProps>) {
+export default function Post({ blok, tags = [], tagLinks, createdAt, related, url }: Readonly<PostProps>) {
   const { title = "", featured_image, excerpt, body } = blok;
   const readingTime = getStoryReadingTime(body);
 
@@ -98,7 +93,9 @@ export default function Post({ blok, tags = [], tagLinks, createdAt, updatedAt, 
             </h1>
           )}
 
-          <PostMeta createdAt={createdAt} updatedAt={updatedAt} readingTime={readingTime} />
+          <PostMeta createdAt={createdAt} readingTime={readingTime} />
+
+          {url && <PostActions url={url} title={title} />}
         </header>
 
         {featured_image?.filename && (
@@ -132,6 +129,12 @@ export default function Post({ blok, tags = [], tagLinks, createdAt, updatedAt, 
                 />
               ))}
             </section>
+          )}
+
+          {url && (
+            <div className="w-full max-w-5xl">
+              <PostActions url={url} title={title} align="start" />
+            </div>
           )}
         </div>
       </article>

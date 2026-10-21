@@ -1,12 +1,13 @@
 import { memo } from 'react';
 import { makeStoryblokEditable } from "@/lib/storyblok-utils";
 import type { StoryblokComponentProps, FooterBlok } from "@/types/storyblok";
+import { AUTHOR_EMAIL, AUTHOR_GITHUB_URL, AUTHOR_LINKEDIN_URL } from '@/lib/seo/author';
 import { FaGithub, FaLinkedin, FaEnvelope, FaRss } from 'react-icons/fa';
 
 const SOCIAL_LINKS = [
-  { name: 'GitHub', url: 'https://github.com/chrisph124', icon: FaGithub },
-  { name: 'LinkedIn', url: 'https://www.linkedin.com/in/chrispham124/', icon: FaLinkedin },
-  { name: 'Email', url: 'mailto:chris.pham124@gmail.com', icon: FaEnvelope },
+  { name: 'GitHub', url: AUTHOR_GITHUB_URL, icon: FaGithub },
+  { name: 'LinkedIn', url: AUTHOR_LINKEDIN_URL, icon: FaLinkedin },
+  { name: 'Email', url: `mailto:${AUTHOR_EMAIL}`, icon: FaEnvelope },
   { name: 'RSS feed', url: '/rss.xml', icon: FaRss },
 ] as const;
 
@@ -33,7 +34,8 @@ const Footer = memo(({ blok }: StoryblokComponentProps<FooterBlok>) => {
                 key={link.name}
                 href={link.url}
                 target={link.url.startsWith('http') ? '_blank' : undefined}
-                rel={link.url.startsWith('http') ? 'noopener noreferrer' : undefined}
+                // `me` ties the profiles to the author for search engines; JSON-LD `sameAs` lists the same URLs.
+                rel={link.url.startsWith('http') ? 'me noopener noreferrer' : undefined}
                 // Padding with a matching negative margin gives a 44px tap area without changing the spacing.
                 className="-m-2.5 p-2.5 text-foreground! hover:text-primary-700! transition-colors"
                 aria-label={link.name}
