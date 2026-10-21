@@ -37,6 +37,29 @@ describe('PostActions', () => {
     expect(writeText).toHaveBeenCalledWith(MARKDOWN);
   });
 
+  it('hands Safari-style clipboards a pending blob that resolves to the Markdown body', async () => {
+    const items: Record<string, Promise<Blob>>[] = [];
+    vi.stubGlobal(
+      'ClipboardItem',
+      class {
+        constructor(data: Record<string, Promise<Blob>>) {
+          items.push(data);
+        }
+      },
+    );
+    const write = vi.fn().mockResolvedValue(undefined);
+    const user = userEvent.setup();
+    Object.defineProperty(navigator, 'clipboard', { value: { write, writeText }, configurable: true });
+    render(<PostActions url={URL_UNDER_TEST} title="My post" />);
+
+    await user.click(screen.getByRole('button', { name: 'Copy page' }));
+
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Page copied'));
+    expect(write).toHaveBeenCalledTimes(1);
+    expect(await (await items[0]['text/plain']).text()).toBe(MARKDOWN);
+    expect(writeText).not.toHaveBeenCalled();
+  });
+
   it('reports a failed copy instead of claiming success', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('', { status: 404 })));
     const user = setup();
@@ -76,6 +99,32 @@ describe('PostActions', () => {
     await waitFor(() =>
       expect(screen.getByRole('status')).toHaveTextContent('Prompt copied. Paste it into Gemini.'),
     );
+  });
+
+  it('copies the canonical link, and Share falls back to that copy without a share sheet', async () => {
+    const user = setup();
+
+    for (const action of ['Copy link', 'Share']) {
+      writeText.mockClear();
+      await user.click(screen.getByRole('button', { name: 'More actions' }));
+      await user.click(screen.getByRole('button', { name: action }));
+
+      expect(writeText).toHaveBeenCalledWith(URL_UNDER_TEST);
+      await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Link copied'));
+    }
+  });
+
+  it('hands the title and canonical URL to the native share sheet when available', async () => {
+    const share = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'share', { value: share, configurable: true });
+    const user = setup();
+
+    await user.click(screen.getByRole('button', { name: 'More actions' }));
+    await user.click(screen.getByRole('button', { name: 'Share' }));
+
+    expect(share).toHaveBeenCalledWith({ title: 'My post', url: URL_UNDER_TEST });
+    expect(writeText).not.toHaveBeenCalled();
+    Reflect.deleteProperty(navigator, 'share');
   });
 
   it('opens and closes the menu from the keyboard and returns focus to the toggle', async () => {
