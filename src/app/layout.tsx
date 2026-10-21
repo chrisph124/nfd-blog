@@ -9,6 +9,7 @@ import MotionProvider from "@/components/providers/MotionProvider";
 import { getSiteUrl, getStoryblokApi, storyblokVersion } from "@/lib/storyblok";
 import Header from "@/components/organisms/Header";
 import Footer from "@/components/organisms/Footer";
+import { SITE_DESCRIPTION, SITE_TITLE } from '@/lib/seo/site';
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -34,8 +35,8 @@ const lora = Lora({
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
-  title: { default: 'Notes of Dev — Frontend Engineering, AI & CMS Notes', template: '%s | Notes of Dev' },
-  description: 'A working notebook on frontend engineering, AI workflows, and headless CMS architecture — research, experiments, and patterns from building real interfaces.',
+  title: { default: SITE_TITLE, template: '%s | Notes of Dev' },
+  description: SITE_DESCRIPTION,
   openGraph: {
     type: 'website',
     siteName: 'Notes of Dev',

@@ -4,12 +4,13 @@ import { getSiteUrl } from '@/lib/storyblok';
 import { getTagCensus, selectArchivedTags } from '@/lib/tags';
 import { buildCollectionPageJsonLd } from '@/lib/seo-structured-data';
 import { escapeJsonLd } from '@/lib/seo/json-ld-escape';
+import { SITE_TOPICS } from '@/lib/seo/site';
 
 export const revalidate = 3600;
 
 const TITLE = 'Tags — Browse by Topic';
 const DESCRIPTION =
-  'Browse every topic on Notes of Dev — frontend engineering, AI, and headless CMS notes, grouped by tag.';
+  `Browse every topic on Notes of Dev (${SITE_TOPICS}), grouped by tag.`;
 
 export async function generateMetadata(): Promise<Metadata> {
   const siteUrl = getSiteUrl();

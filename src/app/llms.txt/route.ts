@@ -1,5 +1,6 @@
 import { fetchAllPosts, getSiteUrl } from '@/lib/storyblok';
 import { buildLlmsIndex, type LlmsPost } from '@/lib/llms/build-index';
+import { SITE_DESCRIPTION } from '@/lib/seo/site';
 
 export const revalidate = 3600;
 
@@ -26,7 +27,7 @@ export async function GET() {
     siteName: 'Notes of Dev',
     siteUrl,
     description:
-      'A working notebook on frontend engineering, AI workflows, and headless CMS architecture — research, experiments, and patterns from building real interfaces.',
+      SITE_DESCRIPTION,
     posts,
     aboutUrl: `${siteUrl}/about`,
   });
