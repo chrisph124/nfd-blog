@@ -5,4 +5,6 @@ export const AUTHOR_SAME_AS = [
   'https://www.linkedin.com/in/chrispham124/',
 ];
 
-export const AUTHOR_BIO = 'Writing about AI, software engineering and developer tools.';
+export const AUTHOR_EMAIL = 'hieu.phamchi124@gmail.com';
+
+export const AUTHOR_BIO ='Writing about AI, software engineering and developer tools.';

@@ -115,7 +115,7 @@ describe('Footer', () => {
       render(<Footer blok={blok} />);
 
       const emailLink = screen.getByLabelText('Email');
-      expect(emailLink).toHaveAttribute('href', 'mailto:chris.pham124@gmail.com');
+      expect(emailLink).toHaveAttribute('href', 'mailto:hieu.phamchi124@gmail.com');
       expect(emailLink).not.toHaveAttribute('target');
       expect(emailLink).not.toHaveAttribute('rel');
     });

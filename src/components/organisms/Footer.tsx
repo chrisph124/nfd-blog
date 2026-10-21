@@ -1,12 +1,13 @@
 import { memo } from 'react';
 import { makeStoryblokEditable } from "@/lib/storyblok-utils";
 import type { StoryblokComponentProps, FooterBlok } from "@/types/storyblok";
+import { AUTHOR_EMAIL } from '@/lib/seo/author';
 import { FaGithub, FaLinkedin, FaEnvelope, FaRss } from 'react-icons/fa';
 
 const SOCIAL_LINKS = [
   { name: 'GitHub', url: 'https://github.com/chrisph124', icon: FaGithub },
   { name: 'LinkedIn', url: 'https://www.linkedin.com/in/chrispham124/', icon: FaLinkedin },
-  { name: 'Email', url: 'mailto:chris.pham124@gmail.com', icon: FaEnvelope },
+  { name: 'Email', url: `mailto:${AUTHOR_EMAIL}`, icon: FaEnvelope },
   { name: 'RSS feed', url: '/rss.xml', icon: FaRss },
 ] as const;
 
