@@ -27,6 +27,15 @@ describe('POST /api/revalidate — new AI-legible surfaces (RT#2)', () => {
     delete process.env.REVALIDATE_SECRET;
   });
 
+  it('expires every cached Storyblok response immediately on publish', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    await POST(postRequest({ full_slug: 'about' }));
+
+    expect(revalidateTag).toHaveBeenCalledWith('storyblok', { expire: 0 });
+    logSpy.mockRestore();
+  });
+
   it('revalidates /llms-full.txt and the /api/md/{slug} surface on a post publish', async () => {
     const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
