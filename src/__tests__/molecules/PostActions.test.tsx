@@ -4,16 +4,23 @@ import userEvent from '@testing-library/user-event';
 import PostActions from '@/components/molecules/PostActions';
 
 const URL_UNDER_TEST = 'https://www.notesof.dev/my-post';
+const TITLE = 'My post';
 const PROMPT = `Read ${URL_UNDER_TEST}.md and answer questions about it.`;
+const encoded = encodeURIComponent(URL_UNDER_TEST);
+
+const stubPointer = (pointer: 'coarse' | 'fine') =>
+  vi.stubGlobal('matchMedia', (query: string) => ({ matches: query === `(pointer: ${pointer})`, media: query }));
 
 describe('PostActions', () => {
   let writeText: ReturnType<typeof vi.fn<(text: string) => Promise<void>>>;
 
   beforeEach(() => {
     writeText = vi.fn<(text: string) => Promise<void>>().mockResolvedValue(undefined);
+    stubPointer('fine');
   });
 
   afterEach(() => {
+    vi.unstubAllGlobals();
     Reflect.deleteProperty(navigator, 'share');
   });
 
@@ -21,8 +28,13 @@ describe('PostActions', () => {
   const setup = (clipboard: Partial<Clipboard> = { writeText }) => {
     const user = userEvent.setup();
     Object.defineProperty(navigator, 'clipboard', { value: clipboard, configurable: true });
-    render(<PostActions url={URL_UNDER_TEST} title="My post" />);
+    render(<PostActions url={URL_UNDER_TEST} title={TITLE} />);
     return user;
+  };
+
+  const stubNativeShare = (share = vi.fn().mockResolvedValue(undefined)) => {
+    Object.defineProperty(navigator, 'share', { value: share, configurable: true });
+    return share;
   };
 
   it('copies a prompt that points at the absolute Markdown URL', async () => {
@@ -50,34 +62,81 @@ describe('PostActions', () => {
     expect(link).toHaveAttribute('target', '_blank');
   });
 
-  it('hands the title and canonical URL to the native share sheet when available', async () => {
-    const share = vi.fn().mockResolvedValue(undefined);
-    Object.defineProperty(navigator, 'share', { value: share, configurable: true });
+  it('gives desktops a share menu with copy link and encoded network links', async () => {
     const user = setup();
 
     await user.click(screen.getByRole('button', { name: 'Share' }));
 
-    expect(share).toHaveBeenCalledWith({ title: 'My post', url: URL_UNDER_TEST });
-    expect(writeText).not.toHaveBeenCalled();
-  });
+    expect(screen.getByRole('button', { name: 'Share' })).toHaveAttribute('aria-expanded', 'true');
+    const expected: Record<string, string> = {
+      LinkedIn: `https://www.linkedin.com/sharing/share-offsite/?url=${encoded}`,
+      X: `https://x.com/intent/post?url=${encoded}&text=${encodeURIComponent(TITLE)}`,
+      Facebook: `https://www.facebook.com/sharer/sharer.php?u=${encoded}`,
+      WhatsApp: `https://wa.me/?text=${encodeURIComponent(TITLE + ' ' + URL_UNDER_TEST)}`,
+    };
+    for (const [name, href] of Object.entries(expected)) {
+      const link = screen.getByRole('link', { name });
+      expect(link).toHaveAttribute('href', href);
+      expect(link).toHaveAttribute('rel', 'nofollow noopener noreferrer');
+    }
+    expect(screen.queryByRole('button', { name: 'More apps…' })).not.toBeInTheDocument();
 
-  it('copies the canonical URL when the browser has no share sheet', async () => {
-    const user = setup();
-
-    await user.click(screen.getByRole('button', { name: 'Share' }));
-
+    await user.click(screen.getByRole('button', { name: 'Copy link' }));
     expect(writeText).toHaveBeenCalledWith(URL_UNDER_TEST);
     await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Link copied'));
+    expect(screen.getByRole('button', { name: 'Share' })).toHaveFocus();
   });
 
-  it('stays quiet when the reader cancels the share sheet', async () => {
-    const share = vi.fn().mockRejectedValue(new DOMException('Share canceled', 'AbortError'));
-    Object.defineProperty(navigator, 'share', { value: share, configurable: true });
+  it('offers the native sheet as "More apps…" on desktops that support it', async () => {
+    const share = stubNativeShare();
+    const user = setup();
+
+    await user.click(screen.getByRole('button', { name: 'Share' }));
+    expect(share).not.toHaveBeenCalled();
+    await user.click(screen.getByRole('button', { name: 'More apps…' }));
+
+    expect(share).toHaveBeenCalledWith({ title: TITLE, url: URL_UNDER_TEST });
+  });
+
+  it('opens the native sheet straight away on touch devices', async () => {
+    stubPointer('coarse');
+    const share = stubNativeShare();
     const user = setup();
 
     await user.click(screen.getByRole('button', { name: 'Share' }));
 
-    await waitFor(() => expect(share).toHaveBeenCalled());
-    expect(screen.getByRole('status')).toBeEmptyDOMElement();
+    expect(share).toHaveBeenCalledWith({ title: TITLE, url: URL_UNDER_TEST });
+    expect(screen.getByRole('button', { name: 'Share' })).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('falls back to the menu when the native sheet fails, but not when the reader cancels it', async () => {
+    stubPointer('coarse');
+    const share = stubNativeShare(vi.fn().mockRejectedValue(new DOMException('Share canceled', 'AbortError')));
+    const user = setup();
+    const shareButton = screen.getByRole('button', { name: 'Share' });
+
+    await user.click(shareButton);
+    await waitFor(() => expect(share).toHaveBeenCalledTimes(1));
+    expect(shareButton).toHaveAttribute('aria-expanded', 'false');
+
+    share.mockRejectedValueOnce(new Error('Share failed'));
+    await user.click(shareButton);
+    await waitFor(() => expect(shareButton).toHaveAttribute('aria-expanded', 'true'));
+    expect(screen.getByRole('button', { name: 'Copy link' })).toBeVisible();
+  });
+
+  it('closes the menu with Escape and returns focus to the Share button', async () => {
+    const user = setup();
+    const shareButton = screen.getByRole('button', { name: 'Share' });
+
+    await user.tab();
+    expect(shareButton).toHaveFocus();
+    await user.keyboard('{Enter}');
+    await user.tab();
+    expect(screen.getByRole('button', { name: 'Copy link' })).toHaveFocus();
+
+    await user.keyboard('{Escape}');
+    expect(shareButton).toHaveAttribute('aria-expanded', 'false');
+    expect(shareButton).toHaveFocus();
   });
 });
