@@ -7,11 +7,6 @@ export function proxy(request: NextRequest) {
   try {
     const { pathname } = request.nextUrl;
 
-    // Block access to /global/* routes (header, footer, etc.)
-    if (pathname.startsWith('/global')) {
-      return NextResponse.rewrite(new URL('/404', request.url));
-    }
-
     // Serve a post's machine-readable markdown at /{slug}.md by rewriting to the
     // /api/md/[slug] handler. Restricted to a single non-slash segment ending in
     // `.md` (RT#9), so nested paths (/posts/foo.md) and `.txt`/`.xml` pass through.

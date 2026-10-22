@@ -91,6 +91,18 @@ describe('CatchAllPage', () => {
     expect(mockNotFound).toHaveBeenCalled();
     consoleSpy.mockRestore();
   });
+
+  it('404s shared global/ stories even though they exist', async () => {
+    mockFetchStory.mockResolvedValue(createMockStory('global/header'));
+
+    await expect(
+      CatchAllPage({ params: makeParams(['global', 'header']) })
+    ).rejects.toThrow('NEXT_NOT_FOUND');
+    expect(mockFetchStory).not.toHaveBeenCalled();
+
+    const metadata = await generateMetadata({ params: makeParams(['global', 'header']) });
+    expect(metadata.title).toBe('Page not found');
+  });
 });
 
 describe('generateMetadata ([...slug])', () => {

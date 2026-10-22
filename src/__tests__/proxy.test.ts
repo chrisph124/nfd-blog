@@ -79,10 +79,6 @@ describe('proxy — /posts/* canonical redirect', () => {
 });
 
 describe('proxy — existing behavior preserved', () => {
-  it('blocks /global/* by rewriting to /404', () => {
-    expect(rewriteOf('/global/header')).toContain('/404');
-  });
-
   it('passes normal pages through', () => {
     expect(rewriteOf('/about')).toBeNull();
   });

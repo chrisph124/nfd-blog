@@ -14,9 +14,14 @@ interface PageProps {
   }>;
 }
 
+// Shared `global/` stories (header, footer) are fragments, not pages. Checked on
+// the decoded slug, so percent-encoded variants like `/%67lobal/header` 404 too.
+const isPageSlug = (fullSlug: string) => fullSlug !== 'global' && !fullSlug.startsWith('global/');
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const fullSlug = slug.join('/');
+  if (!isPageSlug(fullSlug)) return notFoundMetadata;
   const story = await fetchStory(fullSlug);
   // Same as `[slug]`: without the 404 title here, hydration restores the home title.
   if (!story) return notFoundMetadata;
@@ -66,6 +71,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function CatchAllPage({ params }: Readonly<PageProps>) {
   const { slug } = await params;
   const fullSlug = slug.join('/');
+  if (!isPageSlug(fullSlug)) notFound();
 
   const story = await fetchStory(fullSlug);
   if (!story) notFound();

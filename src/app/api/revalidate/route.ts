@@ -1,14 +1,23 @@
+import { createHash, timingSafeEqual } from 'node:crypto';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 import { STORYBLOK_CACHE_TAG } from '@/lib/storyblok-cache';
 import { notifyIndexNow } from '@/lib/indexnow';
 
-export async function POST(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams;
-  const secret = searchParams.get('secret');
+// Hashing first gives both sides the same length, which timingSafeEqual requires,
+// so the comparison time reveals nothing about the secret.
+const digest = (value: string) => createHash('sha256').update(value).digest();
 
-  // Validate secret token (timing-safe comparison)
-  if (!process.env.REVALIDATE_SECRET || secret !== process.env.REVALIDATE_SECRET) {
+function isValidSecret(secret: string | null): boolean {
+  const expected = process.env.REVALIDATE_SECRET;
+  if (!expected || secret === null) return false;
+  return timingSafeEqual(digest(secret), digest(expected));
+}
+
+export async function POST(request: NextRequest) {
+  const secret = request.nextUrl.searchParams.get('secret');
+
+  if (!isValidSecret(secret)) {
     return NextResponse.json(
       { error: 'Invalid token' },
       { status: 401 }
@@ -108,23 +117,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-// Handle GET for testing
-export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams;
-  const secret = searchParams.get('secret');
-
-  if (!process.env.REVALIDATE_SECRET || secret !== process.env.REVALIDATE_SECRET) {
-    return NextResponse.json(
-      { error: 'Invalid token' },
-      { status: 401 }
-    );
-  }
-
-  revalidatePath('/');
-  return NextResponse.json({
-    revalidated: true,
-    timestamp: Date.now(),
-  });
 }
