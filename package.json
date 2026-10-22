@@ -1,6 +1,6 @@
 {
   "name": "nfd-blog",
-  "version": "2.14.3",
+  "version": "2.14.4",
   "private": true,
   "scripts": {
     "dev": "concurrently -k -n next,https -c cyan,magenta \"pnpm dev:next\" \"pnpm dev:https\"",
