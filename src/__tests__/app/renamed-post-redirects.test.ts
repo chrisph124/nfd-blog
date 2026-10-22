@@ -16,7 +16,7 @@ describe('renamed post redirects', () => {
       });
     }
 
-    expect(redirects).toHaveLength(12);
+    expect(redirects).toHaveLength(14);
     expect(redirects.every((r) => 'statusCode' in r && r.statusCode === 301)).toBe(true);
   });
 });

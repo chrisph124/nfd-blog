@@ -52,6 +52,8 @@ const renamedPosts: Record<string, string> = {
     'harness-engineering-proves-your-ai-works',
   'dawn-of-a-new-era-or-the-slow-fade-of-everything-we-took-for-granted':
     'ai-is-changing-work-and-thinking',
+  'how-to-actually-live-in-an-obsidian-vault':
+    'daily-loop-for-obsidian-vaults',
 };
 
 const nextConfig: NextConfig = {
