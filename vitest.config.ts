@@ -13,6 +13,9 @@ export default defineConfig({
     // highlightCode() call in each test worker; on a cold CI runner that first
     // call can take ~9s, past vitest's 5s default. Give the suite headroom.
     testTimeout: 15000,
+    // Sonar generic test-execution report (test counts, failures, duration);
+    // lives in coverage/ so it is gitignored and shipped with the CI artifact.
+    reporters: ['default', ['vitest-sonar-reporter', { outputFile: 'coverage/sonar-report.xml' }]],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov', 'html'],
