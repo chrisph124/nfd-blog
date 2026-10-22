@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import type { PostBlok, StoryblokStory } from '@/types/storyblok';
+import { getOpenGraphType } from '@/__tests__/utils/metadata';
 
 const mockGetTagCensus = vi.fn();
 const mockResolveTagName = vi.fn();
@@ -134,7 +135,7 @@ describe('generateMetadata (tags/[tag])', () => {
     expect(metadata.alternates?.canonical).toBe('/tags/ai');
     expect(metadata.robots).toEqual({ index: false, follow: true });
     expect(metadata.openGraph?.url).toBe('https://example.com/tags/ai');
-    expect(metadata.openGraph?.type).toBe('website');
+    expect(getOpenGraphType(metadata.openGraph)).toBe('website');
   });
 
   it('returns an empty object when the census is unavailable', async () => {

@@ -41,6 +41,11 @@ jobs:
       - name: Run ESLint
         run: pnpm run lint
 
+      # `next build` type-checks app code only (tsconfig.build.json); this
+      # covers the tests too.
+      - name: Type check
+        run: pnpm run typecheck
+
       - name: Run tests with coverage
         run: pnpm run test:coverage
 

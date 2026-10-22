@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import type { StoryblokStory, PageBlok } from '@/types/storyblok';
+import { getOpenGraphType } from '@/__tests__/utils/metadata';
 
 const mockFetchStory = vi.fn();
-const mockGetSiteUrl = vi.fn<[], string>();
+const mockGetSiteUrl = vi.fn<() => string>();
 const mockGetStoryblokApi = vi.fn();
 const mockNotFound = vi.fn();
 
@@ -110,7 +111,7 @@ describe('generateMetadata ([...slug])', () => {
     expect(metadata.openGraph?.images).toEqual([
       { url: 'https://example.com/api/og?slug=docs%2Fgetting-started', width: 1200, height: 630, alt: 'Nested OG Title' },
     ]);
-    expect(metadata.openGraph?.type).toBe('website');
+    expect(getOpenGraphType(metadata.openGraph)).toBe('website');
     expect(metadata.openGraph?.url).toBe('https://example.com/docs/getting-started');
   });
 
