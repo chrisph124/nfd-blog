@@ -35,6 +35,7 @@ class MockIntersectionObserver implements IntersectionObserver {
 
   root: Element | Document | null = null;
   rootMargin: string = '';
+  scrollMargin: string = '';
   thresholds: ReadonlyArray<number> = [];
 }
 

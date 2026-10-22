@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { StoryblokStory, PageBlok, PostBlok, StoryblokAsset } from '@/types/storyblok';
 
-const mockFetchStoryApi = vi.fn<[string], Promise<StoryblokStory<PageBlok> | null>>();
-const mockFetchStoryBySlugApi = vi.fn<[string], Promise<StoryblokStory<PostBlok> | null>>();
+const mockFetchStoryApi = vi.fn<(slug: string) => Promise<StoryblokStory<PageBlok> | null>>();
+const mockFetchStoryBySlugApi = vi.fn<(slug: string) => Promise<StoryblokStory<PostBlok> | null>>();
 
 vi.mock('@/lib/storyblok-api', () => ({
   fetchStoryApi: (...args: [string]) => mockFetchStoryApi(...args),

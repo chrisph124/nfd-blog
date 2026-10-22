@@ -4,10 +4,7 @@ import type { StoryblokStory, PageBlok, PostBlok } from '@/types/storyblok';
 // Use vi.hoisted to ensure mock is ready before module evaluation
 const { mockApi, mockGet } = vi.hoisted(() => {
   const mockApi = {
-    get: vi.fn<
-      [string, { version: string }],
-      Promise<{ data: { story: StoryblokStory } }>
-    >(),
+    get: vi.fn<(slug: string, params: { version: string }) => Promise<{ data: { story: StoryblokStory } }>>(),
   };
   return { mockApi, mockGet: mockApi.get };
 });

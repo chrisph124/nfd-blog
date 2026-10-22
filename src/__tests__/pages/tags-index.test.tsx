@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import type { ArchivedTag } from '@/lib/tags';
+import { getOpenGraphType } from '@/__tests__/utils/metadata';
 
 const mockGetTagCensus = vi.fn();
 const mockSelectArchivedTags = vi.fn();
@@ -110,6 +111,6 @@ describe('generateMetadata (tags index)', () => {
     expect(metadata.alternates?.canonical).toBe('/tags');
     expect(metadata.robots).toEqual({ index: false, follow: true });
     expect(metadata.openGraph?.url).toBe('https://example.com/tags');
-    expect(metadata.openGraph?.type).toBe('website');
+    expect(getOpenGraphType(metadata.openGraph)).toBe('website');
   });
 });

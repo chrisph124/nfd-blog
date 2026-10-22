@@ -309,7 +309,7 @@ export function createRenderRichText() {
  */
 export function createMockGetStoryblokApi(): GetStoryblokApiOptions {
   return {
-    accessToken: process.env.NEXT_PUBLIC_STORYBLOK_CONTENT_API_ACCESS_TOKEN,
+    accessToken: process.env.STORYBLOK_TOKEN,
     cache: { clear: false },
     apiOptions: { region: 'us-east-1', httpsAgent: undefined },
   };

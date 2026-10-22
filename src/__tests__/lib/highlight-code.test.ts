@@ -1,7 +1,14 @@
-import { describe, it, expect } from 'vitest';
+import { beforeAll, describe, it, expect } from 'vitest';
 import { highlightCode } from '@/lib/highlight-code';
 
 describe('highlightCode', () => {
+  // The first call cold-loads Shiki's WASM engine, themes and grammars, which
+  // can take well over the per-test timeout on a busy CI runner. Pay that cost
+  // once here, under its own budget, so no single test absorbs it.
+  beforeAll(async () => {
+    await highlightCode('const x = 1;', 'ts');
+  }, 60_000);
+
   describe('Output shape (parity with richtext code blocks)', () => {
     it('produces a pre.shiki element for valid input', async () => {
       const html = await highlightCode('const x = 1;', 'ts');

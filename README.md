@@ -32,7 +32,8 @@ A personal blog by Hieu (Chris) Pham - notes on software engineering. Built with
 3. Set up environment variables:
    ```bash
    # .env.local
-   NEXT_PUBLIC_STORYBLOK_CONTENT_API_ACCESS_TOKEN=your_token
+   # Server-only: never prefix with NEXT_PUBLIC_, which would inline it into the browser bundle.
+   STORYBLOK_TOKEN=your_preview_token
    ```
 
 ### Development
