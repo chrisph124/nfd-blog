@@ -3,10 +3,7 @@ import type { StoryblokStory, PageBlok, PostBlok } from '@/types/storyblok';
 
 const { mockApi, mockGet } = vi.hoisted(() => {
   const mockApi = {
-    get: vi.fn<
-      [string, { version: string }],
-      Promise<{ data: { story: StoryblokStory } }>
-    >(),
+    get: vi.fn<(slug: string, params: { version: string }) => Promise<{ data: { story: StoryblokStory } }>>(),
   };
   return { mockApi, mockGet: mockApi.get };
 });

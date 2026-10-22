@@ -8,7 +8,9 @@ permissions:
 
 jobs:
   auto-merge:
-    if: github.actor == 'dependabot[bot]' && github.base_ref == 'develop'
+    # Check who opened the PR, not who triggered this run: `github.actor` is
+    # also dependabot when it merely rebases or updates someone else's PR.
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.base_ref == 'develop'
     runs-on: ubuntu-latest
     steps:
       - name: Fetch Dependabot metadata

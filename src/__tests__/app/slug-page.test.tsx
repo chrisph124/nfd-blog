@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import type { StoryblokStory, PageBlok, PostBlok, HeroBlockBlok } from '@/types/storyblok';
 import { AUTHOR_EMAIL, AUTHOR_JOB_TITLES, AUTHOR_NAME, AUTHOR_SAME_AS, AUTHOR_TOPICS } from '@/lib/seo/author';
+import { getOpenGraphType } from '@/__tests__/utils/metadata';
 
 const mockFetchStoryBySlug = vi.fn();
 const mockGetSiteUrl = vi.fn<() => string>();
@@ -166,7 +167,7 @@ describe('generateMetadata ([slug])', () => {
     expect(metadata.openGraph?.images).toEqual([
       { url: 'https://example.com/api/og?slug=my-post', width: 1200, height: 630, alt: 'Post OG' },
     ]);
-    expect(metadata.openGraph?.type).toBe('article');
+    expect(getOpenGraphType(metadata.openGraph)).toBe('article');
     expect(metadata.openGraph?.url).toBe('https://example.com/my-post');
     expect(metadata.other).toMatchObject({
       'article:published_time': '2024-01-01T00:00:00.000Z',
@@ -255,7 +256,7 @@ describe('generateMetadata — ogType branches', () => {
     mockFetchStoryBySlug.mockResolvedValue({ story, source: 'pages' });
 
     const metadata = await generateMetadata({ params: makeParams('about') });
-    expect(metadata.openGraph?.type).toBe('profile');
+    expect(getOpenGraphType(metadata.openGraph)).toBe('profile');
   });
 
   it('uses ogType=website for other non-post pages', async () => {
@@ -263,7 +264,7 @@ describe('generateMetadata — ogType branches', () => {
     mockFetchStoryBySlug.mockResolvedValue({ story, source: 'pages' });
 
     const metadata = await generateMetadata({ params: makeParams('contact') });
-    expect(metadata.openGraph?.type).toBe('website');
+    expect(getOpenGraphType(metadata.openGraph)).toBe('website');
   });
 
   it('omits article:tag when story has no tags', async () => {

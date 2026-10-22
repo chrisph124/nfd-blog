@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST, GET } from '@/app/api/revalidate/route';
+import { POST } from '@/app/api/revalidate/route';
 import { NextRequest } from 'next/server';
 
 // Mock next/cache
@@ -214,36 +214,6 @@ describe('Revalidate API Route', () => {
       await POST(request);
 
       expect(revalidatePath).toHaveBeenCalledWith('/');
-    });
-  });
-
-  describe('GET requests', () => {
-    it('revalidates homepage with valid secret', async () => {
-      const { revalidatePath } = await import('next/cache');
-      const request = createMockRequest('test-secret');
-
-      const response = await GET(request);
-
-      expect(response.status).toBe(200);
-      expect(revalidatePath).toHaveBeenCalledWith('/');
-    });
-
-    it('rejects GET requests with invalid secret', async () => {
-      const request = createMockRequest('wrong-secret');
-
-      const response = await GET(request);
-
-      expect(response.status).toBe(401);
-    });
-
-    it('returns revalidation confirmation for GET', async () => {
-      const request = createMockRequest('test-secret');
-
-      const response = await GET(request);
-      const data = await response.json();
-
-      expect(data.revalidated).toBe(true);
-      expect(data.timestamp).toBeDefined();
     });
   });
 

@@ -8,9 +8,11 @@ import Cta from '@/components/atoms/Cta';
  * nested bloks (Tabs → TabItem → CTAs). Server components render everything else, and importing
  * the full map from `@/lib/storyblok` here shipped Shiki, the markdown pipeline and every
  * component (about 226 KB gzipped) to every reader.
+ *
+ * No access token: the browser never calls the Storyblok API, and any token passed here is
+ * inlined into the public bundle.
  */
 export const initStoryblokClient = storyblokInit({
-  accessToken: process.env.NEXT_PUBLIC_STORYBLOK_CONTENT_API_ACCESS_TOKEN as string,
   components: {
     tabs: Tabs,
     tab_item: TabItem,

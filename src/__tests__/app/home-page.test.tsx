@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import type { StoryblokStory, PageBlok } from '@/types/storyblok';
+import { getOpenGraphType } from '@/__tests__/utils/metadata';
 
-const mockFetchHomeStory = vi.fn<[], Promise<StoryblokStory<PageBlok> | null>>();
-const mockGetSiteUrl = vi.fn<[], string>();
+const mockFetchHomeStory = vi.fn<() => Promise<StoryblokStory<PageBlok> | null>>();
+const mockGetSiteUrl = vi.fn<() => string>();
 const mockNotFound = vi.fn();
 
 vi.mock('@/lib/storyblok', () => ({
@@ -152,7 +153,7 @@ describe('Home generateMetadata', () => {
     expect(metadata.openGraph?.images).toEqual([
       { url: 'https://example.com/api/og?slug=home', width: 1200, height: 630, alt: 'Home OG Title' },
     ]);
-    expect(metadata.openGraph?.type).toBe('website');
+    expect(getOpenGraphType(metadata.openGraph)).toBe('website');
     expect(metadata.openGraph?.url).toBe('https://example.com');
   });
 

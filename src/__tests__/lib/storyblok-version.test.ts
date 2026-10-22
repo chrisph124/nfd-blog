@@ -1,11 +1,8 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 
 describe('storyblokVersion', () => {
-  const originalNodeEnv = process.env.NODE_ENV;
-
   afterEach(() => {
-    // Reset NODE_ENV after each test
-    process.env.NODE_ENV = originalNodeEnv;
+    vi.unstubAllEnvs();
     vi.resetModules();
   });
 
@@ -17,7 +14,7 @@ describe('storyblokVersion', () => {
 
   it('returns "draft" in development', async () => {
     vi.resetModules();
-    process.env.NODE_ENV = 'development';
+    vi.stubEnv('NODE_ENV', 'development');
     const { storyblokVersion } = await import('@/lib/storyblok-version');
     expect(storyblokVersion).toBe('draft');
   });

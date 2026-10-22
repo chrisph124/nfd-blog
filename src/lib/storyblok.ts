@@ -62,7 +62,7 @@ const components = {
 
 // Server-side initialization with access token
 export const getStoryblokApi = storyblokInit({
-  accessToken: process.env.NEXT_PUBLIC_STORYBLOK_CONTENT_API_ACCESS_TOKEN as string,
+  accessToken: process.env.STORYBLOK_TOKEN as string,
   use: [apiPlugin],
   components,
   apiOptions: storyblokApiOptions,

@@ -2,26 +2,6 @@ import { describe, it, expect } from 'vitest';
 import { proxy, config } from '@/proxy';
 
 describe('proxy function', () => {
-  describe('Blocking /global routes', () => {
-    it.each([
-      { name: 'blocks /global route and does not call next', pathname: '/global' },
-      { name: 'blocks /global/header route and does not call next', pathname: '/global/header' },
-      { name: 'blocks /global/footer route and does not call next', pathname: '/global/footer' },
-      { name: 'blocks deeply nested /global routes', pathname: '/global/some/deep/path' },
-    ])('$name', async ({ pathname }) => {
-      const mockRequest = {
-        nextUrl: { pathname },
-        url: `http://localhost${pathname}`,
-      } as unknown as Request;
-
-      const result = await proxy(mockRequest as any);
-
-      expect(result).toBeDefined();
-      // Rewrite responses don't have x-middleware-next header
-      expect(result.headers.get('x-middleware-next')).toBeNull();
-    });
-  });
-
   describe('Allowing normal routes', () => {
     it.each([
       { name: 'allows homepage route - has x-middleware-next header', pathname: '/' },

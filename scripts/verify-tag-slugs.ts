@@ -15,15 +15,13 @@
  *   STORYBLOK_TOKEN=xxx pnpm tsx scripts/verify-tag-slugs.ts
  *
  * Env:
- *   STORYBLOK_TOKEN  (preferred, matches ci.yml) or
- *   NEXT_PUBLIC_STORYBLOK_CONTENT_API_ACCESS_TOKEN — read-only content token.
+ *   STORYBLOK_TOKEN — read-only content token (same name as the app and ci.yml).
  *   STORYBLOK_CONTENT_API_URL (optional) — defaults to the EU CDN host.
  */
 import 'dotenv/config';
 import { findSlugCollisions, slugify } from './lib/tag-taxonomy';
 
-const TOKEN =
-  process.env.STORYBLOK_TOKEN ?? process.env.NEXT_PUBLIC_STORYBLOK_CONTENT_API_ACCESS_TOKEN;
+const TOKEN = process.env.STORYBLOK_TOKEN;
 // EU CDN is the default (matches apiOptions.region: 'eu' in src/lib/storyblok.ts).
 const CDN_BASE = process.env.STORYBLOK_CONTENT_API_URL ?? 'https://api.storyblok.com/v2/cdn';
 
@@ -35,7 +33,7 @@ interface StoryblokTag {
 function requireToken(): string {
   if (!TOKEN) {
     console.error(
-      'Missing read token. Set STORYBLOK_TOKEN (or NEXT_PUBLIC_STORYBLOK_CONTENT_API_ACCESS_TOKEN).',
+      'Missing read token. Set STORYBLOK_TOKEN.',
     );
     process.exit(1);
   }

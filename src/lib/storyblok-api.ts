@@ -6,7 +6,7 @@ import { storyblokApiOptions } from '@/lib/storyblok-cache';
 // Lightweight API-only init — no component imports.
 // Use this in API routes (e.g., OG image) to avoid bundling all React components.
 const getApi = storyblokInit({
-  accessToken: process.env.NEXT_PUBLIC_STORYBLOK_CONTENT_API_ACCESS_TOKEN as string,
+  accessToken: process.env.STORYBLOK_TOKEN as string,
   use: [apiPlugin],
   apiOptions: storyblokApiOptions,
 });
