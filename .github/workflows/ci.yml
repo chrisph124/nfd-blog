@@ -60,12 +60,19 @@ jobs:
       # (e.g. HTTP 500 on report upload) must not fail the required job. The
       # SonarCloud quality gate reports separately via its own status check.
       - name: Upload coverage to SonarCloud
+        id: sonar
         uses: SonarSource/sonarqube-scan-action@v8
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         if: env.SONAR_TOKEN != ''
+
+      # continue-on-error reports a failed scan as "success", so an expired
+      # SONAR_TOKEN went unnoticed for months. Surface it as an annotation.
+      - name: Warn when SonarCloud scan did not run
+        if: steps.sonar.outcome != 'success'
+        run: echo "::warning title=SonarCloud scan skipped::outcome=${{ steps.sonar.outcome }} — check SONAR_TOKEN (expired or missing) and the scan logs."
 
       - name: Upload coverage artifacts
         uses: actions/upload-artifact@v7
