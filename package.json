@@ -47,8 +47,8 @@
     "unist-util-visit": "~5.1.0"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "^16.4.2",
-    "@next/eslint-plugin-next": "^16.4.2",
+    "@next/bundle-analyzer": "^16.4.3",
+    "@next/eslint-plugin-next": "^16.4.3",
     "@tailwindcss/postcss": "~4",
     "@testing-library/jest-dom": "~7.0.1",
     "@testing-library/react": "~16.3.3",
@@ -60,11 +60,11 @@
     "@vitejs/plugin-react": "~6.1.2",
     "@vitest/coverage-v8": "~4.1.12",
     "concurrently": "^10.0.6",
-    "dotenv": "~18.0.8",
+    "dotenv": "~18.0.9",
     "eslint": "~9",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
-    "eslint-plugin-security": "~4.2.0",
+    "eslint-plugin-security": "~4.2.1",
     "eslint-plugin-sonarjs": "^4.2.2",
     "eslint-plugin-testing-library": "^7.16.2",
     "eslint-plugin-unicorn": "^78.0.0",
@@ -76,7 +76,7 @@
     "tailwindcss": "~4",
     "tsx": "~4.23.15",
     "typescript": "~6",
-    "typescript-eslint": "^8.71.2",
+    "typescript-eslint": "^8.72.1",
     "vitest": "~4.1.12",
     "vitest-sonar-reporter": "~3.0.0"
   }
