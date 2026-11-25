@@ -5,6 +5,7 @@ import StoryblokProvider from "@/components/providers/StoryblokProvider";
 import { getStoryblokApi } from "@/lib/storyblok";
 import Header from "@/components/organisms/Header";
 import Footer from "@/components/organisms/Footer";
+import DatadogRUM from "@/components/providers/DatadogRUM";
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -49,6 +50,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className="h-full">
         <body className={`${nunito.variable} ${geistMono.variable} antialiased flex flex-col min-h-full`}>
+          <DatadogRUM />
           <StoryblokProvider>
             {headerStory && <Header blok={headerStory.content.body[0]} />}
             <main className="flex-grow">

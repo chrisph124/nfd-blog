@@ -10,8 +10,11 @@
     "generate-types": "tsx scripts/generate-types.ts"
   },
   "dependencies": {
+    "@datadog/browser-logs": "^7.19.0",
+    "@datadog/browser-rum": "^7.19.0",
     "@heroicons/react": "^2.2.0",
     "@storyblok/react": "^5.4.18",
+    "dd-trace": "^6.27.0",
     "next": "15.3.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
